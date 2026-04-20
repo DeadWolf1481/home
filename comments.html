@@ -74,8 +74,8 @@
 body { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 66px; }
 
 /* ── Nav ── */
-.nav { background: rgba(10,22,40,0.98); padding: 1rem 2rem; display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(12px); }
-.nav-logo { color: #f0c040; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; cursor: pointer; flex-shrink: 0; }
+.nav { display: flex; align-items: center; padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 1px 0 rgba(10,22,40,0.96); }
+.nav-logo { font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #f0c040; white-space: nowrap; flex: 0 0 auto; cursor: pointer; }
 .nav-links { display: flex; gap: 2rem; list-style: none; position: absolute; left: 50%; transform: translateX(-50%); }
 .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s; }
 .nav-links a:hover, .nav-links a.active { color: #f0c040; }
@@ -85,6 +85,8 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 .hamburger.open span:nth-child(2) { opacity: 0; }
 .hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 @media(max-width:800px) { .hamburger { display: flex; } .nav-links { display: none; } }
+@media (max-width: 600px) { .nav { padding: 0.85rem 1rem; } .nav-logo { font-size: 17px; letter-spacing: 0.4px; } }
+@media (max-width: 419.98px) { .nav { padding: 0.75rem 0.75rem; } .nav-logo { font-size: 15px; letter-spacing: 0.3px; } }
 
 /* ── Page ── */
 .page-wrap { max-width: 820px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
@@ -155,7 +157,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 <body>
 
 <nav class="nav">
-  <div class="nav-logo" onclick="window.location.href='index.html'">✈ AIRPORTS TRANSFER TURKEY</div>
+  <div class="nav-logo" onclick="window.location.href='index.html'">AIRPORTS TRANSFER TURKEY</div>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
     <li><a href="about-us.html">About Us</a></li>
@@ -217,7 +219,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 <footer class="footer-rich">
   <div class="footer-inner">
     <div class="footer-col footer-brand">
-      <div class="footer-logo">✈ AIRPORTS<br>TRANSFER TURKEY</div>
+      <div class="footer-logo">AIRPORTS<br>TRANSFER TURKEY</div>
       <div class="footer-contact-list">
         <a href="tel:+905441021414" class="footer-contact-item"><span class="fci-icon">📞</span> +90 544 102 1414</a>
         <a href="mailto:bekpenturizm@gmail.com" class="footer-contact-item"><span class="fci-icon">✉️</span> bekpenturizm@gmail.com</a>
