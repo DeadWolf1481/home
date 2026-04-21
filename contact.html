@@ -10,15 +10,33 @@
 <meta property="og:type" content="website" />
 <link rel="canonical" href="https://airportstransferturkey.com/contact.html" />
 <style>
+.nav { display: flex; align-items: center; padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 1px 0 rgba(10,22,40,0.96); }
+.nav-logo { font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #f0c040; white-space: nowrap; flex: 0 0 auto; cursor: pointer; }
+.nav-links { display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
+.nav-links li { pointer-events: all; list-style: none; }
+.nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; pointer-events: all; }
+.nav-links a:hover, .nav-links a.active { color: #f0c040; }
+.hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: none; border: none; padding: 4px; margin-left: auto; flex-shrink: 0; }
+.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; transition: all 0.3s; }
+.hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+@media(max-width:1150px) { .hamburger { display: flex !important; } .nav-links { display: none !important; } }
+@media(max-width:600px) { .nav { padding: 0.85rem 1rem; } .nav-logo { font-size: 17px; letter-spacing: 0.4px; } }
+@media(max-width:419.98px) { .nav { padding: 0.75rem 0.75rem; } .nav-logo { font-size: 15px; letter-spacing: 0.3px; } }
+
+@media(max-width:800px) {   }
+@media(max-width:600px) {   }
+@media(max-width:419.98px) {   }
+
+@media(max-width:800px) {   }
+@media (max-width: 600px) {   }
+@media (max-width: 419.98px) {   }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, -apple-system, sans-serif; padding-top: 66px; background: #243649; color: #dde6f0; }
 
 /* ── Nav ── */
-.nav { background: rgba(10,22,40,0.98); padding: 1rem 2rem; display: flex; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.nav-logo { color: #f0c040; font-size: 18px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; cursor: pointer; flex-shrink: 0; }
-.nav-links { display: flex; gap: 2rem; list-style: none; position: absolute; left: 50%; transform: translateX(-50%); }
-.nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s; }
-.nav-links a:hover { color: #f0c040; }
+
 .nav-links a.active { color: #f0c040; }
 
 /* ── Page Content ── */
@@ -54,14 +72,13 @@ body { font-family: system-ui, -apple-system, sans-serif; padding-top: 66px; bac
 .cf-success.show { display: block; }
 
 /* ── Responsive ── */
-@media (max-width: 800px) {
-  .nav-links { display: none; }
+
   .contact-layout { grid-template-columns: 1fr; gap: 2.5rem; }
   .cf-row { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
-  .nav { padding: 0.85rem 1rem; }
-  .nav-logo { font-size: 14px; }
+  
+  
   .page-wrap { padding: 2rem 1rem 4rem; }
   .page-title { font-size: 26px; margin-bottom: 2rem; }
 }
@@ -70,7 +87,7 @@ body { font-family: system-ui, -apple-system, sans-serif; padding-top: 66px; bac
 <body>
 
 <nav class="nav">
-  <div class="nav-logo" onclick="window.location.href='index.html'">✈ AIRPORTS TRANSFER TURKEY</div>
+  <div class="nav-logo" onclick="window.location.href='index.html'">AIRPORTS TRANSFER TURKEY</div>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
     <li><a href="about-us.html">About Us</a></li>
@@ -90,12 +107,8 @@ body { font-family: system-ui, -apple-system, sans-serif; padding-top: 66px; bac
   <a href="index.html#reviews" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Reviews</a>
   <a href="contact.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;">Contact</a>
 </div>
-<style>@media(max-width:800px){#hamburger{display:flex!important;}.nav-links{display:none!important;}}
-.hamburger{display:none;flex-direction:column;gap:6px;cursor:pointer;background:none;border:none;padding:4px;margin-left:auto;flex-shrink:0;}
-.hamburger span{display:block;width:22px;height:2px;background:white;border-radius:2px;transition:all 0.3s;}
-.hamburger.open span:nth-child(1){transform:translateY(8px) rotate(45deg);}
-.hamburger.open span:nth-child(2){opacity:0;}
-.hamburger.open span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+<style>}
+
 </style>
 <script>
 function toggleMenu(){
@@ -273,18 +286,18 @@ function sendMessage() {
 <footer class="footer-rich">
   <div class="footer-inner">
     <div class="footer-col footer-brand">
-      <div class="footer-logo">✈ AIRPORTS<br>TRANSFER TURKEY</div>
+      <div class="footer-logo">AIRPORTS<br>TRANSFER TURKEY</div>
       <div class="footer-contact-list">
         <a href="tel:+905441021414" class="footer-contact-item"><span class="fci-icon">📞</span> +90 544 102 1414</a>
         <a href="mailto:bekpenturizm@gmail.com" class="footer-contact-item"><span class="fci-icon">✉️</span> bekpenturizm@gmail.com</a>
         <div class="footer-contact-item"><span class="fci-icon">📍</span><span>Esenyalı Mah. Mezkur Sk. Nizamettin Otluoğlu Apt. NO:26 A Pendik / Istanbul</span></div>
       </div>
       <div class="footer-socials">
-        <a href="https://www.instagram.com/bekpen.turizm/" target="_blank" rel="noopener" class="social-btn"><img src="../pngler/instagram.png" alt="Instagram" style="width:18px;height:18px;object-fit:contain;"></a>
-        <a href="https://www.facebook.com/profile.php?id=61573780439659" target="_blank" rel="noopener" class="social-btn"><img src="../pngler/facebook.png" alt="Facebook" style="width:18px;height:18px;object-fit:contain;"></a>
-        <a href="https://x.com/BekpenTurizm" target="_blank" rel="noopener" class="social-btn"><img src="../pngler/twitter.png" alt="X/Twitter" style="width:18px;height:18px;object-fit:contain;"></a>
-        <a href="https://www.youtube.com/@BekpenTurizm/featured" target="_blank" rel="noopener" class="social-btn"><img src="../pngler/youtube.png" alt="YouTube" style="width:18px;height:18px;object-fit:contain;"></a>
-        <a href="https://www.tiktok.com/@bekpen.turizm?lang=tr-TR" target="_blank" rel="noopener" class="social-btn"><img src="../pngler/tiktok.png" alt="TikTok" style="width:18px;height:18px;object-fit:contain;"></a>
+        <a href="https://www.instagram.com/bekpen.turizm/" target="_blank" rel="noopener" class="social-btn"><img src="pngler/instagram.png" alt="Instagram" style="width:18px;height:18px;object-fit:contain;"></a>
+        <a href="https://www.facebook.com/profile.php?id=61573780439659" target="_blank" rel="noopener" class="social-btn"><img src="pngler/facebook.png" alt="Facebook" style="width:18px;height:18px;object-fit:contain;"></a>
+        <a href="https://x.com/BekpenTurizm" target="_blank" rel="noopener" class="social-btn"><img src="pngler/twitter.png" alt="X/Twitter" style="width:18px;height:18px;object-fit:contain;"></a>
+        <a href="https://www.youtube.com/@BekpenTurizm/featured" target="_blank" rel="noopener" class="social-btn"><img src="pngler/youtube.png" alt="YouTube" style="width:18px;height:18px;object-fit:contain;"></a>
+        <a href="https://www.tiktok.com/@bekpen.turizm?lang=tr-TR" target="_blank" rel="noopener" class="social-btn"><img src="pngler/tiktok.png" alt="TikTok" style="width:18px;height:18px;object-fit:contain;"></a>
       </div>
     </div>
     <div class="footer-col">
