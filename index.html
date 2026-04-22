@@ -44,7 +44,7 @@ body { padding-top: 0; }
 .hero-title { font-size: 42px; font-weight: 600; line-height: 1.2; margin-bottom: 0.75rem; }
 .hero-title span { color: #f0c040; }
 .hero-sub { font-size: 16px; color: rgba(255,255,255,0.65); margin-bottom: 2.5rem; }
-.search-card { background: rgba(255,255,255,0.97); border-radius: 16px; padding: 1.75rem 2rem; max-width: 900px; margin: 0 auto 2rem; color: #1a1a1a; text-align: left; }
+.search-card { background: rgba(255,255,255,0.55); border-radius: 16px; padding: 1.75rem 2rem; max-width: 900px; margin: 0 auto 2rem; color: #1a1a1a; text-align: left; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .search-fields { display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr 0.7fr; gap: 12px; align-items: flex-end; }
 .field-group { display: flex; flex-direction: column; gap: 4px; }
 .field-group label { font-size: 12px; color: #444; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; text-align: left; }
@@ -81,6 +81,17 @@ body { padding-top: 0; }
 .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
 .review-card { background: #3a5570; border: 0.5px solid #4a6a84; border-radius: 12px; padding: 1.25rem; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; }
 .review-card:hover { border-color: #f0c040; box-shadow: 0 4px 16px rgba(240,192,64,0.12); transform: translateY(-2px); }
+.blog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 1rem; }
+.blog-card { background: #3a5570; border: 0.5px solid #4a6a84; border-radius: 14px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; }
+.blog-card:hover { border-color: #f0c040; box-shadow: 0 6px 24px rgba(240,192,64,0.15); transform: translateY(-3px); }
+.blog-img { height: 180px; overflow: hidden; background: #2a3f55; }
+.blog-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s; }
+.blog-card:hover .blog-img img { transform: scale(1.05); }
+.blog-body { padding: 1.1rem 1.25rem 1.25rem; }
+.blog-tag { font-size: 10px; font-weight: 700; color: #f0c040; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.5rem; }
+.blog-title { font-size: 15px; font-weight: 700; color: #dde6f0; line-height: 1.4; margin-bottom: 0.6rem; }
+.blog-excerpt { font-size: 13px; color: #9ab4cc; line-height: 1.6; margin-bottom: 0.75rem; }
+.blog-meta { font-size: 11px; color: #6a85a0; }
 .stars { color: #f0c040; font-size: 14px; margin-bottom: 8px; }
 .review-text { font-size: 13px; color: #c0d0e0; line-height: 1.6; margin-bottom: 12px; }
 .reviewer { display: flex; align-items: center; gap: 8px; }
@@ -114,13 +125,13 @@ body { padding-top: 0; }
 .select-wrap select { width: 100%; padding-right: 32px; appearance: none; -webkit-appearance: none; }
 .sel-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; transition: transform 0.25s; opacity: 0.5; }
 .sel-arrow.open { transform: translateY(-50%) rotate(180deg); opacity: 0.8; }
-.custom-select { position: relative; }
+.custom-select { position: relative; min-width: 160px; }
 .cs-trigger { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 10px; height: 42px; border: 0.5px solid #d8d8d8; border-radius: 8px; font-size: 14px; font-weight: 400; color: #1a1a1a; background: white; cursor: pointer; user-select: none; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; overflow: hidden; white-space: nowrap; }
 .cs-trigger:hover { border-color: #1a3a5c; box-shadow: 0 0 0 3px rgba(26,58,92,0.08); }
 .cs-val { flex: 1; text-align: left; }
 .cs-arrow { flex-shrink: 0; transition: transform 0.22s; }
 .custom-select.open .cs-arrow { transform: rotate(180deg); }
-.cs-list { display: none; position: fixed; background: white; border: 0.5px solid #d0d0d0; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); z-index: 10001; overflow-y: auto; max-height: 260px; }
+.cs-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 0.5px solid #d0d0d0; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); z-index: 10001; overflow-y: auto; max-height: 260px; min-width: 160px; }
 .custom-select.open .cs-list { display: block; }
 .cs-item { padding: 13px 18px; font-size: 15px; color: #1a1a1a; cursor: pointer; border-bottom: 0.5px solid #f0f0f0; transition: background 0.15s; text-align: left; }
 .cs-item:last-child { border-bottom: none; }
@@ -248,12 +259,13 @@ body { padding-top: 0; }
   .section { padding: 2rem 1rem; }
   .hero-title { font-size: 26px; }
   .hero-sub { font-size: 14px; }
-  .hero-content { padding: 5rem 1rem 1.5rem; }
+  .hero-content { padding: 9rem 1rem 1.5rem; }
   .search-fields { grid-template-columns: 1fr; gap: 10px; }
   .search-btn { width: 100%; padding: 12px; }
   .features-grid { grid-template-columns: 1fr; gap: 0.8rem; }
   .vehicles-grid { grid-template-columns: 1fr; gap: 0.8rem; }
   .reviews-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+  .blog-grid { grid-template-columns: 1fr; gap: 1rem; }
   .stats-row { gap: 1rem; flex-wrap: wrap; justify-content: space-around; }
   .stat-num { font-size: 20px; }
   
@@ -268,7 +280,7 @@ body { padding-top: 0; }
 @media (max-width: 419.98px) {
   
   
-  .hero-content { padding: 4.5rem 0.75rem 1.5rem; }
+  .hero-content { padding: 8rem 0.75rem 1.5rem; }
   .hero-title { font-size: 22px; }
   .hero-badge { font-size: 11px; }
   .hero-bg { background-position: 35% top; }
@@ -352,7 +364,7 @@ body { padding-top: 0; }
 
 /* ── Rich Footer ── */
 .footer-rich { background: #07101e; padding: 0; margin-top: 0; }
-.footer-inner { max-width: 1300px; margin: 0 auto; padding: 3.5rem 2rem 2.5rem; display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.4fr; gap: 3rem; }
+.footer-inner { max-width: 1300px; margin: 0 auto; padding: 3.5rem 2rem 2.5rem; display: grid; grid-template-columns: 1.2fr 1.4fr 1.2fr; gap: 2rem; }
 
 .footer-logo { font-size: 22px; font-weight: 800; color: #f0c040; letter-spacing: 1px; line-height: 1.25; margin-bottom: 1.5rem; }
 
@@ -367,30 +379,35 @@ body { padding-top: 0; }
 .social-btn img { width: 20px; height: 20px; object-fit: contain; }
 
 .footer-col-title { font-size: 18px; font-weight: 700; color: white; margin-bottom: 1.25rem; }
-.footer-menu { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
+.footer-menu { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; padding: 0; }
 .footer-menu a { font-size: 14px; color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s; }
 .footer-menu a:hover { color: #f0c040; }
+.footer-menu-2col { display: flex; gap: 1.5rem; }
 
-.tursab-badge { display: block; text-decoration: none; }
-.tursab-inner { background: white; border-radius: 8px; padding: 1rem 1.1rem; max-width: 200px; cursor: pointer; transition: box-shadow 0.2s; }
-.tursab-badge:hover .tursab-inner { box-shadow: 0 4px 16px rgba(240,192,64,0.3); }
-.tursab-logo { font-size: 20px; font-weight: 900; color: #cc0000; letter-spacing: 2px; margin-bottom: 2px; }
-.tursab-sub { font-size: 9px; font-weight: 700; color: #cc0000; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.tursab-desc { font-size: 9.5px; color: #444; line-height: 1.4; margin-bottom: 8px; }
-.tursab-licence { font-size: 11px; color: #333; }
-.tursab-licence strong { font-size: 18px; font-weight: 900; color: #cc0000; display: block; }
 
-.footer-bottom { border-top: 0.5px solid rgba(255,255,255,0.08); text-align: center; padding: 1.25rem 2rem; font-size: 12px; color: rgba(255,255,255,0.3); }
 
-@media (max-width: 1000px) {
-  .footer-inner { grid-template-columns: 1fr 1fr; gap: 2rem; }
-}
-@media (max-width: 600px) {
-  .footer-inner { grid-template-columns: 1fr; gap: 2rem; }
-}
+
+
+
+
+
+
+
+.footer-bottom { border-top: 0.5px solid rgba(255,255,255,0.06); text-align: center; padding: 1.25rem 2rem; font-size: 12px; color: rgba(180,200,220,0.35); letter-spacing: 0.3px; }
+
+
+
 
 .footer-legal-note { background: #04090f; text-align: center; padding: 0.75rem 2rem; font-size: 11px; color: rgba(255,255,255,0.25); border-top: 0.5px solid rgba(255,255,255,0.05); }
 
+.tursab-badge { display: block; text-decoration: none; }
+.tursab-img { width: 220px; border-radius: 10px; transition: box-shadow 0.2s; }
+.tursab-badge:hover .tursab-img { box-shadow: 0 4px 20px rgba(240,192,64,0.35); }
+
+
+@media (max-width: 960px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; } .footer-col.footer-tursab { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; } .tursab-img { width: 200px; } }
+@media (max-width: 705px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; } }
+@media (max-width: 600px) { .footer-inner { grid-template-columns: 1fr; gap: 1.5rem; } }
 </style>
 <script type="application/ld+json">
 {
@@ -471,7 +488,7 @@ body { padding-top: 0; }
     <li><a href="#hero" onclick="smoothTo(event,'hero')">Home</a></li>
     <li><a href="about-us.html">About Us</a></li>
     <li><a href="#vehicles" onclick="smoothTo(event,'vehicles')">Our Fleet</a></li>
-    <li><a href="#reviews" onclick="smoothTo(event,'reviews')">Reviews</a></li>
+    <li><a href="blog.html">Blog</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
   <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
@@ -483,7 +500,7 @@ body { padding-top: 0; }
   <a href="#hero" onclick="mobileNav(event,'hero')">Home</a>
   <a href="about-us.html">About Us</a>
   <a href="#vehicles" onclick="mobileNav(event,'vehicles')">Our Fleet</a>
-  <a href="#reviews" onclick="mobileNav(event,'reviews')">Reviews</a>
+  <a href="blog.html">Blog</a>
   <a href="contact.html">Contact</a>
 </div>
 
@@ -709,37 +726,40 @@ body { padding-top: 0; }
   <div class="divider"></div>
 
   <!-- Reviews -->
-  <div class="section" id="reviews">
-    <div class="section-label">Reviews</div>
-    <h2 class="section-title">What Our Passengers Say</h2>
-    <div class="reviews-grid">
-      <div class="review-card" onclick="window.location.href='comments.html?review=0'" style="cursor:pointer;">
-        <div class="stars">★★★★★</div>
-        <div class="review-text">From Istanbul Airport to our hotel — very comfortable and right on time. The driver was extremely kind. Highly recommended!</div>
-        <div class="reviewer">
-          <div class="avatar">CM</div>
-          <div><div class="reviewer-name">Craig Mitchell</div><div class="reviewer-loc">London, UK</div></div>
+  <div class="section" id="blog">
+    <div class="section-label">Blog</div>
+    <h2 class="section-title">Istanbul Travel Guide</h2>
+    <div class="blog-grid">
+      <div class="blog-card" onclick="window.location.href='blog.html'" style="cursor:pointer;">
+        <div class="blog-img"><img src="pngler/hagiasophia.png" alt="Hagia Sophia Istanbul" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+        <div class="blog-body">
+          <div class="blog-tag">History</div>
+          <div class="blog-title">Hagia Sophia: A Guide for First-Time Visitors</div>
+          <div class="blog-excerpt">Everything you need to know before visiting one of Istanbul's most iconic landmarks — opening hours, tips, and how to get there from the airport.</div>
+          <div class="blog-meta">5 min read</div>
         </div>
       </div>
-      <div class="review-card" onclick="window.location.href='comments.html?review=1'" style="cursor:pointer;">
-        <div class="stars">★★★★★</div>
-        <div class="review-text">Our transfer from Sabiha to Taksim was excellent. The car was spotless, the driver was punctual, and the price was very reasonable. Thank you!</div>
-        <div class="reviewer">
-          <div class="avatar">AB</div>
-          <div><div class="reviewer-name">Anna Bauer</div><div class="reviewer-loc">Berlin, Germany</div></div>
+      <div class="blog-card" onclick="window.location.href='blog.html'" style="cursor:pointer;">
+        <div class="blog-img"><img src="pngler/grandbaazar.png" alt="Grand Bazaar Istanbul" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+        <div class="blog-body">
+          <div class="blog-tag">Shopping</div>
+          <div class="blog-title">Grand Bazaar: The Ultimate Shopping Experience</div>
+          <div class="blog-excerpt">Explore 4,000 shops in one of the world's oldest and largest covered markets. Our guide covers what to buy, how to bargain, and the best entrances.</div>
+          <div class="blog-meta">4 min read</div>
         </div>
       </div>
-      <div class="review-card" onclick="window.location.href='comments.html?review=2'" style="cursor:pointer;">
-        <div class="stars">★★★★★</div>
-        <div class="review-text">We booked a minibus for our family holiday. Everything was perfect. Even the kids had a great time. We'll definitely use this service again!</div>
-        <div class="reviewer">
-          <div class="avatar">MK</div>
-          <div><div class="reviewer-name">Mehmet Kaya</div><div class="reviewer-loc">Istanbul, Turkey</div></div>
+      <div class="blog-card" onclick="window.location.href='blog.html'" style="cursor:pointer;">
+        <div class="blog-img"><img src="pngler/bosphorus.png" alt="Bosphorus Istanbul" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+        <div class="blog-body">
+          <div class="blog-tag">Travel Tips</div>
+          <div class="blog-title">Istanbul Airport to Bosphorus: Your Transfer Guide</div>
+          <div class="blog-excerpt">Getting from Istanbul Airport to the Bosphorus area doesn't have to be stressful. Discover the fastest, most comfortable way to reach your destination.</div>
+          <div class="blog-meta">3 min read</div>
         </div>
       </div>
     </div>
     <div style="text-align:center;margin-top:1.5rem;">
-      <a href="comments.html" style="color:#f0c040;text-decoration:none;font-size:14px;font-weight:600;border:0.5px solid #f0c040;padding:8px 24px;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(240,192,64,0.1)'" onmouseout="this.style.background='transparent'">View All Reviews →</a>
+      <a href="blog.html" style="color:#f0c040;text-decoration:none;font-size:14px;font-weight:600;border:0.5px solid #f0c040;padding:8px 24px;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(240,192,64,0.1)'" onmouseout="this.style.background='transparent'">Read All Articles →</a>
     </div>
   </div>
 
@@ -759,7 +779,7 @@ body { padding-top: 0; }
           </a>
           <div class="footer-contact-item">
             <span class="fci-icon">📍</span>
-            <span>Esenyalı Mah. Mezkur Sk. Nizamettin Otluoğlu Apt. NO:26 A Pendik / Istanbul</span>
+            <span>Esenyalı Mah. Mezkur Sk.<br>Nizamettin Otluoğlu Apt. NO:26 A<br>Pendik / Istanbul</span>
           </div>
         </div>
         <div class="footer-socials">
@@ -774,35 +794,28 @@ body { padding-top: 0; }
       <!-- Col 2: Quick Menu -->
       <div class="footer-col">
         <div class="footer-col-title">Quick Menu</div>
-        <ul class="footer-menu">
-          <li><a href="index.html">→ Home Page</a></li>
-          <li><a href="about-us.html">→ About Us</a></li>
-          <li><a href="index.html#vehicles">→ Our Fleet</a></li>
-          <li><a href="index.html#how">→ How It Works</a></li>
-          <li><a href="index.html#reviews">→ Reviews</a></li>
-          <li><a href="contact.html">→ Contact</a></li>
-        </ul>
+        <div class="footer-menu-2col">
+          <ul class="footer-menu">
+            <li><a href="index.html">→ Home Page</a></li>
+            <li><a href="about-us.html">→ About Us</a></li>
+            <li><a href="index.html#vehicles">→ Our Fleet</a></li>
+            <li><a href="index.html#how">→ How It Works</a></li>
+            <li><a href="blog.html">→ Blog</a></li>
+            <li><a href="contact.html">→ Contact</a></li>
+          </ul>
+          <ul class="footer-menu">
+            <li><a href="terms.html">→ Terms of Use</a></li>
+            <li><a href="privacy.html">→ Privacy Policy</a></li>
+            <li><a href="distance-sales.html">→ Distance Sales Agreement</a></li>
+          </ul>
+        </div>
       </div>
 
-      <!-- Col 3: Legal -->
-      <div class="footer-col">
-        <div class="footer-col-title">Legal</div>
-        <ul class="footer-menu">
-          <li><a href="terms.html">→ Terms of Use</a></li>
-          <li><a href="privacy.html">→ Privacy Policy</a></li>
-        </ul>
-      </div>
-
-      <!-- Col 4: TURSAB -->
+      <!-- Col 3: TURSAB -->
       <div class="footer-col footer-tursab">
         <div class="footer-col-title">TURSAB</div>
-        <a href="https://www.tursab.org.tr" target="_blank" rel="noopener" class="tursab-badge">
-          <div class="tursab-inner">
-            <div class="tursab-logo">TÜRSAB</div>
-            <div class="tursab-sub">DIGITAL VERIFICATION SYSTEM</div>
-            <div class="tursab-desc">CLICK to verify if your travel agency is an official agency registered with TÜRSAB</div>
-            <div class="tursab-licence">Licence Nr<br><strong>14563</strong></div>
-          </div>
+        <a href="https://www.tursab.org.tr/tr/ddsv" target="_blank" rel="noopener" class="tursab-badge">
+          <img src="pngler/tursab.png" alt="TURSAB Verified" class="tursab-img" onerror="this.onerror=null;this.src='https://bekpentravel.com/upload/64ae5e1f2f5d7-1689148959.png';" />
         </a>
       </div>
 
@@ -1074,27 +1087,29 @@ function buildDrop(dropId, listId, items, defaultIndex) {
 
 function positionDrop(dropId) {
   var drop = document.getElementById(dropId);
-  var trigger = drop.querySelector('.cs-trigger');
   var list = drop.querySelector('.cs-list');
-  var rect = trigger.getBoundingClientRect();
-  var w = Math.max(rect.width, 180);
-  var left = rect.left;
-  var navH = 66;
-  var spaceAbove = rect.top - navH - 4;
-  var spaceBelow = window.innerHeight - rect.bottom - 4;
-  var top, maxH;
-  if (spaceAbove >= 120) {
-    maxH = Math.min(260, spaceAbove);
-    top = rect.top - maxH - 4;
+  var rect = drop.getBoundingClientRect();
+  var navH = document.querySelector('.nav') ? document.querySelector('.nav').offsetHeight : 62;
+  var spaceBelow = window.innerHeight - rect.bottom - 8;
+  var spaceAbove = rect.top - navH - 8;
+
+  // Reset both
+  list.style.top = 'auto';
+  list.style.bottom = 'auto';
+
+  if (spaceBelow >= spaceAbove) {
+    // More space below — open downward
+    list.style.top = '100%';
+    list.style.bottom = 'auto';
+    list.style.maxHeight = Math.max(180, spaceBelow) + 'px';
   } else {
-    maxH = Math.min(260, spaceBelow);
-    top = rect.bottom + 4;
+    // More space above — open upward
+    list.style.bottom = '100%';
+    list.style.top = 'auto';
+    list.style.maxHeight = Math.max(180, spaceAbove) + 'px';
   }
-  if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
-  list.style.top = top + 'px';
-  list.style.left = left + 'px';
-  list.style.width = w + 'px';
-  list.style.maxHeight = maxH + 'px';
+  list.style.marginTop = '4px';
+  list.style.marginBottom = '4px';
 }
 
 function toggleDrop(dropId) {
@@ -1140,17 +1155,26 @@ function toggleMenu() {
   var btn = document.getElementById('hamburger');
   var menu = document.getElementById('mobileMenu');
   var nav = document.querySelector('.nav');
+  var hero = document.querySelector('.hero-content');
   document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
   btn.classList.toggle('open');
   if (menu.dataset.open === 'true') {
     menu.style.maxHeight = '0';
     menu.dataset.open = 'false';
-    setTimeout(function(){ menu.style.display="none"; }, 300);
+    setTimeout(function(){
+      menu.style.display = 'none';
+      if (hero && window.innerWidth < 600) hero.style.paddingTop = '';
+    }, 300);
   } else {
     menu.style.display = 'block';
     requestAnimationFrame(function() {
       menu.style.maxHeight = '400px';
       menu.dataset.open = 'true';
+      if (hero && window.innerWidth < 600) {
+        var menuH = menu.scrollHeight;
+        var currentPad = parseFloat(getComputedStyle(hero).paddingTop) || 0;
+        hero.style.paddingTop = (currentPad + menuH) + 'px';
+      }
     });
   }
 }

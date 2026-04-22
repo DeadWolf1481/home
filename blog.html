@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Passenger Reviews | Airports Transfer Turkey</title>
-<meta name="description" content="Read genuine passenger reviews for Airports Transfer Turkey. Over 12,000 happy travellers rate our Istanbul airport transfer service 4.9/5. See what they say." />
+<title>Blog | Airports Transfer Turkey</title>
+<meta name="description" content="Airports Transfer Turkey Blog. Istanbul travel tips, airport transfer guides, and top attractions. Over 12,000 happy travellers rate our Istanbul airport transfer service 4.9/5. See what they say." />
 <meta name="keywords" content="airports transfer turkey reviews, istanbul airport transfer reviews, istanbul transfer testimonials, bekpen turizm reviews" />
 <meta name="robots" content="index, follow" />
 <meta property="og:title" content="Passenger Reviews | Airports Transfer Turkey" />
 <meta property="og:description" content="Read real reviews from passengers who used Airports Transfer Turkey. Trusted by 12,000+ travellers across Istanbul." />
 <meta property="og:type" content="website" />
-<link rel="canonical" href="https://airportstransferturkey.com/comments.html" />
+<link rel="canonical" href="https://airportstransferturkey.com/blog.html" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -103,6 +103,18 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 
 /* ── Page ── */
 .page-wrap { max-width: 820px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+.blog-listing { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem; }
+.blog-list-card { display: flex; gap: 1.25rem; background: #2a3f55; border: 0.5px solid #3d5c78; border-radius: 14px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s; }
+.blog-list-card:hover { border-color: #f0c040; box-shadow: 0 4px 20px rgba(240,192,64,0.12); transform: translateY(-2px); }
+.blog-list-img { width: 200px; flex-shrink: 0; background: #1e2d3d; overflow: hidden; }
+.blog-list-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s; }
+.blog-list-card:hover .blog-list-img img { transform: scale(1.05); }
+.blog-list-body { padding: 1.25rem 1.25rem 1.25rem 0; display: flex; flex-direction: column; justify-content: center; }
+.blog-list-tag { font-size: 10px; font-weight: 700; color: #f0c040; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.4rem; }
+.blog-list-title { font-size: 16px; font-weight: 700; color: #dde6f0; line-height: 1.4; margin-bottom: 0.5rem; }
+.blog-list-excerpt { font-size: 13px; color: #9ab4cc; line-height: 1.6; margin-bottom: 0.6rem; }
+.blog-list-meta { font-size: 11px; color: #6a85a0; }
+@media(max-width:600px) { .blog-list-card { flex-direction: column; } .blog-list-img { width: 100%; height: 160px; } .blog-list-body { padding: 1rem; } }
 .page-label { font-size: 11px; font-weight: 700; color: #f0c040; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.4rem; }
 .page-title { font-size: 28px; font-weight: 700; color: #dde6f0; margin-bottom: 0.4rem; }
 .page-sub { font-size: 14px; color: #9ab4cc; margin-bottom: 2rem; }
@@ -135,7 +147,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 .rv-input { background: #2a3f55; border: 0.5px solid #3d5c78; border-radius: 8px; padding: 11px 14px; font-size: 14px; color: #dde6f0; outline: none; width: 100%; margin-bottom: 0.75rem; font-family: inherit; transition: border-color 0.2s; }
 .rv-input::placeholder { color: #6a85a0; }
 .rv-input:focus { border-color: #f0c040; }
-.rv-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+.rv-row { display: grid; grid-template-columns: 1.2fr 1.4fr 1.2fr; gap: 0.75rem; margin-bottom: 0.75rem; }
 .rv-textarea { min-height: 110px; resize: vertical; }
 .rv-btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 11px 28px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
 .rv-btn:hover { background: #d4a820; }
@@ -143,7 +155,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 
 /* Footer */
 .footer-rich { background: #07101e; margin-top: 2rem; }
-.footer-inner { max-width: 1300px; margin: 0 auto; padding: 3rem 2rem 2rem; display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.4fr; gap: 3rem; }
+.footer-inner { max-width: 1300px; margin: 0 auto; padding: 3.5rem 2rem 2.5rem; display: grid; grid-template-columns: 1.2fr 1.4fr 1.2fr; gap: 2rem; }
 .footer-logo { font-size: 20px; font-weight: 800; color: #f0c040; letter-spacing: 1px; line-height: 1.25; margin-bottom: 1.25rem; }
 .footer-contact-list { display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1.25rem; }
 .footer-contact-item { display: flex; align-items: flex-start; gap: 0.6rem; font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; line-height: 1.5; }
@@ -155,16 +167,25 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 .footer-menu { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
 .footer-menu a { font-size: 13px; color: rgba(255,255,255,0.55); text-decoration: none; }
 .footer-menu a:hover { color: #f0c040; }
-.tursab-inner { background: white; border-radius: 8px; padding: 0.9rem 1rem; max-width: 190px; }
-.tursab-logo { font-size: 18px; font-weight: 900; color: #cc0000; letter-spacing: 2px; margin-bottom: 2px; }
-.tursab-sub { font-size: 8px; font-weight: 700; color: #cc0000; text-transform: uppercase; margin-bottom: 5px; }
-.tursab-desc { font-size: 9px; color: #444; line-height: 1.4; margin-bottom: 6px; }
-.tursab-licence { font-size: 10px; color: #333; }
-.tursab-licence strong { font-size: 16px; font-weight: 900; color: #cc0000; display: block; }
-.footer-bottom { border-top: 0.5px solid rgba(255,255,255,0.08); text-align: center; padding: 1.25rem 2rem; font-size: 12px; color: rgba(255,255,255,0.3); }
+.footer-menu-2col { display: flex; gap: 1.5rem; }
+
+
+
+
+
+
+.footer-bottom { border-top: 0.5px solid rgba(255,255,255,0.06); text-align: center; padding: 1.25rem 2rem; font-size: 12px; color: rgba(180,200,220,0.35); letter-spacing: 0.3px; }
 .footer-legal-note { background: #04090f; text-align: center; padding: 0.75rem 2rem; font-size: 11px; color: rgba(255,255,255,0.2); border-top: 0.5px solid rgba(255,255,255,0.05); }
-@media(max-width:1000px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 2rem; } }
+
 @media(max-width:600px) { .footer-inner { grid-template-columns: 1fr; } .rv-row { grid-template-columns: 1fr; } }
+.tursab-badge { display: block; text-decoration: none; }
+.tursab-img { width: 220px; border-radius: 10px; transition: box-shadow 0.2s; }
+.tursab-badge:hover .tursab-img { box-shadow: 0 4px 20px rgba(240,192,64,0.35); }
+
+
+@media (max-width: 960px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; } .footer-col.footer-tursab { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; } .tursab-img { width: 200px; } }
+@media (max-width: 705px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; } }
+@media (max-width: 600px) { .footer-inner { grid-template-columns: 1fr; gap: 1.5rem; } }
 </style>
 </head>
 <body>
@@ -175,7 +196,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
     <li><a href="index.html">Home</a></li>
     <li><a href="about-us.html">About Us</a></li>
     <li><a href="index.html#vehicles">Our Fleet</a></li>
-    <li><a href="comments.html" class="active">Reviews</a></li>
+    <li><a href="blog.html" class="active">Blog</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
   <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
@@ -187,44 +208,79 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
   <a href="index.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Home</a>
   <a href="about-us.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">About Us</a>
   <a href="index.html#vehicles" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Our Fleet</a>
-  <a href="comments.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Reviews</a>
+  <a href="blog.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Blog</a>
   <a href="contact.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;">Contact</a>
 </div>
 
 <div class="page-wrap">
-  <div class="page-label">Passenger Reviews</div>
-  <h1 class="page-title">What Our Passengers Say</h1>
-  <p class="page-sub" id="pageSubtitle">Showing all reviews from Airports Transfer Turkey passengers.</p>
+  <div class="page-label">Blog</div>
+  <h1 class="page-title">Istanbul Travel Guide</h1>
+  <p class="page-sub">Tips, guides and stories for travellers visiting Istanbul.</p>
 
-  <!-- Highlighted review (shown when clicked from index) -->
-  <div id="highlightSection"></div>
+  <div class="blog-listing">
 
-  <!-- Nav trigger — nav reappears after this -->
-  <div id="nav-trigger"></div>
-
-  <!-- All Reviews -->
-  <div class="divider" id="allDivider" style="display:none;"></div>
-  <div class="section-title" id="allTitle" style="display:none;">All Reviews</div>
-  <div class="reviews-list" id="reviewsList"></div>
-
-  <!-- Leave a Review -->
-  <div class="leave-review">
-    <div class="leave-title">✍️ Leave a Review</div>
-    <div class="star-picker" id="starPicker">
-      <span onclick="setStar(1)">★</span>
-      <span onclick="setStar(2)">★</span>
-      <span onclick="setStar(3)">★</span>
-      <span onclick="setStar(4)">★</span>
-      <span onclick="setStar(5)">★</span>
+    <div class="blog-list-card" onclick="window.location.href='blog-hagiasophia.html'">
+      <div class="blog-list-img"><img src="pngler/hagiasophia.png" alt="Hagia Sophia" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+      <div class="blog-list-body">
+        <div class="blog-list-tag">History</div>
+        <div class="blog-list-title">Hagia Sophia: A Guide for First-Time Visitors</div>
+        <div class="blog-list-excerpt">Everything you need to know before visiting one of Istanbul's most iconic landmarks — opening hours, tips, and how to get there from the airport.</div>
+        <div class="blog-list-meta">5 min read</div>
+      </div>
     </div>
-    <div class="rv-row">
-      <input class="rv-input" id="rv-name" type="text" placeholder="Your Name *" />
-      <input class="rv-input" id="rv-origin" type="text" placeholder="Your City / Country" />
+
+    <div id="nav-trigger"></div>
+
+    <div class="blog-list-card" onclick="window.location.href='blog-grandbazaar.html'">
+      <div class="blog-list-img"><img src="pngler/grandbaazar.png" alt="Grand Bazaar" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+      <div class="blog-list-body">
+        <div class="blog-list-tag">Shopping</div>
+        <div class="blog-list-title">Grand Bazaar: The Ultimate Shopping Experience</div>
+        <div class="blog-list-excerpt">Explore 4,000 shops in one of the world's oldest and largest covered markets. Our guide covers what to buy, how to bargain, and the best entrances.</div>
+        <div class="blog-list-meta">4 min read</div>
+      </div>
     </div>
-    <textarea class="rv-input rv-textarea" id="rv-text" placeholder="Share your experience with Airports Transfer Turkey... *"></textarea>
-    <button class="rv-btn" onclick="submitReview()">Send Review</button>
-    <p class="rv-note">* Your review will be sent to us via email and published after approval.<br>
-    <!-- MAIL ENTEGRASYONU: Formspree veya backend kurulunca buraya gerçek gönderim eklenecek --></p>
+
+    <div class="blog-list-card" onclick="window.location.href='blog-bosphorus.html'">
+      <div class="blog-list-img"><img src="pngler/bosphorus.png" alt="Bosphorus" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+      <div class="blog-list-body">
+        <div class="blog-list-tag">Travel Tips</div>
+        <div class="blog-list-title">Istanbul Airport to Bosphorus: Your Transfer Guide</div>
+        <div class="blog-list-excerpt">Getting from Istanbul Airport to the Bosphorus area doesn't have to be stressful. Discover the fastest, most comfortable way to reach your destination.</div>
+        <div class="blog-list-meta">3 min read</div>
+      </div>
+    </div>
+
+    <div class="blog-list-card" onclick="window.location.href='blog-topkapi.html'">
+      <div class="blog-list-img"><img src="pngler/topkapi.png" alt="Topkapi Palace" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+      <div class="blog-list-body">
+        <div class="blog-list-tag">History</div>
+        <div class="blog-list-title">Topkapi Palace: Inside the Heart of the Ottoman Empire</div>
+        <div class="blog-list-excerpt">Discover the palace that ruled an empire for over 400 years. A complete visitor's guide to Topkapi Palace including the best rooms, treasures, and transfer options.</div>
+        <div class="blog-list-meta">6 min read</div>
+      </div>
+    </div>
+
+    <div class="blog-list-card" onclick="window.location.href='blog-sultanahmet.html'">
+      <div class="blog-list-img"><img src="pngler/sultanahmet.png" alt="Blue Mosque" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+      <div class="blog-list-body">
+        <div class="blog-list-tag">Culture</div>
+        <div class="blog-list-title">Sultanahmet: Exploring the Historic Heart of Istanbul</div>
+        <div class="blog-list-excerpt">The Blue Mosque, the Hippodrome, underground cisterns — Sultanahmet is packed with millennia of history. Here's how to make the most of your visit.</div>
+        <div class="blog-list-meta">5 min read</div>
+      </div>
+    </div>
+
+    <div class="blog-list-card" onclick="window.location.href='blog-galatatower.html'">
+      <div class="blog-list-img"><img src="pngler/galatatower.png" alt="Galata Tower" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
+      <div class="blog-list-body">
+        <div class="blog-list-tag">Views</div>
+        <div class="blog-list-title">Galata Tower: The Best Panoramic View in Istanbul</div>
+        <div class="blog-list-excerpt">Standing 67 metres tall, Galata Tower offers one of the most spectacular views of Istanbul. Everything you need to know before you go to the top.</div>
+        <div class="blog-list-meta">3 min read</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -236,7 +292,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
       <div class="footer-contact-list">
         <a href="tel:+905441021414" class="footer-contact-item"><span class="fci-icon">📞</span> +90 544 102 1414</a>
         <a href="mailto:bekpenturizm@gmail.com" class="footer-contact-item"><span class="fci-icon">✉️</span> bekpenturizm@gmail.com</a>
-        <div class="footer-contact-item"><span class="fci-icon">📍</span><span>Esenyalı Mah. Mezkur Sk. Nizamettin Otluoğlu Apt. NO:26 A Pendik / Istanbul</span></div>
+        <div class="footer-contact-item"><span class="fci-icon">📍</span><span>Esenyalı Mah. Mezkur Sk.<br>Nizamettin Otluoğlu Apt. NO:26 A<br>Pendik / Istanbul</span></div>
       </div>
       <div class="footer-socials">
         <a href="https://www.instagram.com/bekpen.turizm/" target="_blank" rel="noopener" class="social-btn"><img src="pngler/instagram.png" alt="Instagram" style="width:18px;height:18px;object-fit:contain;"></a>
@@ -248,31 +304,26 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Quick Menu</div>
-      <ul class="footer-menu">
-        <li><a href="index.html">→ Home Page</a></li>
-        <li><a href="about-us.html">→ About Us</a></li>
-        <li><a href="index.html#vehicles">→ Our Fleet</a></li>
-        <li><a href="index.html#how">→ How It Works</a></li>
-        <li><a href="index.html#reviews">→ Reviews</a></li>
-        <li><a href="contact.html">→ Contact</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Legal</div>
-      <ul class="footer-menu">
-        <li><a href="terms.html">→ Terms of Use</a></li>
-        <li><a href="privacy.html">→ Privacy Policy</a></li>
-      </ul>
+      <div class="footer-menu-2col">
+        <ul class="footer-menu">
+          <li><a href="index.html">→ Home Page</a></li>
+          <li><a href="about-us.html">→ About Us</a></li>
+          <li><a href="index.html#vehicles">→ Our Fleet</a></li>
+          <li><a href="index.html#how">→ How It Works</a></li>
+          <li><a href="blog.html">→ Blog</a></li>
+          <li><a href="contact.html">→ Contact</a></li>
+        </ul>
+        <ul class="footer-menu">
+          <li><a href="terms.html">→ Terms of Use</a></li>
+          <li><a href="privacy.html">→ Privacy Policy</a></li>
+          <li><a href="distance-sales.html">→ Distance Sales Agreement</a></li>
+        </ul>
+      </div>
     </div>
     <div class="footer-col footer-tursab">
       <div class="footer-col-title">TURSAB</div>
-      <a href="https://www.tursab.org.tr" target="_blank" rel="noopener" class="tursab-badge">
-        <div class="tursab-inner">
-          <div class="tursab-logo">TÜRSAB</div>
-          <div class="tursab-sub">DIGITAL VERIFICATION SYSTEM</div>
-          <div class="tursab-desc">CLICK to verify if your travel agency is an official agency registered with TÜRSAB</div>
-          <div class="tursab-licence">Licence Nr<br><strong>14563</strong></div>
-        </div>
+      <a href="https://www.tursab.org.tr/tr/ddsv" target="_blank" rel="noopener" class="tursab-badge">
+        <img src="pngler/tursab.png" alt="TURSAB Verified" class="tursab-img" onerror="this.onerror=null;this.src='https://bekpentravel.com/upload/64ae5e1f2f5d7-1689148959.png';" />
       </a>
     </div>
   </div>
@@ -327,7 +378,7 @@ function renderList() {
   var list = document.getElementById('reviewsList');
   var others = REVIEWS.filter(function(r) { return r.id !== selectedId; });
   list.innerHTML = others.map(function(r) {
-    return '<div class="review-item" onclick="window.location.href=\'comments.html?review=' + r.id + '\'">' +
+    return '<div class="review-item" onclick="window.location.href=\'blog.html?review=' + r.id + '\'">' +
       '<div class="review-stars">' + starsHtml(r.stars) + '</div>' +
       '<div class="review-body">"' + r.text + '"</div>' +
       '<div class="reviewer-row">' +
@@ -384,38 +435,62 @@ function toggleMenu() {
   }
 }
 
-// Nav scroll behavior — show nav after first review card
+// Nav scroll behavior — same as index, trigger = first blog card bottom
 (function() {
   var nav = document.querySelector('.nav');
-  var lastY = 0, hidden = false;
+  var lastScrollY = 0;
+  var navVisible = true;
+  var navH = 0;
   var trigger = document.getElementById('nav-trigger');
 
+  function updateNav() {
+    navH = nav.offsetHeight;
+    var scrollY = window.scrollY || window.pageYOffset;
+    var scrollingDown = scrollY > lastScrollY;
+    var cardBottom = trigger ? trigger.getBoundingClientRect().top : 0;
+
+    if (cardBottom <= 0) {
+      // Past first blog card — always show nav
+      if (!navVisible) {
+        navVisible = true;
+        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+        nav.style.transform = 'translateY(0)';
+      }
+    } else if (scrollingDown && scrollY > 10) {
+      // Scrolling down — hide nav smoothly with scroll
+      navVisible = false;
+      var ty = Math.min(scrollY, navH);
+      nav.style.transition = 'none';
+      nav.style.transform = 'translateY(-' + ty + 'px)';
+    } else if (!scrollingDown && scrollY <= 10) {
+      // Back at top — show nav
+      navVisible = true;
+      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+      nav.style.transform = 'translateY(0)';
+    } else if (!scrollingDown && !navVisible) {
+      // Scrolling up above trigger — follow scroll
+      var ty2 = Math.min(scrollY, navH);
+      nav.style.transition = 'none';
+      nav.style.transform = 'translateY(-' + ty2 + 'px)';
+    }
+
+    lastScrollY = scrollY;
+  }
+
+  // Close mobile menu on scroll
   window.addEventListener('scroll', function() {
-    var y = window.scrollY || window.pageYOffset;
     var m = document.getElementById('mobileMenu');
+    var h = document.getElementById('hamburger');
     if (m && m.dataset.open === 'true') {
       m.style.maxHeight = '0'; m.dataset.open = 'false';
       setTimeout(function() { m.style.display = 'none'; }, 300);
-      var h = document.getElementById('hamburger');
       if (h) h.classList.remove('open');
     }
-    var tb = trigger ? trigger.getBoundingClientRect().top : -1;
-    if (tb > 0) {
-      if (y <= 10) {
-        nav.style.transition = 'none'; nav.style.transform = 'translateY(0)'; hidden = false;
-      } else if (y > lastY && !hidden) {
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(-100%)'; hidden = true;
-      } else if (y < lastY && hidden) {
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(0)'; hidden = false;
-      }
-    } else {
-      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      nav.style.transform = 'translateY(0)'; hidden = false;
-    }
-    lastY = y;
   }, { passive: true });
+
+  nav.style.transform = 'translateY(0)';
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
 })();
 </script>
 </body>
