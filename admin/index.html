@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel | Airports Transfer Turkey</title>
+<style>
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #0d1117;
+  --bg2:      #161b22;
+  --bg3:      #1c2128;
+  --bg4:      #21262d;
+  --border:   #30363d;
+  --text:     #e6edf3;
+  --text2:    #8b949e;
+  --text3:    #6e7681;
+  --blue:     #2ea8f0;
+  --blue2:    #1a7fc1;
+  --green:    #3fb950;
+  --red:      #f85149;
+  --yellow:   #d29922;
+  --purple:   #8957e5;
+  --gold:     #f0c040;
+  --active-bg:#1c2a3a;
+}
+html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+button { cursor: pointer; font-family: inherit; font-size: 14px; }
+input, textarea, select { font-family: inherit; font-size: 14px; }
+a { text-decoration: none; color: inherit; }
+
+/* ── Login Page ── */
+#loginPage {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 0%, #1a2a3a 0%, var(--bg) 70%);
+}
+.login-box {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+  padding: 3rem 2.5rem; width: 100%; max-width: 440px; text-align: center;
+}
+.login-title { font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+.login-sub { font-size: 14px; color: var(--text2); margin-bottom: 2.5rem; }
+.login-logo { font-size: 13px; font-weight: 700; color: var(--gold); letter-spacing: 1px; margin-bottom: 2rem; }
+.lf-input {
+  display: block; width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 13px 16px; color: var(--text); outline: none; margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+.lf-input::placeholder { color: var(--text3); }
+.lf-input:focus { border-color: var(--blue); }
+.lf-remember { display: flex; align-items: center; gap: 0.5rem; text-align: left; margin-bottom: 1.5rem; color: var(--text2); font-size: 13px; }
+.lf-remember input { width: 16px; height: 16px; accent-color: var(--blue); }
+.btn-login {
+  width: 100%; background: var(--blue); color: white; border: none; border-radius: 8px;
+  padding: 13px; font-size: 15px; font-weight: 600; transition: background 0.2s;
+}
+.btn-login:hover { background: var(--blue2); }
+.login-error { background: rgba(248,81,73,0.12); border: 1px solid rgba(248,81,73,0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--red); margin-bottom: 1rem; display: none; }
+
+/* ── App Layout ── */
+#app { display: none; flex-direction: column; min-height: 100vh; }
+
+/* ── Top Nav ── */
+.top-nav {
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-item {
+  padding: 1rem 1.25rem; text-align: center; cursor: pointer;
+  border-right: 1px solid var(--border); transition: background 0.2s;
+  user-select: none;
+}
+.nav-item:last-child { border-right: none; }
+.nav-item:hover { background: var(--bg3); }
+.nav-item.active { background: var(--active-bg); border-bottom: 2px solid var(--blue); }
+.nav-item-title { font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: 0.3px; }
+.nav-item-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+/* ── Sub Nav ── */
+.sub-nav {
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 0 2rem; display: flex; gap: 0.5rem; align-items: center; min-height: 52px;
+}
+.sub-btn {
+  padding: 8px 18px; border-radius: 6px; border: none;
+  background: transparent; color: var(--text2); font-size: 13px; font-weight: 500;
+  transition: all 0.2s;
+}
+.sub-btn:hover { background: var(--bg3); color: var(--text); }
+.sub-btn.active { background: var(--bg4); color: var(--text); }
+.sub-nav-right { margin-left: auto; }
+
+/* ── Main Content ── */
+.main-content { padding: 2rem; flex: 1; max-width: 1400px; margin: 0 auto; width: 100%; }
+
+/* ── Section Header ── */
+.section-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
+.section-header-left h2 { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+.section-header-left p { font-size: 13px; color: var(--text2); }
+
+/* ── Buttons ── */
+.btn { border: none; border-radius: 6px; padding: 9px 18px; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.4rem; }
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { background: var(--blue2); }
+.btn-success { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+.btn-success:hover { background: rgba(63,185,80,0.25); }
+.btn-danger { background: rgba(248,81,73,0.15); color: var(--red); border: 1px solid rgba(248,81,73,0.3); }
+.btn-danger:hover { background: rgba(248,81,73,0.25); }
+.btn-ghost { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--text3); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+
+/* ── Table ── */
+.table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.table-toolbar { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.table-toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+.table-search { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; color: var(--text); outline: none; min-width: 200px; }
+.table-search:focus { border-color: var(--blue); }
+.table-show { display: flex; align-items: center; gap: 0.5rem; font-size: 13px; color: var(--text2); }
+.table-show select { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; color: var(--text); }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: var(--text2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 14px 16px; border-bottom: 1px solid rgba(48,54,61,0.5); font-size: 13px; color: var(--text); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.table-footer { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); font-size: 12px; color: var(--text2); }
+.table-pages { display: flex; gap: 0.35rem; }
+.page-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: 4px; padding: 4px 10px; font-size: 12px; }
+.page-btn:hover { color: var(--text); border-color: var(--text3); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Badges ── */
+.badge { display: inline-block; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 600; }
+.badge-green { background: rgba(63,185,80,0.15); color: var(--green); }
+.badge-red { background: rgba(248,81,73,0.15); color: var(--red); }
+.badge-yellow { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.badge-blue { background: rgba(46,168,240,0.15); color: var(--blue); }
+.badge-gray { background: rgba(139,148,158,0.15); color: var(--text2); }
+
+/* ── Stats Cards ── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; }
+.stat-label { font-size: 12px; color: var(--text2); margin-bottom: 0.5rem; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text); }
+.stat-sub { font-size: 11px; color: var(--text3); margin-top: 0.25rem; }
+.stat-blue .stat-label { color: var(--blue); }
+.stat-green .stat-label { color: var(--green); }
+.stat-red .stat-label { color: var(--red); }
+.stat-yellow .stat-label { color: var(--yellow); }
+.stat-purple .stat-label { color: var(--purple); }
+
+/* ── Modal ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem; width: 90%; max-width: 520px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.2s ease; }
+.modal-lg { max-width: 720px; }
+@keyframes modalIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+.modal-close { background: none; border: none; color: var(--text2); font-size: 20px; cursor: pointer; padding: 0 4px; }
+.modal-close:hover { color: var(--text); }
+.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+
+/* ── Form ── */
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 9px 12px; color: var(--text); outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--blue); }
+.form-textarea { min-height: 120px; resize: vertical; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* ── Dropdown Actions ── */
+.actions-wrap { position: relative; display: inline-block; }
+.actions-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; padding: 6px 12px; font-size: 12px; display: flex; align-items: center; gap: 4px; }
+.actions-btn:hover { border-color: var(--text3); color: var(--text); }
+.actions-menu { position: absolute; right: 0; top: 100%; margin-top: 4px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; min-width: 140px; z-index: 200; overflow: hidden; display: none; }
+.actions-menu.open { display: block; }
+.actions-menu-item { display: block; width: 100%; padding: 9px 14px; text-align: left; background: none; border: none; color: var(--text2); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.actions-menu-item:hover { background: var(--bg4); color: var(--text); }
+.actions-menu-item.danger { color: var(--red); }
+.actions-menu-item.danger:hover { background: rgba(248,81,73,0.1); }
+
+/* ── Vehicle Image ── */
+.vehicle-img { width: 40px; height: 30px; object-fit: cover; border-radius: 4px; background: var(--bg4); vertical-align: middle; margin-right: 8px; }
+
+/* ── Tracking ── */
+.step-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.step-homepage   { background: rgba(139,148,158,0.15); color: var(--text2); }
+.step-vehicle    { background: rgba(46,168,240,0.15); color: var(--blue); }
+.step-form       { background: rgba(210,153,34,0.15); color: var(--yellow); }
+.step-completed  { background: rgba(63,185,80,0.15); color: var(--green); }
+
+/* ── Empty State ── */
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text2); }
+.empty-state .empty-icon { font-size: 40px; margin-bottom: 1rem; }
+.empty-state p { font-size: 14px; }
+
+/* ── Confirm Dialog ── */
+.confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center; }
+.confirm-overlay.open { display: flex; }
+.confirm-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; width: 90%; max-width: 380px; text-align: center; }
+.confirm-icon { font-size: 40px; margin-bottom: 1rem; }
+.confirm-title { font-size: 17px; font-weight: 700; margin-bottom: 0.5rem; }
+.confirm-msg { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; }
+.confirm-actions { display: flex; gap: 0.75rem; justify-content: center; }
+
+/* ── Toast ── */
+#toast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+.toast-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 0.5rem; animation: toastIn 0.25s ease; min-width: 240px; }
+.toast-item.success { border-color: rgba(63,185,80,0.4); }
+.toast-item.error { border-color: rgba(248,81,73,0.4); }
+@keyframes toastIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+
+/* ── Logout ── */
+.top-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0.6rem 2rem; display: flex; align-items: center; justify-content: flex-end; gap: 1rem; }
+.top-bar-user { font-size: 13px; color: var(--text2); }
+.top-bar-logout { background: none; border: 1px solid var(--border); color: var(--text2); border-radius: 6px; padding: 5px 12px; font-size: 12px; }
+.top-bar-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* ── Responsive ── */
+@media(max-width:900px) {
+  .top-nav { grid-template-columns: repeat(3, 1fr); }
+  .form-row { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media(max-width:600px) {
+  .main-content { padding: 1rem; }
+  .top-nav { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN PAGE ───────────────────────────────────────────────── -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">AIRPORTS TRANSFER TURKEY</div>
+    <h1 class="login-title">Sign In</h1>
+    <p class="login-sub">Admin Panel</p>
+    <div class="login-error" id="loginError"></div>
+    <input class="lf-input" type="email" id="loginEmail" placeholder="E-Mail" autocomplete="email" />
+    <input class="lf-input" type="password" id="loginPassword" placeholder="Password" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter') doLogin()" />
+    <div class="lf-remember">
+      <input type="checkbox" id="rememberMe" />
+      <label for="rememberMe">Remember Me</label>
+    </div>
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ── APP ─────────────────────────────────────────────────────── -->
+<div id="app">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <span class="top-bar-user" id="topBarUser"></span>
+    <button class="top-bar-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+
+  <!-- Main Nav -->
+  <div class="top-nav">
+    <div class="nav-item active" onclick="switchSection('reservations')" data-section="reservations">
+      <div class="nav-item-title">RESERVATIONS</div>
+      <div class="nav-item-sub">Transfer &amp; Tour Reservations</div>
+    </div>
+    <div class="nav-item" onclick="switchSection('content')" data-section="content">
+      <div class="nav-item-title">CONTENT</div>
+      <div class="nav-item-sub">Tours, Blog, Pages</div>
+    </div>
+    <div class="nav-item" onclick="switchSection('vehicles')" data-section="vehicles">
+      <div class="nav-item-title">VEHICLES</div>
+      <div class="nav-item-sub">Transfer Vehicles</div>
+    </div>
+    <div class="nav-item" onclick="switchSection('accounting')" data-section="accounting">
+      <div class="nav-item-title">ACCOUNTING</div>
+      <div class="nav-item-sub">Revenue</div>
+    </div>
+    <div class="nav-item" onclick="switchSection('messages')" data-section="messages">
+      <div class="nav-item-title">MESSAGES</div>
+      <div class="nav-item-sub">Contact &amp; Inbox</div>
+    </div>
+    <div class="nav-item" onclick="switchSection('settings')" data-section="settings">
+      <div class="nav-item-title">SETTINGS</div>
+      <div class="nav-item-sub">FAQ &amp; Pages</div>
+    </div>
+  </div>
+
+  <!-- Sub Nav -->
+  <div class="sub-nav" id="subNav"></div>
+
+  <!-- Content -->
+  <div class="main-content" id="mainContent">
+    <div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>
+  </div>
+</div>
+
+<!-- ── MODAL ─────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-title">
+      <span id="modalTitle">Modal</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- ── CONFIRM ────────────────────────────────────────────────────── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+// Change this to your Railway/Render backend URL after deployment
+const API_URL = (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '' ||
+  window.location.protocol === 'file:'
+) ? 'http://localhost:3001'
+  : 'https://YOUR-BACKEND.railway.app';
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let token = localStorage.getItem('att_token') || sessionStorage.getItem('att_token');
+let currentSection = 'reservations';
+let currentSub = '';
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API_URL + path, { ...opts, headers: { ...headers, ...opts.headers } });
+  if (res.status === 401) { doLogout(); throw new Error('Unauthorized'); }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'API error');
+  return data;
+}
+
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  const el = document.createElement('div');
+  el.className = 'toast-item ' + type;
+  el.innerHTML = (type === 'success' ? '✅' : '❌') + ' ' + msg;
+  t.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function statusBadge(s) {
+  const map = {
+    pending: 'badge-yellow', approved: 'badge-green', cancelled: 'badge-red',
+    active: 'badge-green', passive: 'badge-red', unread: 'badge-blue', read: 'badge-gray',
+  };
+  return `<span class="badge ${map[s] || 'badge-gray'}">${s}</span>`;
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function openModal(title, body, footer = '', large = false) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalFooter').innerHTML = footer;
+  const box = document.getElementById('modalBox');
+  box.className = large ? 'modal modal-lg' : 'modal';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ─── CONFIRM ─────────────────────────────────────────────────────────────────
+function openConfirm(title, msg, onOk) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmOkBtn').onclick = () => { closeConfirm(); onOk(); };
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!email || !password) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
+
+  const btn = document.querySelector('.btn-login');
+  btn.textContent = 'Signing in…'; btn.disabled = true;
+
+  try {
+    const data = await api('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    token = data.token;
+    const remember = document.getElementById('rememberMe').checked;
+    if (remember) localStorage.setItem('att_token', token);
+    else sessionStorage.setItem('att_token', token);
+
+    document.getElementById('topBarUser').textContent = data.user.email;
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('app').style.flexDirection = 'column';
+    switchSection('reservations');
+  } catch (err) {
+    errEl.textContent = 'Invalid email or password.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Sign In'; btn.disabled = false;
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem('att_token');
+  sessionStorage.removeItem('att_token');
+  token = null;
+  location.reload();
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+const SECTIONS = {
+  reservations: {
+    subs: ['Transfer Reservations', 'Customers'],
+    render: (sub) => sub === 'Customers' ? renderCustomers() : renderReservations(),
+  },
+  content: {
+    subs: ['Tours', 'Blog', 'Pages'],
+    render: (sub) => sub === 'Tours' ? renderTours() : sub === 'Blog' ? renderBlog() : renderPages(),
+  },
+  vehicles: {
+    subs: ['Vehicles'],
+    render: () => renderVehicles(),
+  },
+  accounting: {
+    subs: ['Revenue'],
+    render: () => renderAccounting(),
+  },
+  messages: {
+    subs: ['Contact Messages'],
+    render: () => renderMessages(),
+  },
+  settings: {
+    subs: ['FAQ', 'Pages'],
+    render: (sub) => sub === 'Pages' ? renderPages() : renderFaq(),
+  },
+};
+
+function switchSection(section) {
+  currentSection = section;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.section === section);
+  });
+
+  const cfg = SECTIONS[section];
+  const subNav = document.getElementById('subNav');
+  subNav.innerHTML = '';
+
+  cfg.subs.forEach((sub, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'sub-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = sub;
+    btn.onclick = () => {
+      subNav.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSub = sub;
+      cfg.render(sub);
+    };
+    subNav.appendChild(btn);
+  });
+
+  currentSub = cfg.subs[0];
+  cfg.render(cfg.subs[0]);
+}
+
+// ─── RESERVATIONS ─────────────────────────────────────────────────────────────
+async function renderReservations() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const data = await api('/api/reservations?limit=50');
+    const rows = data.data || [];
+
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left">
+          <h2>Transfer Reservations</h2>
+          <p>All transfer bookings from the website.</p>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-show">Show <select onchange="loadReservations(this.value)"><option>10</option><option selected>50</option><option>100</option></select></div>
+          <div class="table-toolbar-right">
+            <input class="table-search" placeholder="Search name, email, ref…" id="resSearch" oninput="filterReservations()" />
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+        <table id="resTable">
+          <thead><tr>
+            <th>ID ↓</th><th>Reference</th><th>Customer</th><th>Route</th>
+            <th>Date</th><th>Vehicle</th><th>Status</th><th>Created</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="resTbody"></tbody>
+        </table>
+        </div>
+        <div class="table-footer"><span id="resCount">—</span></div>
+      </div>`;
+
+    window._allReservations = rows;
+    renderResRows(rows);
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>Could not load reservations: ${err.message}</p></div>`;
+  }
+}
+
+function renderResRows(rows) {
+  const tbody = document.getElementById('resTbody');
+  if (!tbody) return;
+  document.getElementById('resCount').textContent = `${rows.length} record${rows.length !== 1 ? 's' : ''}`;
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text2)">No reservations found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.id}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--blue)">${r.reference?.slice(0,10) || '—'}</td>
+      <td>
+        <div style="font-weight:600">${r.customer_name}</div>
+        <div style="font-size:11px;color:var(--text2)">${r.email}</div>
+      </td>
+      <td style="font-size:12px">
+        <div>${r.pickup_location}</div>
+        <div style="color:var(--text2)">→ ${r.dropoff_location}</div>
+      </td>
+      <td style="font-size:12px;white-space:nowrap">${r.date}</td>
+      <td style="font-size:12px">${r.vehicle?.name || '—'}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.created_at)}</td>
+      <td>
+        <div class="actions-wrap">
+          <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+          <div class="actions-menu">
+            <button class="actions-menu-item" onclick="viewReservation(${r.id});closeAllActions()">View Detail</button>
+            <button class="actions-menu-item" onclick="setResStatus(${r.id},'approved');closeAllActions()">✅ Approve</button>
+            <button class="actions-menu-item" onclick="setResStatus(${r.id},'cancelled');closeAllActions()">❌ Cancel</button>
+            <button class="actions-menu-item danger" onclick="deleteReservation(${r.id});closeAllActions()">🗑 Delete</button>
+          </div>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function filterReservations() {
+  const q = document.getElementById('resSearch')?.value.toLowerCase() || '';
+  const filtered = (window._allReservations || []).filter(r =>
+    r.customer_name?.toLowerCase().includes(q) ||
+    r.email?.toLowerCase().includes(q) ||
+    r.phone?.toLowerCase().includes(q) ||
+    r.reference?.toLowerCase().includes(q)
+  );
+  renderResRows(filtered);
+}
+
+async function viewReservation(id) {
+  try {
+    const r = await api(`/api/reservations/${id}`);
+    openModal('Reservation Detail', `
+      <div style="display:grid;gap:0.75rem;font-size:13px">
+        <div class="form-row">
+          <div><span style="color:var(--text2)">Reference</span><br><b style="color:var(--blue);font-family:monospace">${r.reference}</b></div>
+          <div><span style="color:var(--text2)">Status</span><br>${statusBadge(r.status)}</div>
+        </div>
+        <div class="form-row">
+          <div><span style="color:var(--text2)">Customer</span><br><b>${r.customer_name}</b></div>
+          <div><span style="color:var(--text2)">Phone</span><br>${r.phone}</div>
+        </div>
+        <div><span style="color:var(--text2)">Email</span><br>${r.email}</div>
+        <div class="form-row">
+          <div><span style="color:var(--text2)">From</span><br>${r.pickup_location}</div>
+          <div><span style="color:var(--text2)">To</span><br>${r.dropoff_location}</div>
+        </div>
+        <div class="form-row">
+          <div><span style="color:var(--text2)">Date</span><br>${r.date}</div>
+          <div><span style="color:var(--text2)">Vehicle</span><br>${r.vehicle?.name || '—'}</div>
+        </div>
+        <div class="form-row">
+          <div><span style="color:var(--text2)">Passengers</span><br>${r.passengers}</div>
+          <div><span style="color:var(--text2)">Luggage</span><br>${r.luggage}</div>
+        </div>
+        ${r.flight_number ? `<div><span style="color:var(--text2)">Flight</span><br>${r.flight_number}</div>` : ''}
+        ${r.notes ? `<div><span style="color:var(--text2)">Notes</span><br>${r.notes}</div>` : ''}
+        <div><span style="color:var(--text2)">Created</span><br>${fmtDate(r.created_at)}</div>
+      </div>`,
+      `<button class="btn btn-success" onclick="setResStatus(${r.id},'approved');closeModalDirect()">Approve</button>
+       <button class="btn btn-danger" onclick="setResStatus(${r.id},'cancelled');closeModalDirect()">Cancel</button>
+       <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>`
+    );
+  } catch (err) { toast('Error loading reservation', 'error'); }
+}
+
+async function setResStatus(id, status) {
+  try {
+    await api(`/api/reservations/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
+    toast(`Reservation ${status}`);
+    renderReservations();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function deleteReservation(id) {
+  openConfirm('Delete Reservation', 'This action cannot be undone.', async () => {
+    try {
+      await api(`/api/reservations/${id}`, { method: 'DELETE' });
+      toast('Reservation deleted');
+      renderReservations();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
+}
+
+// ─── CUSTOMERS TRACKING ───────────────────────────────────────────────────────
+async function renderCustomers() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const data = await api('/api/customers-tracking?limit=100');
+    const rows = data.data || [];
+
+    const stepCount = { homepage: 0, vehicle_selected: 0, form_filled: 0, completed: 0 };
+    rows.forEach(r => { if (stepCount[r.current_step] !== undefined) stepCount[r.current_step]++; });
+
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left">
+          <h2>Customer Journey Tracking</h2>
+          <p>Real-time user behavior on the website.</p>
+        </div>
+      </div>
+      <div class="stats-grid" style="margin-bottom:1.5rem">
+        <div class="stat-card stat-gray"><div class="stat-label">Visited Site</div><div class="stat-value">${stepCount.homepage}</div></div>
+        <div class="stat-card stat-blue"><div class="stat-label">Selected Vehicle</div><div class="stat-value">${stepCount.vehicle_selected}</div></div>
+        <div class="stat-card stat-yellow"><div class="stat-label">Filled Form</div><div class="stat-value">${stepCount.form_filled}</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">Completed</div><div class="stat-value">${stepCount.completed}</div></div>
+      </div>
+      <div class="table-card">
+        <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Session</th><th>Step</th><th>Last Action</th><th>IP</th><th>Updated</th></tr></thead>
+          <tbody>
+            ${rows.length ? rows.map(r => `<tr>
+              <td style="font-family:monospace;font-size:11px;color:var(--text2)">${r.session_id?.slice(0,16)}…</td>
+              <td><span class="step-badge step-${r.current_step.replace('_selected','').replace('_filled','')}">${r.current_step}</span></td>
+              <td style="font-size:12px;color:var(--text2)">${r.last_action || '—'}</td>
+              <td style="font-size:11px;color:var(--text3)">${r.ip_address || '—'}</td>
+              <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.updated_at)}</td>
+            </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No tracking data yet</td></tr>'}
+          </tbody>
+        </table>
+        </div>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+// ─── VEHICLES ─────────────────────────────────────────────────────────────────
+async function renderVehicles() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const vehicles = await api('/api/vehicles');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left">
+          <h2>Vehicles</h2>
+          <p>Manage transfer fleet vehicles.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openVehicleModal()">＋ Add Vehicle</button>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-show">Show <select><option>10</option><option selected>50</option></select></div>
+          <div class="table-toolbar-right"><input class="table-search" placeholder="Search…" oninput="filterTable(this,'vehTable')" /></div>
+        </div>
+        <div style="overflow-x:auto">
+        <table id="vehTable">
+          <thead><tr><th>ID ↓</th><th>Vehicle</th><th>Passenger Cap.</th><th>Luggage Cap.</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${vehicles.map(v => `<tr>
+              <td>${v.id}</td>
+              <td>
+                ${v.image_url ? `<img class="vehicle-img" src="${v.image_url}" onerror="this.style.display='none'" />` : ''}
+                <b>${v.name}</b>
+              </td>
+              <td>${v.passenger_capacity} Pax</td>
+              <td>${v.luggage_capacity} Bags</td>
+              <td>€${v.price}</td>
+              <td>${statusBadge(v.status)}</td>
+              <td>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="openVehicleModal(${JSON.stringify(v).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item" onclick="toggleVehicleStatus(${v.id},'${v.status === 'active' ? 'passive' : 'active'}');closeAllActions()">${v.status === 'active' ? '⏸ Deactivate' : '▶ Activate'}</button>
+                    <button class="actions-menu-item danger" onclick="deleteVehicle(${v.id});closeAllActions()">🗑 Delete</button>
+                  </div>
+                </div>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        </div>
+        <div class="table-footer"><span>${vehicles.length} vehicle${vehicles.length !== 1 ? 's' : ''}</span></div>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+function openVehicleModal(v = null) {
+  const isEdit = !!v;
+  openModal(isEdit ? 'Edit Vehicle' : 'Add Vehicle', `
+    <div class="form-group"><label class="form-label">Vehicle Name *</label>
+      <input class="form-input" id="vName" value="${v?.name || ''}" placeholder="Mercedes Vito" /></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Passenger Capacity *</label>
+        <input class="form-input" id="vPax" type="number" value="${v?.passenger_capacity || ''}" placeholder="6" /></div>
+      <div class="form-group"><label class="form-label">Luggage Capacity *</label>
+        <input class="form-input" id="vLug" type="number" value="${v?.luggage_capacity || ''}" placeholder="8" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Price (€)</label>
+        <input class="form-input" id="vPrice" type="number" value="${v?.price || ''}" placeholder="59" /></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="vStatus">
+          <option value="active" ${v?.status === 'active' ? 'selected' : ''}>Active</option>
+          <option value="passive" ${v?.status === 'passive' ? 'selected' : ''}>Passive</option>
+        </select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Image URL</label>
+      <input class="form-input" id="vImg" value="${v?.image_url || ''}" placeholder="https://…" /></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveVehicle(${isEdit ? v.id : 'null'})">${isEdit ? 'Save Changes' : 'Add Vehicle'}</button>`
+  );
+}
+
+async function saveVehicle(id) {
+  const body = {
+    name: document.getElementById('vName').value.trim(),
+    passenger_capacity: document.getElementById('vPax').value,
+    luggage_capacity: document.getElementById('vLug').value,
+    price: document.getElementById('vPrice').value,
+    status: document.getElementById('vStatus').value,
+    image_url: document.getElementById('vImg').value.trim() || null,
+  };
+  if (!body.name || !body.passenger_capacity || !body.luggage_capacity)
+    return toast('Please fill required fields', 'error');
+  try {
+    if (id) await api(`/api/vehicles/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await api('/api/vehicles', { method: 'POST', body: JSON.stringify(body) });
+    toast(id ? 'Vehicle updated' : 'Vehicle added');
+    closeModalDirect();
+    renderVehicles();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function toggleVehicleStatus(id, newStatus) {
+  try {
+    await api(`/api/vehicles/${id}`, { method: 'PUT', body: JSON.stringify({ status: newStatus }) });
+    toast('Status updated');
+    renderVehicles();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function deleteVehicle(id) {
+  openConfirm('Delete Vehicle', 'This vehicle will be permanently deleted.', async () => {
+    try {
+      await api(`/api/vehicles/${id}`, { method: 'DELETE' });
+      toast('Vehicle deleted');
+      renderVehicles();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
+}
+
+// ─── TOURS ────────────────────────────────────────────────────────────────────
+async function renderTours() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const tours = await api('/api/tours');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Tours</h2><p>Manage tour packages.</p></div>
+        <button class="btn btn-primary" onclick="openTourModal()">＋ Add Tour</button>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-toolbar-right"><input class="table-search" placeholder="Search…" oninput="filterTable(this,'tourTable')" /></div>
+        </div>
+        <div style="overflow-x:auto">
+        <table id="tourTable">
+          <thead><tr><th>ID ↓</th><th>Tour Name</th><th>Duration</th><th>Max People</th><th>KM Limit</th><th>Price</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${tours.length ? tours.map(t => `<tr>
+              <td>${t.id}</td><td><b>${t.name}</b><br><span style="font-size:11px;color:var(--text2)">${t.description?.slice(0,50) || ''}</span></td>
+              <td>${t.duration}</td><td>${t.max_people}</td><td>${t.km_limit ? t.km_limit + ' km' : '—'}</td>
+              <td>€${t.price}</td><td>${statusBadge(t.status)}</td>
+              <td style="font-size:11px;color:var(--text2)">${fmtDate(t.created_at)}</td>
+              <td>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="openTourModal(${JSON.stringify(t).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item danger" onclick="deleteTour(${t.id});closeAllActions()">🗑 Delete</button>
+                  </div>
+                </div>
+              </td>
+            </tr>`).join('') : '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text2)">No tours yet</td></tr>'}
+          </tbody>
+        </table>
+        </div>
+        <div class="table-footer"><span>${tours.length} tour${tours.length !== 1 ? 's' : ''}</span></div>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+function openTourModal(t = null) {
+  const isEdit = !!t;
+  openModal(isEdit ? 'Edit Tour' : 'Add Tour', `
+    <div class="form-group"><label class="form-label">Tour Name *</label>
+      <input class="form-input" id="tName" value="${t?.name || ''}" /></div>
+    <div class="form-group"><label class="form-label">Description</label>
+      <textarea class="form-textarea" id="tDesc">${t?.description || ''}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Duration *</label>
+        <input class="form-input" id="tDur" value="${t?.duration || ''}" placeholder="5 hours" /></div>
+      <div class="form-group"><label class="form-label">Max People *</label>
+        <input class="form-input" id="tMax" type="number" value="${t?.max_people || ''}" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">KM Limit</label>
+        <input class="form-input" id="tKm" type="number" value="${t?.km_limit || ''}" /></div>
+      <div class="form-group"><label class="form-label">Price (€) *</label>
+        <input class="form-input" id="tPrice" type="number" value="${t?.price || ''}" /></div>
+    </div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-select" id="tStatus">
+        <option value="active" ${t?.status === 'active' ? 'selected' : ''}>Active</option>
+        <option value="passive" ${t?.status === 'passive' ? 'selected' : ''}>Passive</option>
+      </select></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveTour(${isEdit ? t.id : 'null'})">${isEdit ? 'Save' : 'Add Tour'}</button>`
+  );
+}
+
+async function saveTour(id) {
+  const body = {
+    name: document.getElementById('tName').value.trim(),
+    description: document.getElementById('tDesc').value.trim(),
+    duration: document.getElementById('tDur').value.trim(),
+    max_people: document.getElementById('tMax').value,
+    km_limit: document.getElementById('tKm').value || null,
+    price: document.getElementById('tPrice').value,
+    status: document.getElementById('tStatus').value,
+  };
+  if (!body.name || !body.duration || !body.max_people || !body.price)
+    return toast('Fill required fields', 'error');
+  try {
+    if (id) await api(`/api/tours/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await api('/api/tours', { method: 'POST', body: JSON.stringify(body) });
+    toast(id ? 'Tour updated' : 'Tour added');
+    closeModalDirect();
+    renderTours();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function deleteTour(id) {
+  openConfirm('Delete Tour', 'This tour will be permanently deleted.', async () => {
+    try {
+      await api(`/api/tours/${id}`, { method: 'DELETE' });
+      toast('Tour deleted');
+      renderTours();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
+}
+
+// ─── BLOG ─────────────────────────────────────────────────────────────────────
+async function renderBlog() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const posts = await api('/api/blog');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Blog Posts</h2><p>Manage blog content.</p></div>
+        <button class="btn btn-primary" onclick="openBlogModal()">＋ New Post</button>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-toolbar-right"><input class="table-search" placeholder="Search…" oninput="filterTable(this,'blogTable')" /></div>
+        </div>
+        <div style="overflow-x:auto">
+        <table id="blogTable">
+          <thead><tr><th>ID ↓</th><th>Title</th><th>Slug</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${posts.length ? posts.map(p => `<tr>
+              <td>${p.id}</td>
+              <td>
+                ${p.image_url ? `<img class="vehicle-img" src="${p.image_url}" onerror="this.style.display='none'" />` : ''}
+                <b>${p.title}</b>
+              </td>
+              <td style="font-size:11px;font-family:monospace;color:var(--text2)">${p.slug}</td>
+              <td>${statusBadge(p.status)}</td>
+              <td style="font-size:11px;color:var(--text2)">${fmtDate(p.created_at)}</td>
+              <td>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="openBlogModal(${JSON.stringify(p).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item danger" onclick="deleteBlog(${p.id});closeAllActions()">🗑 Delete</button>
+                  </div>
+                </div>
+              </td>
+            </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">No posts yet</td></tr>'}
+          </tbody>
+        </table>
+        </div>
+        <div class="table-footer"><span>${posts.length} post${posts.length !== 1 ? 's' : ''}</span></div>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+function openBlogModal(p = null) {
+  const isEdit = !!p;
+  openModal(isEdit ? 'Edit Post' : 'New Blog Post', `
+    <div class="form-group"><label class="form-label">Title *</label>
+      <input class="form-input" id="bTitle" value="${p?.title || ''}" /></div>
+    <div class="form-group"><label class="form-label">Excerpt</label>
+      <input class="form-input" id="bExcerpt" value="${p?.excerpt || ''}" placeholder="Short summary…" /></div>
+    <div class="form-group"><label class="form-label">Content *</label>
+      <textarea class="form-textarea" id="bContent" style="min-height:200px">${p?.content || ''}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Image URL</label>
+        <input class="form-input" id="bImg" value="${p?.image_url || ''}" /></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="bStatus">
+          <option value="active" ${p?.status !== 'passive' ? 'selected' : ''}>Active</option>
+          <option value="passive" ${p?.status === 'passive' ? 'selected' : ''}>Passive</option>
+        </select></div>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveBlog(${isEdit ? p.id : 'null'})">${isEdit ? 'Save' : 'Publish'}</button>`,
+    true
+  );
+}
+
+async function saveBlog(id) {
+  const body = {
+    title: document.getElementById('bTitle').value.trim(),
+    content: document.getElementById('bContent').value.trim(),
+    excerpt: document.getElementById('bExcerpt').value.trim() || null,
+    image_url: document.getElementById('bImg').value.trim() || null,
+    status: document.getElementById('bStatus').value,
+  };
+  if (!body.title || !body.content) return toast('Title and content required', 'error');
+  try {
+    if (id) await api(`/api/blog/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await api('/api/blog', { method: 'POST', body: JSON.stringify(body) });
+    toast(id ? 'Post updated' : 'Post published');
+    closeModalDirect();
+    renderBlog();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function deleteBlog(id) {
+  openConfirm('Delete Post', 'This post will be permanently deleted.', async () => {
+    try {
+      await api(`/api/blog/${id}`, { method: 'DELETE' });
+      toast('Post deleted');
+      renderBlog();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
+}
+
+// ─── FAQ ──────────────────────────────────────────────────────────────────────
+async function renderFaq() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const faqs = await api('/api/faq');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>FAQ</h2><p>Frequently asked questions shown on the website.</p></div>
+        <button class="btn btn-primary" onclick="openFaqModal()">＋ Add FAQ</button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>ID</th><th>Question</th><th>Answer</th><th>Order</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${faqs.length ? faqs.map(f => `<tr>
+              <td>${f.id}</td>
+              <td style="max-width:280px"><b>${f.question}</b></td>
+              <td style="font-size:12px;color:var(--text2);max-width:320px">${f.answer.slice(0,100)}${f.answer.length > 100 ? '…' : ''}</td>
+              <td>${f.order_num}</td>
+              <td>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="openFaqModal(${JSON.stringify(f).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item danger" onclick="deleteFaq(${f.id});closeAllActions()">🗑 Delete</button>
+                  </div>
+                </div>
+              </td>
+            </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No FAQs yet</td></tr>'}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+function openFaqModal(f = null) {
+  const isEdit = !!f;
+  openModal(isEdit ? 'Edit FAQ' : 'Add FAQ', `
+    <div class="form-group"><label class="form-label">Question *</label>
+      <input class="form-input" id="fQ" value="${f?.question || ''}" /></div>
+    <div class="form-group"><label class="form-label">Answer *</label>
+      <textarea class="form-textarea" id="fA">${f?.answer || ''}</textarea></div>
+    <div class="form-group"><label class="form-label">Order</label>
+      <input class="form-input" id="fOrd" type="number" value="${f?.order_num || 0}" /></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveFaq(${isEdit ? f.id : 'null'})">${isEdit ? 'Save' : 'Add'}</button>`
+  );
+}
+
+async function saveFaq(id) {
+  const body = {
+    question: document.getElementById('fQ').value.trim(),
+    answer: document.getElementById('fA').value.trim(),
+    order_num: parseInt(document.getElementById('fOrd').value) || 0,
+  };
+  if (!body.question || !body.answer) return toast('Question and answer required', 'error');
+  try {
+    if (id) await api(`/api/faq/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await api('/api/faq', { method: 'POST', body: JSON.stringify(body) });
+    toast(id ? 'FAQ updated' : 'FAQ added');
+    closeModalDirect();
+    renderFaq();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function deleteFaq(id) {
+  openConfirm('Delete FAQ', 'This FAQ will be removed from the website.', async () => {
+    try {
+      await api(`/api/faq/${id}`, { method: 'DELETE' });
+      toast('FAQ deleted');
+      renderFaq();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
+}
+
+// ─── PAGES ────────────────────────────────────────────────────────────────────
+async function renderPages() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const pages = await api('/api/pages');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Pages</h2><p>Edit static page content.</p></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1rem">
+        ${pages.map(p => `
+          <div class="table-card" style="padding:1.5rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+              <div>
+                <div style="font-weight:700;font-size:16px">${p.title || p.page_name}</div>
+                <div style="font-size:12px;color:var(--text2)">${p.page_name}</div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openPageModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">Edit</button>
+            </div>
+            <p style="font-size:13px;color:var(--text2);line-height:1.6">${p.content?.slice(0,200)}${p.content?.length > 200 ? '…' : ''}</p>
+          </div>`).join('')}
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+function openPageModal(p) {
+  openModal(`Edit: ${p.title || p.page_name}`, `
+    <div class="form-group"><label class="form-label">Title</label>
+      <input class="form-input" id="pgTitle" value="${p.title || ''}" /></div>
+    <div class="form-group"><label class="form-label">Content</label>
+      <textarea class="form-textarea" id="pgContent" style="min-height:180px">${p.content || ''}</textarea></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="savePage('${p.page_name}')">Save</button>`
+  );
+}
+
+async function savePage(name) {
+  const body = {
+    title: document.getElementById('pgTitle').value.trim(),
+    content: document.getElementById('pgContent').value.trim(),
+  };
+  try {
+    await api(`/api/pages/${name}`, { method: 'PUT', body: JSON.stringify(body) });
+    toast('Page saved');
+    closeModalDirect();
+    renderPages();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+// ─── ACCOUNTING ───────────────────────────────────────────────────────────────
+async function renderAccounting() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const stats = await api('/api/stats');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Revenue & Statistics</h2><p>Financial overview.</p></div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:1.25rem">Transfer Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-card stat-blue"><div class="stat-label">Total Reservations</div><div class="stat-value">${stats.reservations.total}</div></div>
+          <div class="stat-card stat-yellow"><div class="stat-label">Pending</div><div class="stat-value">${stats.reservations.pending}</div></div>
+          <div class="stat-card stat-green"><div class="stat-label">Approved</div><div class="stat-value">${stats.reservations.approved}</div></div>
+          <div class="stat-card stat-red"><div class="stat-label">Cancelled</div><div class="stat-value">${stats.reservations.cancelled}</div></div>
+          <div class="stat-card stat-green"><div class="stat-label">Total Revenue (Approved)</div><div class="stat-value">€${(stats.revenue.total || 0).toFixed(2)}</div></div>
+          <div class="stat-card stat-purple"><div class="stat-label">Active Vehicles</div><div class="stat-value">${stats.vehicles.active} / ${stats.vehicles.total}</div></div>
+          <div class="stat-card stat-blue"><div class="stat-label">Blog Posts</div><div class="stat-value">${stats.blog.total}</div></div>
+          <div class="stat-card stat-yellow"><div class="stat-label">Unread Messages</div><div class="stat-value">${stats.unreadMessages}</div></div>
+        </div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:1.25rem">Recent Reservations</h3>
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr>
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Ref</th>
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Customer</th>
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Vehicle</th>
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Status</th>
+            <th style="padding:10px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Date</th>
+          </tr></thead>
+          <tbody>
+            ${stats.recentReservations.map(r => `<tr>
+              <td style="padding:12px;font-family:monospace;font-size:11px;color:var(--blue)">${r.reference?.slice(0,10)}</td>
+              <td style="padding:12px;font-size:13px">${r.customer_name}</td>
+              <td style="padding:12px;font-size:12px;color:var(--text2)">${r.vehicle?.name || '—'}</td>
+              <td style="padding:12px">${statusBadge(r.status)}</td>
+              <td style="padding:12px;font-size:11px;color:var(--text2)">${fmtDate(r.created_at)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+// ─── MESSAGES ─────────────────────────────────────────────────────────────────
+async function renderMessages() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const messages = await api('/api/contact');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Contact Messages</h2><p>Messages from the website contact form.</p></div>
+      </div>
+      <div class="table-card">
+        <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${messages.length ? messages.map(m => `<tr>
+              <td>${m.id}</td>
+              <td><b>${m.name}</b></td>
+              <td style="font-size:12px">${m.email}</td>
+              <td style="font-size:12px;color:var(--text2)">${m.subject || '—'}</td>
+              <td>${statusBadge(m.status)}</td>
+              <td style="font-size:11px;color:var(--text2)">${fmtDate(m.created_at)}</td>
+              <td>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')});closeAllActions()">👁 View</button>
+                    <button class="actions-menu-item" onclick="markRead(${m.id});closeAllActions()">✅ Mark Read</button>
+                  </div>
+                </div>
+              </td>
+            </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text2)">No messages yet</td></tr>'}
+          </tbody>
+        </table>
+        </div>
+        <div class="table-footer"><span>${messages.length} message${messages.length !== 1 ? 's' : ''}</span></div>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+function viewMessage(m) {
+  openModal('Message Detail', `
+    <div style="display:grid;gap:0.75rem;font-size:13px">
+      <div class="form-row">
+        <div><span style="color:var(--text2)">From</span><br><b>${m.name}</b></div>
+        <div><span style="color:var(--text2)">Status</span><br>${statusBadge(m.status)}</div>
+      </div>
+      <div><span style="color:var(--text2)">Email</span><br><a href="mailto:${m.email}" style="color:var(--blue)">${m.email}</a></div>
+      ${m.phone ? `<div><span style="color:var(--text2)">Phone</span><br>${m.phone}</div>` : ''}
+      ${m.subject ? `<div><span style="color:var(--text2)">Subject</span><br>${m.subject}</div>` : ''}
+      <div><span style="color:var(--text2)">Message</span><br><div style="background:var(--bg3);padding:12px;border-radius:6px;line-height:1.6;margin-top:6px">${m.message}</div></div>
+      <div><span style="color:var(--text2)">Received</span><br>${fmtDate(m.created_at)}</div>
+    </div>`,
+    `<button class="btn btn-success" onclick="markRead(${m.id});closeModalDirect()">Mark as Read</button>
+     <a href="mailto:${m.email}?subject=Re: ${m.subject || ''}" class="btn btn-primary">Reply by Email</a>
+     <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>`
+  );
+}
+
+async function markRead(id) {
+  try {
+    await api(`/api/contact/${id}/read`, { method: 'PUT' });
+    toast('Marked as read');
+    renderMessages();
+  } catch (err) { toast('Error', 'error'); }
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function toggleActions(btn) {
+  closeAllActions();
+  btn.nextElementSibling.classList.toggle('open');
+  document.addEventListener('click', closeAllActionsOnce, { once: true });
+}
+
+function closeAllActions() {
+  document.querySelectorAll('.actions-menu.open').forEach(m => m.classList.remove('open'));
+}
+
+function closeAllActionsOnce() {
+  closeAllActions();
+}
+
+function filterTable(input, tableId) {
+  const q = input.value.toLowerCase();
+  const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ─── AUTO LOGIN (if token exists) ─────────────────────────────────────────────
+if (token) {
+  api('/api/auth/me').then(user => {
+    document.getElementById('topBarUser').textContent = user.email;
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('app').style.flexDirection = 'column';
+    switchSection('reservations');
+  }).catch(() => {
+    localStorage.removeItem('att_token');
+    sessionStorage.removeItem('att_token');
+    token = null;
+  });
+}
+</script>
+</body>
+</html>

@@ -247,6 +247,9 @@ function showCfError(msg) {
 function closeCfError() {
   document.getElementById('cfErrorOverlay').style.display = 'none';
 }
+// Backend entegrasyon için bu URL'i değiştirin:
+var CONTACT_API_URL = '/api/contact';
+
 function sendMessage() {
   var name    = document.getElementById('cf-name').value.trim();
   var email   = document.getElementById('cf-email').value.trim();
@@ -254,29 +257,54 @@ function sendMessage() {
   var subject = document.getElementById('cf-subject').value.trim();
   var message = document.getElementById('cf-message').value.trim();
 
-  // Highlight empty required fields
   ['cf-name','cf-email','cf-message'].forEach(function(id) {
     var el = document.getElementById(id);
     el.style.borderColor = el.value.trim() ? '' : '#e05c5c';
   });
 
-  if (!name && !email && !message) {
-    showCfError('Please fill in your Name, E-Mail and Message to send us a message.');
-    return;
-  }
-  if (!name) { showCfError('Please enter your name.'); return; }
-  if (!email) { showCfError('Please enter your e-mail address.'); return; }
+  if (!name && !email && !message) { showCfError('Please fill in your Name, E-Mail and Message.'); return; }
+  if (!name)    { showCfError('Please enter your name.'); return; }
+  if (!email)   { showCfError('Please enter your e-mail address.'); return; }
   if (!message) { showCfError('Please write your message before sending.'); return; }
 
-  var body = 'Name: ' + name + '\n'
-           + 'Phone: ' + (phone || '—') + '\n\n'
-           + message;
+  var btn = document.querySelector('.cf-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
 
-  var mailto = 'mailto:bekpenturizm@gmail.com'
-             + '?subject=' + encodeURIComponent(subject || 'Website Contact: ' + name)
-             + '&body='    + encodeURIComponent(body);
+  var payload = {
+    name: name, email: email,
+    phone: phone || null,
+    subject: subject || ('Website Contact: ' + name),
+    message: message,
+    source: 'contact-page'
+  };
 
-  window.location.href = mailto;
+  fetch(CONTACT_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Server error: ' + res.status);
+    return res.json();
+  })
+  .then(function() {
+    document.getElementById('cfSuccess').classList.add('show');
+    ['cf-name','cf-email','cf-phone','cf-subject','cf-message'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+  })
+  .catch(function(err) {
+    console.error('Contact API error:', err);
+    // Fallback: mailto
+    var body = 'Name: ' + name + '\nPhone: ' + (phone || '—') + '\n\n' + message;
+    var mailto = 'mailto:bekpenturizm@gmail.com'
+               + '?subject=' + encodeURIComponent(subject || 'Website Contact: ' + name)
+               + '&body='    + encodeURIComponent(body);
+    window.location.href = mailto;
+  })
+  .finally(function() {
+    btn.disabled = false; btn.textContent = 'Send';
+  });
 }
 </script>
 
