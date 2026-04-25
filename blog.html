@@ -217,70 +217,8 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
   <h1 class="page-title">Istanbul Travel Guide</h1>
   <p class="page-sub">Tips, guides and stories for travellers visiting Istanbul.</p>
 
-  <div class="blog-listing">
-
-    <div class="blog-list-card" onclick="window.location.href='blog-hagiasophia.html'">
-      <div class="blog-list-img"><img src="pngler/hagiasophia.png" alt="Hagia Sophia" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-      <div class="blog-list-body">
-        <div class="blog-list-tag">History</div>
-        <div class="blog-list-title">Hagia Sophia: A Guide for First-Time Visitors</div>
-        <div class="blog-list-excerpt">Everything you need to know before visiting one of Istanbul's most iconic landmarks — opening hours, tips, and how to get there from the airport.</div>
-        <div class="blog-list-meta">5 min read</div>
-      </div>
-    </div>
-
-    <div id="nav-trigger"></div>
-
-    <div class="blog-list-card" onclick="window.location.href='blog-grandbazaar.html'">
-      <div class="blog-list-img"><img src="pngler/grandbaazar.png" alt="Grand Bazaar" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-      <div class="blog-list-body">
-        <div class="blog-list-tag">Shopping</div>
-        <div class="blog-list-title">Grand Bazaar: The Ultimate Shopping Experience</div>
-        <div class="blog-list-excerpt">Explore 4,000 shops in one of the world's oldest and largest covered markets. Our guide covers what to buy, how to bargain, and the best entrances.</div>
-        <div class="blog-list-meta">4 min read</div>
-      </div>
-    </div>
-
-    <div class="blog-list-card" onclick="window.location.href='blog-bosphorus.html'">
-      <div class="blog-list-img"><img src="pngler/bosphorus.png" alt="Bosphorus" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-      <div class="blog-list-body">
-        <div class="blog-list-tag">Travel Tips</div>
-        <div class="blog-list-title">Istanbul Airport to Bosphorus: Your Transfer Guide</div>
-        <div class="blog-list-excerpt">Getting from Istanbul Airport to the Bosphorus area doesn't have to be stressful. Discover the fastest, most comfortable way to reach your destination.</div>
-        <div class="blog-list-meta">3 min read</div>
-      </div>
-    </div>
-
-    <div class="blog-list-card" onclick="window.location.href='blog-topkapi.html'">
-      <div class="blog-list-img"><img src="pngler/topkapi.png" alt="Topkapi Palace" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-      <div class="blog-list-body">
-        <div class="blog-list-tag">History</div>
-        <div class="blog-list-title">Topkapi Palace: Inside the Heart of the Ottoman Empire</div>
-        <div class="blog-list-excerpt">Discover the palace that ruled an empire for over 400 years. A complete visitor's guide to Topkapi Palace including the best rooms, treasures, and transfer options.</div>
-        <div class="blog-list-meta">6 min read</div>
-      </div>
-    </div>
-
-    <div class="blog-list-card" onclick="window.location.href='blog-sultanahmet.html'">
-      <div class="blog-list-img"><img src="pngler/sultanahmet.png" alt="Blue Mosque" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-      <div class="blog-list-body">
-        <div class="blog-list-tag">Culture</div>
-        <div class="blog-list-title">Sultanahmet: Exploring the Historic Heart of Istanbul</div>
-        <div class="blog-list-excerpt">The Blue Mosque, the Hippodrome, underground cisterns — Sultanahmet is packed with millennia of history. Here's how to make the most of your visit.</div>
-        <div class="blog-list-meta">5 min read</div>
-      </div>
-    </div>
-
-    <div class="blog-list-card" onclick="window.location.href='blog-galatatower.html'">
-      <div class="blog-list-img"><img src="pngler/galatatower.png" alt="Galata Tower" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-      <div class="blog-list-body">
-        <div class="blog-list-tag">Views</div>
-        <div class="blog-list-title">Galata Tower: The Best Panoramic View in Istanbul</div>
-        <div class="blog-list-excerpt">Standing 67 metres tall, Galata Tower offers one of the most spectacular views of Istanbul. Everything you need to know before you go to the top.</div>
-        <div class="blog-list-meta">3 min read</div>
-      </div>
-    </div>
-
+  <div class="blog-listing" id="blogListing">
+    <div style="text-align:center;padding:3rem;color:#9ab4cc;">Loading...</div>
   </div>
 </div>
 
@@ -492,6 +430,54 @@ function toggleMenu() {
   window.addEventListener('scroll', updateNav, { passive: true });
   updateNav();
 })();
+</script>
+<script>
+// ─── Load blogs from API ──────────────────────────────────────────────────────
+var API_BASE = 'https://home-production-6910.up.railway.app';
+
+fetch(API_BASE + '/api/blog?status=active')
+  .then(function(res) { return res.json(); })
+  .then(function(posts) {
+    var listing = document.getElementById('blogListing');
+    if (!posts.length) {
+      listing.innerHTML = '<div style="text-align:center;padding:3rem;color:#9ab4cc;">No blog posts yet.</div>';
+      return;
+    }
+    listing.innerHTML = posts.map(function(post, i) {
+      return '<div class="blog-list-card" onclick="window.location.href=\'blog-detail.html?slug=' + post.slug + '\'">' +
+        (post.image_url ? '<div class="blog-list-img"><img src="' + post.image_url + '" alt="' + post.title + '" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" /></div>' : '<div class="blog-list-img" style="background:#2a3f55;"></div>') +
+        '<div class="blog-list-body">' +
+          '<div class="blog-list-tag">Blog</div>' +
+          '<div class="blog-list-title">' + post.title + '</div>' +
+          '<div class="blog-list-excerpt">' + (post.excerpt || post.content.slice(0, 150) + '…') + '</div>' +
+          '<div class="blog-list-meta">' + new Date(post.created_at).toLocaleDateString('en-GB') + '</div>' +
+        '</div>' +
+      '</div>' +
+      (i === 0 ? '<div id="nav-trigger"></div>' : '');
+    }).join('');
+  })
+  .catch(function() {
+    // Fallback to static cards if API fails
+    var listing = document.getElementById('blogListing');
+    listing.innerHTML = [
+      { href:'blog-hagiasophia.html', img:'pngler/hagiasophia.png', tag:'History', title:'Hagia Sophia: A Guide for First-Time Visitors', excerpt:'Everything you need to know before visiting one of Istanbul\'s most iconic landmarks.', meta:'5 min read' },
+      { href:'blog-grandbazaar.html', img:'pngler/grandbaazar.png', tag:'Shopping', title:'Grand Bazaar: The Ultimate Shopping Experience', excerpt:'Explore 4,000 shops in one of the world\'s oldest covered markets.', meta:'4 min read' },
+      { href:'blog-bosphorus.html', img:'pngler/bosphorus.png', tag:'Travel Tips', title:'Istanbul Airport to Bosphorus: Your Transfer Guide', excerpt:'Getting from Istanbul Airport to the Bosphorus area doesn\'t have to be stressful.', meta:'3 min read' },
+      { href:'blog-topkapi.html', img:'pngler/topkapi.png', tag:'History', title:'Topkapi Palace: Inside the Heart of the Ottoman Empire', excerpt:'Discover the palace that ruled an empire for over 400 years.', meta:'6 min read' },
+      { href:'blog-sultanahmet.html', img:'pngler/sultanahmet.png', tag:'Culture', title:'Sultanahmet: Exploring the Historic Heart of Istanbul', excerpt:'The Blue Mosque, the Hippodrome, underground cisterns.', meta:'5 min read' },
+      { href:'blog-galatatower.html', img:'pngler/galatatower.png', tag:'Views', title:'Galata Tower: The Best Panoramic View in Istanbul', excerpt:'Standing 67 metres tall, Galata Tower offers spectacular views.', meta:'3 min read' },
+    ].map(function(b, i) {
+      return '<div class="blog-list-card" onclick="window.location.href=\'' + b.href + '\'">' +
+        '<div class="blog-list-img"><img src="' + b.img + '" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" /></div>' +
+        '<div class="blog-list-body">' +
+          '<div class="blog-list-tag">' + b.tag + '</div>' +
+          '<div class="blog-list-title">' + b.title + '</div>' +
+          '<div class="blog-list-excerpt">' + b.excerpt + '</div>' +
+          '<div class="blog-list-meta">' + b.meta + '</div>' +
+        '</div>' +
+      '</div>' + (i === 0 ? '<div id="nav-trigger"></div>' : '');
+    }).join('');
+  });
 </script>
 </body>
 </html>

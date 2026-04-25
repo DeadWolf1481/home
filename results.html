@@ -329,53 +329,8 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 
 <script>
 // ─── Config ───────────────────────────────────────────────────────────────────
-// Backend entegrasyon için bu URL'i değiştirin:
-var BOOKING_API_URL = 'https://home-production-6910.up.railway.app/api/booking';
-var CONTACT_API_URL = '/api/contact';        // contact.html için de hazır
-
-// ─── Vehicles ─────────────────────────────────────────────────────────────────
-var VEHICLES = [
-  {
-    id: 'vito',
-    name: 'Mercedes Vito',
-    type: 'Standard Transfer',
-    maxPax: 6,
-    maxLug: 8,
-    price: 59,
-    features: ['Professional licensed driver', 'Flight tracking included', 'Free cancellation 24h', 'Meet & greet at airport'],
-    pills: [{ icon: '👤', label: 'Up to 6 pax' }, { icon: '🧳', label: 'Up to 8 bags' }]
-  },
-  {
-    id: 'vip-vito',
-    name: 'VIP Mercedes Vito',
-    type: 'VIP Transfer',
-    maxPax: 4,
-    maxLug: 6,
-    price: 79,
-    features: ['VIP interior & amenities', 'Professional licensed driver', 'Flight tracking included', 'Free cancellation 24h'],
-    pills: [{ icon: '👤', label: 'Up to 4 pax' }, { icon: '🧳', label: 'Up to 6 bags' }, { icon: '⭐', label: 'VIP' }]
-  },
-  {
-    id: 'sprinter',
-    name: 'Mercedes Sprinter',
-    type: 'Group Transfer',
-    maxPax: 12,
-    maxLug: 12,
-    price: 119,
-    features: ['Ideal for large groups', 'Professional licensed driver', 'Flight tracking included', 'Free cancellation 24h'],
-    pills: [{ icon: '👤', label: 'Up to 12 pax' }, { icon: '🧳', label: 'Up to 12 bags' }]
-  },
-  {
-    id: 'vip-sprinter',
-    name: 'VIP Mercedes Sprinter',
-    type: 'VIP Group Transfer',
-    maxPax: 12,
-    maxLug: 16,
-    price: 139,
-    features: ['VIP interior for groups', 'Professional licensed driver', 'Flight tracking included', 'Free cancellation 24h'],
-    pills: [{ icon: '👤', label: 'Up to 12 pax' }, { icon: '🧳', label: 'Up to 16 bags' }, { icon: '⭐', label: 'VIP' }]
-  }
-];
+var API_BASE = 'https://home-production-6910.up.railway.app';
+var BOOKING_API_URL = API_BASE + '/api/booking';
 
 // ─── URL Params ───────────────────────────────────────────────────────────────
 var params = new URLSearchParams(window.location.search);
@@ -392,73 +347,93 @@ document.getElementById('tripPax').textContent  = tripPax;
 document.getElementById('tripLug').textContent  = tripLug;
 
 // ─── Best Match ───────────────────────────────────────────────────────────────
-function findBestMatch(pax, lug) {
-  for (var i = 0; i < VEHICLES.length; i++) {
-    if (VEHICLES[i].maxPax >= pax && VEHICLES[i].maxLug >= lug) return VEHICLES[i].id;
+function findBestMatch(vehicles, pax, lug) {
+  var sorted = vehicles.slice().sort(function(a,b){ return a.passenger_capacity - b.passenger_capacity; });
+  for (var i = 0; i < sorted.length; i++) {
+    if (sorted[i].passenger_capacity >= pax && sorted[i].luggage_capacity >= lug) return sorted[i].id;
   }
-  return VEHICLES[VEHICLES.length - 1].id;
+  return sorted[sorted.length - 1].id;
 }
 
-var bestId = findBestMatch(tripPax, tripLug);
-var bestVehicle = VEHICLES.find(function(v){ return v.id === bestId; });
-
-if (bestVehicle) {
-  var note = document.getElementById('bestMatchNote');
-  note.textContent = '⭐ Best match for your trip: ' + bestVehicle.name + ' — fits ' + tripPax + ' passenger' + (tripPax>1?'s':'') + ' and ' + tripLug + ' bag' + (tripLug!==1?'s':'') + '.';
-  note.classList.add('show');
-}
-
-// ─── Render Cards ─────────────────────────────────────────────────────────────
+// ─── Render Cards from API ────────────────────────────────────────────────────
 var grid = document.getElementById('vehiclesGrid');
-VEHICLES.forEach(function(v) {
-  var isBest = v.id === bestId;
-  var paxOk  = v.maxPax >= tripPax;
-  var lugOk  = v.maxLug >= tripLug;
 
-  var pillsHtml = v.pills.map(function(p) {
-    return '<span class="vc-pill">' + p.icon + ' ' + p.label + '</span>';
-  }).join('');
+fetch(API_BASE + '/api/vehicles?status=active')
+  .then(function(res) { return res.json(); })
+  .then(function(vehicles) {
+    if (!vehicles.length) {
+      grid.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ab4cc">No vehicles available.</div>';
+      return;
+    }
 
-  var featuresHtml = v.features.map(function(f) {
-    return '<div class="vc-feat">' + f + '</div>';
-  }).join('');
+    var bestId = findBestMatch(vehicles, tripPax, tripLug);
+    var bestVehicle = vehicles.find(function(v){ return v.id === bestId; });
 
-  var capWarning = '';
-  if (!paxOk) capWarning = '<div style="font-size:12px;color:#eb7267;margin-top:0.5rem;">⚠️ May not fit all passengers</div>';
-  if (!lugOk) capWarning += '<div style="font-size:12px;color:#eb7267;margin-top:0.25rem;">⚠️ May not fit all luggage</div>';
+    if (bestVehicle) {
+      var note = document.getElementById('bestMatchNote');
+      note.textContent = '⭐ Best match for your trip: ' + bestVehicle.name + ' — fits ' + tripPax + ' passenger' + (tripPax>1?'s':'') + ' and ' + tripLug + ' bag' + (tripLug!==1?'s':'') + '.';
+      note.classList.add('show');
+    }
 
-  var card = document.createElement('div');
-  card.className = 'vc' + (isBest ? ' best' : '');
-  card.innerHTML =
-    (isBest ? '<div class="vc-badge">Best Match</div>' : '') +
-    '<div class="vc-body">' +
-      '<div class="vc-name">' + v.name + '</div>' +
-      '<div class="vc-type">' + v.type + '</div>' +
-      '<div class="vc-pills">' + pillsHtml + '</div>' +
-      '<div class="vc-features">' + featuresHtml + '</div>' +
-      capWarning +
-      '<div class="vc-bottom">' +
-        '<div>' +
-          '<div class="vc-price">€' + v.price + '</div>' +
-          '<div class="vc-price-note">fixed price · all-inclusive</div>' +
-        '</div>' +
-        '<button class="vc-select-btn" onclick="openBooking(\'' + v.id + '\')">Select →</button>' +
-      '</div>' +
-    '</div>';
+    vehicles.forEach(function(v) {
+      var isBest = v.id === bestId;
+      var paxOk  = v.passenger_capacity >= tripPax;
+      var lugOk  = v.luggage_capacity >= tripLug;
 
-  grid.appendChild(card);
-});
+      var pillsHtml = '<span class="vc-pill">👤 Up to ' + v.passenger_capacity + ' pax</span>'
+                    + '<span class="vc-pill">🧳 Up to ' + v.luggage_capacity + ' bags</span>';
+
+      var capWarning = '';
+      if (!paxOk) capWarning = '<div style="font-size:12px;color:#eb7267;margin-top:0.5rem;">⚠️ May not fit all passengers</div>';
+      if (!lugOk) capWarning += '<div style="font-size:12px;color:#eb7267;margin-top:0.25rem;">⚠️ May not fit all luggage</div>';
+
+      var card = document.createElement('div');
+      card.className = 'vc' + (isBest ? ' best' : '');
+      card.innerHTML =
+        (isBest ? '<div class="vc-badge">Best Match</div>' : '') +
+        '<div class="vc-body">' +
+          '<div class="vc-name">' + v.name + '</div>' +
+          '<div class="vc-type">Transfer Vehicle</div>' +
+          '<div class="vc-pills">' + pillsHtml + '</div>' +
+          '<div class="vc-features">' +
+            '<div class="vc-feat">Professional licensed driver</div>' +
+            '<div class="vc-feat">Flight tracking included</div>' +
+            '<div class="vc-feat">Free cancellation 24h</div>' +
+            '<div class="vc-feat">Meet &amp; greet at airport</div>' +
+          '</div>' +
+          capWarning +
+          '<div class="vc-bottom">' +
+            '<div>' +
+              '<div class="vc-price">€' + v.price + '</div>' +
+              '<div class="vc-price-note">fixed price · all-inclusive</div>' +
+            '</div>' +
+            '<button class="vc-select-btn" onclick="openBooking(' + v.id + ')">Select →</button>' +
+          '</div>' +
+        '</div>';
+
+      // Store vehicle data for booking modal
+      card.dataset.vehicle = JSON.stringify(v);
+      grid.appendChild(card);
+    });
+
+    // Store vehicles globally for modal
+    window._VEHICLES = vehicles;
+  })
+  .catch(function(err) {
+    console.error('Could not load vehicles:', err);
+    grid.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ab4cc">Could not load vehicles. Please refresh.</div>';
+  });
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
 var selectedVehicle = null;
 
 function openBooking(vehicleId) {
-  selectedVehicle = VEHICLES.find(function(v){ return v.id === vehicleId; });
+  selectedVehicle = (window._VEHICLES || []).find(function(v){ return v.id === vehicleId; });
   if (!selectedVehicle) return;
 
   document.getElementById('modalVehicleName').textContent  = selectedVehicle.name;
   document.getElementById('modalVehiclePrice').textContent = '€' + selectedVehicle.price;
-  document.getElementById('modalVehicleCap').textContent   = 'Up to ' + selectedVehicle.maxPax + ' pax · ' + selectedVehicle.maxLug + ' bags';
+  document.getElementById('modalVehicleCap').textContent   = 'Up to ' + selectedVehicle.passenger_capacity + ' pax · ' + selectedVehicle.luggage_capacity + ' bags';
 
   // Reset views
   document.getElementById('formView').style.display    = 'block';
