@@ -330,9 +330,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 // Change this to your Railway/Render backend URL after deployment
-const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:3001'
-  : 'https://home-production-6910.up.railway.app'; // ← change after deploy
+const API_URL = 'https://home-production-6910.up.railway.app';
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let token = localStorage.getItem('att_token') || sessionStorage.getItem('att_token');
