@@ -1059,7 +1059,6 @@ function toggleMenu() {
   var btn = document.getElementById('hamburger');
   var menu = document.getElementById('mobileMenu');
   var nav = document.querySelector('.nav');
-  var hero = document.querySelector('.hero-content');
   document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
   btn.classList.toggle('open');
   if (menu.dataset.open === 'true') {
@@ -1067,18 +1066,12 @@ function toggleMenu() {
     menu.dataset.open = 'false';
     setTimeout(function(){
       menu.style.display = 'none';
-      if (hero && window.innerWidth < 600) hero.style.paddingTop = '';
     }, 300);
   } else {
     menu.style.display = 'block';
     requestAnimationFrame(function() {
       menu.style.maxHeight = '400px';
       menu.dataset.open = 'true';
-      if (hero && window.innerWidth < 600) {
-        var menuH = menu.scrollHeight;
-        var currentPad = parseFloat(getComputedStyle(hero).paddingTop) || 0;
-        hero.style.paddingTop = (currentPad + menuH) + 'px';
-      }
     });
   }
 }
