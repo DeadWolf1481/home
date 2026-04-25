@@ -33,9 +33,9 @@ app.use(express.urlencoded({ extended: true }));
 app.locals.prisma = prisma;
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
-app.use('/admin', express.static(path.join(__dirname, '../../admin')));
+app.use('/admin', express.static(path.join(__dirname, '../../../admin')));
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../admin/index.html'));
+  res.sendFile(path.join(__dirname, '../../../admin/index.html'));
 });
 
 // ── Routes ────────────────────────────────────────────────────────────────────
