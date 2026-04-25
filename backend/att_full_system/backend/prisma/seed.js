@@ -74,6 +74,53 @@ async function main() {
   });
   console.log('✅ Pages seeded');
 
+  // Sample blog posts
+  const blogPosts = [
+    {
+      title: 'Hagia Sophia: A Complete Guide for First-Time Visitors',
+      slug: 'hagia-sophia-guide-' + Date.now(),
+      excerpt: 'Everything you need to know before visiting one of Istanbul\'s most iconic landmarks — opening hours, dress code, tips, and how to get there from the airport.',
+      content: 'Hagia Sophia is one of the greatest architectural achievements in human history. Built in 537 AD under Emperor Justinian I, it served as a cathedral, mosque, museum, and is now an active mosque open to visitors. The massive dome, stunning Byzantine mosaics, and Ottoman calligraphy panels make it a must-see. Arrive early in the morning to avoid crowds. Modest dress is required — shoulders and knees must be covered. Entry is free. From Istanbul Airport, a private transfer takes 45-60 minutes.',
+      image_url: null,
+      status: 'active',
+    },
+    {
+      title: 'Grand Bazaar: The Ultimate Shopping Guide',
+      slug: 'grand-bazaar-guide-' + (Date.now() + 1),
+      excerpt: 'With over 4,000 shops across 61 covered streets, the Grand Bazaar is one of the world\'s oldest and largest covered markets. Here\'s how to make the most of your visit.',
+      content: 'The Grand Bazaar (Kapalıçarşı) has been the commercial heart of Istanbul since 1461. You\'ll find gold jewellery, leather goods, ceramics, Turkish carpets, spices, and much more. Bargaining is expected — start at roughly half the asking price. The main entrance on the Beyazıt side is most convenient. Allow at least 2-3 hours to explore. From Istanbul Airport, a private transfer to the Bazaar area takes approximately 45-55 minutes.',
+      image_url: null,
+      status: 'active',
+    },
+    {
+      title: 'Bosphorus Cruise: What You Need to Know',
+      slug: 'bosphorus-cruise-guide-' + (Date.now() + 2),
+      excerpt: 'The Bosphorus strait separates Europe and Asia and offers some of Istanbul\'s most spectacular scenery. Here\'s everything you need to plan the perfect cruise.',
+      content: 'A Bosphorus cruise is one of the best ways to experience Istanbul. Public ferries from Eminönü make the full return journey to Anadolu Kavağı, passing Ottoman palaces, wooden mansions, and fortress ruins. For a shorter experience, the commuter ferries between Kabataş and Üsküdar take about 20 minutes. Sunset cruises are particularly popular. Both Istanbul Airport and Sabiha Gökçen Airport are well-connected to the Bosphorus waterfront by private transfer.',
+      image_url: null,
+      status: 'active',
+    },
+    {
+      title: 'Topkapi Palace: Inside the Heart of the Ottoman Empire',
+      slug: 'topkapi-palace-guide-' + (Date.now() + 3),
+      excerpt: 'For nearly 400 years, Topkapi Palace was the centre of the Ottoman Empire. Today it is one of Istanbul\'s most rewarding museums — here\'s how to visit.',
+      content: 'Topkapi Palace was built by Sultan Mehmed II in the 1450s and expanded by successive sultans. The palace is organised around four courtyards. Don\'t miss the Treasury — home to the famous Spoonmaker\'s Diamond and the Topkapi Dagger — and the Harem, which requires a separate ticket. Book tickets online to avoid queuing. The palace is closed on Tuesdays. Allow at least 3-4 hours for a thorough visit. From Istanbul Airport, a private transfer to Sultanahmet takes approximately 45-60 minutes.',
+      image_url: null,
+      status: 'active',
+    },
+    {
+      title: 'Galata Tower: Best Views in Istanbul',
+      slug: 'galata-tower-guide-' + (Date.now() + 4),
+      excerpt: 'Rising above the rooftops of Beyoğlu, the Galata Tower offers what many consider the finest panoramic view of Istanbul. Here\'s what to expect.',
+      content: 'The Galata Tower dates from 1348 when it was built by Genoese merchants. The observation gallery at 63 metres height offers panoramic views of the Golden Horn, Bosphorus, and the historic peninsula. Sunrise and sunset are the best times for photographers. Book tickets online — queues can be long in high season. The Galata neighbourhood below is one of Istanbul\'s most charming areas, with jewellery shops, music instrument makers, and excellent coffee. From Istanbul Airport, a private transfer to Galata takes approximately 40-55 minutes.',
+      image_url: null,
+      status: 'active',
+    },
+  ];
+
+  for (const post of blogPosts) {
+    await prisma.blog.create({ data: post }).catch(() => {});
+  }
   console.log('🎉 Database seeded successfully!');
 }
 

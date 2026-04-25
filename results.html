@@ -332,13 +332,16 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 var API_BASE = 'https://home-production-6910.up.railway.app';
 var BOOKING_API_URL = API_BASE + '/api/booking';
 
-// ─── URL Params ───────────────────────────────────────────────────────────────
+// ─── URL Params + SessionStorage ─────────────────────────────────────────────
 var params = new URLSearchParams(window.location.search);
-var tripFrom = params.get('from') || '';
-var tripTo   = params.get('to')   || '';
-var tripDate = params.get('date') || '';
-var tripPax  = parseInt(params.get('passengers')) || 1;
-var tripLug  = parseInt(params.get('luggage'))    || 0;
+var _stored = {};
+try { _stored = JSON.parse(sessionStorage.getItem('att_search') || '{}'); } catch(e) {}
+
+var tripFrom = _stored.from || params.get('from') || '';
+var tripTo   = _stored.to   || params.get('to')   || '';
+var tripDate = _stored.date || params.get('date')  || '';
+var tripPax  = parseInt(_stored.passengers || params.get('passengers')) || 1;
+var tripLug  = parseInt(_stored.luggage    || params.get('luggage'))    || 0;
 
 document.getElementById('tripFrom').textContent = tripFrom || '—';
 document.getElementById('tripTo').textContent   = tripTo   || '—';

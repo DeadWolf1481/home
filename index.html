@@ -1120,6 +1120,8 @@ function goToResults() {
   }
 
   var params = new URLSearchParams({ from: from, to: to, date: date, passengers: passengers, luggage: luggage });
+  // sessionStorage'a da kaydet — results.html direkt okur
+  sessionStorage.setItem('att_search', JSON.stringify({ from: from, to: to, date: date, passengers: passengers, luggage: luggage }));
   window.location.href = 'results.html?' + params.toString();
 }
 
