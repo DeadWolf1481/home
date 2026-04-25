@@ -298,7 +298,14 @@ body { padding-top: 0; }
   .hero-bg { background-position: 40% 30%; }
 }
 
-@keyframes shake {
+/* Google Places Autocomplete */
+.pac-container { border-radius: 10px !important; border: 0.5px solid #d0d0d0 !important; box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important; font-family: system-ui, sans-serif !important; margin-top: 4px !important; }
+.pac-item { padding: 10px 16px !important; font-size: 14px !important; cursor: pointer !important; }
+.pac-item:hover { background: #f0f4f8 !important; }
+.pac-item-query { font-size: 14px !important; color: #1a1a1a !important; }
+.pac-matched { font-weight: 700 !important; }
+
+
   0%,100% { transform: translateX(0); }
   20% { transform: translateX(-6px); }
   40% { transform: translateX(6px); }
@@ -516,11 +523,11 @@ body { padding-top: 0; }
       <div class="search-fields">
         <div class="field-group">
           <label>From</label>
-          <input type="text" placeholder="Istanbul Airport" />
+          <input type="text" id="inputFrom" placeholder="Istanbul Airport" autocomplete="off" />
         </div>
         <div class="field-group">
           <label>To</label>
-          <input type="text" placeholder="Taksim, Istanbul" />
+          <input type="text" id="inputTo" placeholder="Taksim, Istanbul" autocomplete="off" />
         </div>
         <div class="field-group">
           <label>Date</label>
@@ -1092,15 +1099,14 @@ function mobileNav(e, id) {
 }
 
 function goToResults() {
-  var fromEl = document.querySelector('input[placeholder="Istanbul Airport"]');
-  var toEl = document.querySelector('input[placeholder="Taksim, Istanbul"]');
+  var fromEl = document.getElementById('inputFrom');
+  var toEl   = document.getElementById('inputTo');
   var from = fromEl.value.trim();
-  var to = toEl.value.trim();
+  var to   = toEl.value.trim();
   var date = document.getElementById('dtDisplay').textContent.trim();
   var passengers = document.querySelector('#passengerDrop .cs-val').textContent.trim();
-  var luggage = document.querySelector('#luggageDrop .cs-val').textContent.trim();
+  var luggage    = document.querySelector('#luggageDrop .cs-val').textContent.trim();
 
-  // Validation
   var errors = [];
   if (!from) { errors.push('From'); fromEl.style.borderColor = '#e24b4a'; }
   else { fromEl.style.borderColor = ''; }
@@ -1110,7 +1116,6 @@ function goToResults() {
   else { document.getElementById('dtTrigger').style.borderColor = ''; }
 
   if (errors.length > 0) {
-    // Shake the empty fields
     errors.forEach(function(f) {
       var el = f === 'From' ? fromEl : f === 'To' ? toEl : document.getElementById('dtTrigger');
       el.classList.add('shake');
@@ -1248,6 +1253,27 @@ function track(step, action) {
 // Track homepage visit
 track('homepage', 'Visited homepage');
 
+// ─── Google Places Autocomplete ───────────────────────────────────────────────
+var _placesReady = false;
+function initPlaces() {
+  _placesReady = true;
+  var options = {
+    componentRestrictions: { country: 'tr' },
+    fields: ['name', 'formatted_address'],
+  };
+  var acFrom = new google.maps.places.Autocomplete(document.getElementById('inputFrom'), options);
+  var acTo   = new google.maps.places.Autocomplete(document.getElementById('inputTo'),   options);
+
+  acFrom.addListener('place_changed', function() {
+    var place = acFrom.getPlace();
+    if (place.name) document.getElementById('inputFrom').value = place.name + (place.formatted_address ? ', ' + place.formatted_address.split(',')[0] : '');
+  });
+  acTo.addListener('place_changed', function() {
+    var place = acTo.getPlace();
+    if (place.name) document.getElementById('inputTo').value = place.name + (place.formatted_address ? ', ' + place.formatted_address.split(',')[0] : '');
+  });
+}
+
 // ─── Load Vehicles ────────────────────────────────────────────────────────────
 fetch(API_BASE + '/api/vehicles?status=active')
   .then(function(r){ return r.json(); })
@@ -1326,5 +1352,6 @@ fetch(API_BASE + '/api/blog?status=active')
     }).join('');
   });
 </script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpHjMeXM5kIJiRuQEfWP7Lc8j-GvTg5QQ&libraries=places&callback=initPlaces"></script>
 </body>
 </html>
