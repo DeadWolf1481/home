@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 
 const app = express();
@@ -30,6 +31,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // Make prisma available to routes
 app.locals.prisma = prisma;
+
+// ── Admin Panel ───────────────────────────────────────────────────────────────
+app.use('/admin', express.static(path.join(__dirname, '../../admin')));
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../admin/index.html'));
+});
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth',               require('./routes/auth'));
