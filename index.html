@@ -608,55 +608,8 @@ body { padding-top: 0; }
   <div class="section" id="vehicles">
     <div class="section-label">Our Fleet</div>
     <h2 class="section-title">The Right Vehicle for Every Need</h2>
-    <div class="vehicles-grid">
-      <div class="vehicle-card">
-        <div class="vehicle-img">🚐</div>
-        <div class="vehicle-info">
-          <div class="vehicle-name">Mercedes Vito</div>
-          <div class="vehicle-cap">Up to 6 passengers · 8 suitcases</div>
-          <div class="vehicle-pills">
-            <span class="vpill">👥 6 Passengers</span>
-            <span class="vpill">🧳 8 Suitcases</span>
-            <span class="vpill">❄️ A/C</span>
-          </div>
-        </div>
-      </div>
-      <div class="vehicle-card">
-        <div class="vehicle-img">🚐</div>
-        <div class="vehicle-info">
-          <div class="vehicle-name">VIP Mercedes Vito</div>
-          <div class="vehicle-cap">Up to 4 passengers · 6 suitcases</div>
-          <div class="vehicle-pills">
-            <span class="vpill">👥 4 Passengers</span>
-            <span class="vpill">🧳 6 Suitcases</span>
-            <span class="vpill">💎 VIP</span>
-          </div>
-        </div>
-      </div>
-      <div class="vehicle-card">
-        <div class="vehicle-img">🚌</div>
-        <div class="vehicle-info">
-          <div class="vehicle-name">Mercedes Sprinter</div>
-          <div class="vehicle-cap">Up to 12 passengers · 12 suitcases</div>
-          <div class="vehicle-pills">
-            <span class="vpill">👥 12 Passengers</span>
-            <span class="vpill">🧳 12 Suitcases</span>
-            <span class="vpill">❄️ A/C</span>
-          </div>
-        </div>
-      </div>
-      <div class="vehicle-card">
-        <div class="vehicle-img">🚌</div>
-        <div class="vehicle-info">
-          <div class="vehicle-name">VIP Mercedes Sprinter</div>
-          <div class="vehicle-cap">Up to 12 passengers · 16 suitcases</div>
-          <div class="vehicle-pills">
-            <span class="vpill">👥 12 Passengers</span>
-            <span class="vpill">🧳 16 Suitcases</span>
-            <span class="vpill">💎 VIP</span>
-          </div>
-        </div>
-      </div>
+    <div class="vehicles-grid" id="vehiclesGrid">
+      <div style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ab4cc;">Loading...</div>
     </div>
   </div>
 
@@ -695,68 +648,19 @@ body { padding-top: 0; }
   <div class="section" id="faq">
     <div class="section-label">Got Questions?</div>
     <h2 class="section-title">Frequently Asked Questions</h2>
-    <div class="faq-list">
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">How does Airports Transfer Turkey track my flight? <span class="faq-arrow">▾</span></div>
-        <div class="faq-a">Airports Transfer Turkey monitors all flights in real time, 24/7. Whether your flight lands early or is delayed by hours, your driver adjusts automatically — you never need to call or send a message.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">Are Airports Transfer Turkey prices fixed? <span class="faq-arrow">▾</span></div>
-        <div class="faq-a">Yes, all Airports Transfer Turkey prices are fully fixed at the time of booking. No hidden fees, no surge pricing, no extra charges for traffic or delays. What you see is what you pay.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">Can I cancel my Airports Transfer Turkey booking? <span class="faq-arrow">▾</span></div>
-        <div class="faq-a">Yes. Airports Transfer Turkey offers free cancellation up to 24 hours before your scheduled pickup. Simply reach us via WhatsApp at +90 544 102 1414 or by email.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">Where will I meet my Airports Transfer Turkey driver at the airport? <span class="faq-arrow">▾</span></div>
-        <div class="faq-a">Your Airports Transfer Turkey driver will be waiting in the arrivals hall holding a name sign with your name. You'll also receive your driver's name and phone number in advance so you can reach them directly.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">Does Airports Transfer Turkey serve both Istanbul airports? <span class="faq-arrow">▾</span></div>
-        <div class="faq-a">Yes. Airports Transfer Turkey covers both Istanbul Airport (IST) on the European side and Sabiha Gökçen Airport (SAW) on the Asian side, as well as all major hotels and destinations across Istanbul.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">What payment methods does Airports Transfer Turkey accept? <span class="faq-arrow">▾</span></div>
-        <div class="faq-a">Airports Transfer Turkey accepts cash (EUR, USD, GBP, TRY) and major credit or debit cards — paid directly to your driver on the day of travel. No prepayment is required to confirm your booking.</div>
-      </div>
+    <div class="faq-list" id="faqList">
+      <div style="text-align:center;padding:2rem;color:#9ab4cc;">Loading...</div>
     </div>
   </div>
 
   <div class="divider"></div>
 
-  <!-- Reviews -->
+  <!-- Blog -->
   <div class="section" id="blog">
     <div class="section-label">Blog</div>
     <h2 class="section-title">Istanbul Travel Guide</h2>
-    <div class="blog-grid">
-      <div class="blog-card" onclick="window.location.href='blog.html'" style="cursor:pointer;">
-        <div class="blog-img"><img src="pngler/hagiasophia.png" alt="Hagia Sophia Istanbul" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-        <div class="blog-body">
-          <div class="blog-tag">History</div>
-          <div class="blog-title">Hagia Sophia: A Guide for First-Time Visitors</div>
-          <div class="blog-excerpt">Everything you need to know before visiting one of Istanbul's most iconic landmarks — opening hours, tips, and how to get there from the airport.</div>
-          <div class="blog-meta">5 min read</div>
-        </div>
-      </div>
-      <div class="blog-card" onclick="window.location.href='blog.html'" style="cursor:pointer;">
-        <div class="blog-img"><img src="pngler/grandbaazar.png" alt="Grand Bazaar Istanbul" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-        <div class="blog-body">
-          <div class="blog-tag">Shopping</div>
-          <div class="blog-title">Grand Bazaar: The Ultimate Shopping Experience</div>
-          <div class="blog-excerpt">Explore 4,000 shops in one of the world's oldest and largest covered markets. Our guide covers what to buy, how to bargain, and the best entrances.</div>
-          <div class="blog-meta">4 min read</div>
-        </div>
-      </div>
-      <div class="blog-card" onclick="window.location.href='blog.html'" style="cursor:pointer;">
-        <div class="blog-img"><img src="pngler/bosphorus.png" alt="Bosphorus Istanbul" onerror="this.parentElement.style.background='#2a3f55';this.style.display='none';" /></div>
-        <div class="blog-body">
-          <div class="blog-tag">Travel Tips</div>
-          <div class="blog-title">Istanbul Airport to Bosphorus: Your Transfer Guide</div>
-          <div class="blog-excerpt">Getting from Istanbul Airport to the Bosphorus area doesn't have to be stressful. Discover the fastest, most comfortable way to reach your destination.</div>
-          <div class="blog-meta">3 min read</div>
-        </div>
-      </div>
+    <div class="blog-grid" id="homeBlogGrid">
+      <div style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ab4cc;">Loading...</div>
     </div>
     <div style="text-align:center;margin-top:1.5rem;">
       <a href="blog.html" style="color:#f0c040;text-decoration:none;font-size:14px;font-weight:600;border:0.5px solid #f0c040;padding:8px 24px;border-radius:8px;transition:background 0.2s;" onmouseover="this.style.background='rgba(240,192,64,0.1)'" onmouseout="this.style.background='transparent'">Read All Articles →</a>
@@ -1328,6 +1232,87 @@ function sendMessage() {
   }, 2500);
 }
 
+<script>
+// ─── API Base ─────────────────────────────────────────────────────────────────
+var API_BASE = 'https://home-production-6910.up.railway.app';
+
+// ─── Load Vehicles ────────────────────────────────────────────────────────────
+fetch(API_BASE + '/api/vehicles?status=active')
+  .then(function(r){ return r.json(); })
+  .then(function(vehicles){
+    var grid = document.getElementById('vehiclesGrid');
+    if (!vehicles.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ab4cc;">No vehicles available.</div>'; return; }
+    grid.innerHTML = vehicles.map(function(v){
+      var icon = v.passenger_capacity > 8 ? '🚌' : '🚐';
+      var isVip = v.name.toLowerCase().includes('vip');
+      return '<div class="vehicle-card">' +
+        (v.image_url ? '<div class="vehicle-img"><img src="'+v.image_url+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML=\''+icon+'\'" /></div>' : '<div class="vehicle-img">'+icon+'</div>') +
+        '<div class="vehicle-info">' +
+          '<div class="vehicle-name">'+v.name+'</div>' +
+          '<div class="vehicle-cap">Up to '+v.passenger_capacity+' passengers · '+v.luggage_capacity+' suitcases</div>' +
+          '<div class="vehicle-pills">' +
+            '<span class="vpill">👥 '+v.passenger_capacity+' Passengers</span>' +
+            '<span class="vpill">🧳 '+v.luggage_capacity+' Suitcases</span>' +
+            (isVip ? '<span class="vpill">💎 VIP</span>' : '<span class="vpill">❄️ A/C</span>') +
+            '<span class="vpill" style="color:#f0c040;font-weight:700;">€'+v.price+'</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  })
+  .catch(function(){
+    document.getElementById('vehiclesGrid').innerHTML =
+      ['Mercedes Vito|6|8|59|🚐','VIP Mercedes Vito|4|6|79|🚐','Mercedes Sprinter|12|12|119|🚌','VIP Mercedes Sprinter|12|16|139|🚌']
+      .map(function(s){ var p=s.split('|'); return '<div class="vehicle-card"><div class="vehicle-img">'+p[4]+'</div><div class="vehicle-info"><div class="vehicle-name">'+p[0]+'</div><div class="vehicle-cap">Up to '+p[1]+' passengers · '+p[2]+' suitcases</div><div class="vehicle-pills"><span class="vpill">👥 '+p[1]+'</span><span class="vpill">🧳 '+p[2]+'</span><span class="vpill" style="color:#f0c040;font-weight:700;">€'+p[3]+'</span></div></div></div>'; }).join('');
+  });
+
+// ─── Load FAQ ─────────────────────────────────────────────────────────────────
+fetch(API_BASE + '/api/faq')
+  .then(function(r){ return r.json(); })
+  .then(function(faqs){
+    var list = document.getElementById('faqList');
+    if (!faqs.length) { list.innerHTML = ''; return; }
+    list.innerHTML = faqs.map(function(f){
+      return '<div class="faq-item" onclick="toggleFaq(this)">' +
+        '<div class="faq-q">'+f.question+' <span class="faq-arrow">▾</span></div>' +
+        '<div class="faq-a">'+f.answer+'</div>' +
+      '</div>';
+    }).join('');
+  })
+  .catch(function(){
+    // Fallback static FAQs already removed — show empty
+    document.getElementById('faqList').innerHTML = '';
+  });
+
+// ─── Load Blog ────────────────────────────────────────────────────────────────
+fetch(API_BASE + '/api/blog?status=active')
+  .then(function(r){ return r.json(); })
+  .then(function(posts){
+    var grid = document.getElementById('homeBlogGrid');
+    var shown = posts.slice(0, 3);
+    if (!shown.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ab4cc;">No posts yet.</div>'; return; }
+    grid.innerHTML = shown.map(function(p){
+      return '<div class="blog-card" onclick="window.location.href=\'blog.html\'" style="cursor:pointer;">' +
+        '<div class="blog-img">'+(p.image_url ? '<img src="'+p.image_url+'" alt="'+p.title+'" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" />' : '')+'</div>' +
+        '<div class="blog-body">' +
+          '<div class="blog-tag">Blog</div>' +
+          '<div class="blog-title">'+p.title+'</div>' +
+          '<div class="blog-excerpt">'+(p.excerpt || p.content.slice(0,120)+'…')+'</div>' +
+          '<div class="blog-meta">'+new Date(p.created_at).toLocaleDateString('en-GB')+'</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  })
+  .catch(function(){
+    var grid = document.getElementById('homeBlogGrid');
+    grid.innerHTML = [
+      {img:'pngler/hagiasophia.png',tag:'History',title:'Hagia Sophia: A Guide for First-Time Visitors',exc:'Everything you need to know before visiting.',meta:'5 min read'},
+      {img:'pngler/grandbaazar.png',tag:'Shopping',title:'Grand Bazaar: The Ultimate Shopping Experience',exc:'Explore 4,000 shops in one of the world\'s oldest markets.',meta:'4 min read'},
+      {img:'pngler/bosphorus.png',tag:'Travel Tips',title:'Istanbul Airport to Bosphorus',exc:'Getting from Istanbul Airport doesn\'t have to be stressful.',meta:'3 min read'},
+    ].map(function(b){
+      return '<div class="blog-card" onclick="window.location.href=\'blog.html\'" style="cursor:pointer;"><div class="blog-img"><img src="'+b.img+'" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" /></div><div class="blog-body"><div class="blog-tag">'+b.tag+'</div><div class="blog-title">'+b.title+'</div><div class="blog-excerpt">'+b.exc+'</div><div class="blog-meta">'+b.meta+'</div></div></div>';
+    }).join('');
+  });
 </script>
 </body>
 </html>
