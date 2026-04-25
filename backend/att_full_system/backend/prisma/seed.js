@@ -74,7 +74,30 @@ async function main() {
   });
   console.log('✅ Pages seeded');
 
-  // Sample blog posts
+  // Sample reservations (customers)
+  const sampleReservations = [
+    { reference: 'ATT001', customer_name: 'James Wilson', email: 'james.wilson@gmail.com', phone: '+44 7700 900123', pickup_location: 'Istanbul Airport (IST)', dropoff_location: 'Taksim Hotel, Istanbul', date: '15 May 2026 09:30', passengers: 2, luggage: 2, flight_number: 'TK 1234', status: 'approved', price: 59, source: 'website' },
+    { reference: 'ATT002', customer_name: 'Sophie Laurent', email: 'sophie.laurent@email.fr', phone: '+33 6 12 34 56 78', pickup_location: 'Sabiha Gökçen Airport (SAW)', dropoff_location: 'Grand Bazaar Area, Istanbul', date: '16 May 2026 14:00', passengers: 3, luggage: 4, flight_number: 'AF 1820', status: 'pending', price: 79, source: 'website' },
+    { reference: 'ATT003', customer_name: 'Marco Rossi', email: 'marco.rossi@libero.it', phone: '+39 333 123 4567', pickup_location: 'Sultanahmet Hotel', dropoff_location: 'Istanbul Airport (IST)', date: '17 May 2026 06:00', passengers: 2, luggage: 2, flight_number: 'TK 788', status: 'approved', price: 59, source: 'website' },
+    { reference: 'ATT004', customer_name: 'Ahmet Yılmaz', email: 'ahmet.yilmaz@outlook.com', phone: '+90 532 123 4567', pickup_location: 'Istanbul Airport (IST)', dropoff_location: 'Beşiktaş, Istanbul', date: '18 May 2026 11:15', passengers: 1, luggage: 1, flight_number: 'PC 501', status: 'pending', price: 59, source: 'website' },
+    { reference: 'ATT005', customer_name: 'Emma Johnson', email: 'emma.j@hotmail.com', phone: '+1 415 555 0192', pickup_location: 'Istanbul Airport (IST)', dropoff_location: 'Four Seasons Bosphorus', date: '19 May 2026 18:45', passengers: 4, luggage: 6, flight_number: 'AA 92', status: 'approved', price: 79, source: 'website' },
+    { reference: 'ATT006', customer_name: 'Hans Mueller', email: 'h.mueller@web.de', phone: '+49 151 1234 5678', pickup_location: 'Sabiha Gökçen Airport (SAW)', dropoff_location: 'Kadıköy, Istanbul', date: '20 May 2026 08:30', passengers: 6, luggage: 8, flight_number: 'LH 3310', status: 'cancelled', price: 59, source: 'website' },
+    { reference: 'ATT007', customer_name: 'Yuki Tanaka', email: 'yuki.tanaka@yahoo.jp', phone: '+81 90 1234 5678', pickup_location: 'Istanbul Airport (IST)', dropoff_location: 'Ciragan Palace, Istanbul', date: '21 May 2026 22:00', passengers: 2, luggage: 3, flight_number: 'TK 198', status: 'approved', price: 79, source: 'website' },
+    { reference: 'ATT008', customer_name: 'Maria Garcia', email: 'maria.garcia@gmail.com', phone: '+34 612 345 678', pickup_location: 'Istanbul Airport (IST)', dropoff_location: 'Nisantasi, Istanbul', date: '22 May 2026 15:20', passengers: 8, luggage: 10, flight_number: 'IB 6251', status: 'pending', price: 119, source: 'website' },
+    { reference: 'ATT009', customer_name: 'David Smith', email: 'david.smith@company.com', phone: '+61 4 1234 5678', pickup_location: 'Sabiha Gökçen Airport (SAW)', dropoff_location: 'Galata Tower Area', date: '23 May 2026 07:00', passengers: 12, luggage: 14, flight_number: 'QF 71', status: 'approved', price: 139, source: 'website' },
+    { reference: 'ATT010', customer_name: 'Anna Kowalski', email: 'anna.k@wp.pl', phone: '+48 501 234 567', pickup_location: 'Istanbul Airport (IST)', dropoff_location: 'Topkapi Palace Area', date: '24 May 2026 13:00', passengers: 3, luggage: 3, flight_number: 'LO 137', status: 'pending', price: 59, source: 'website' },
+  ];
+
+  for (const res of sampleReservations) {
+    await prisma.reservation.upsert({
+      where: { reference: res.reference },
+      update: {},
+      create: res,
+    });
+  }
+  console.log('✅ Sample reservations seeded');
+
+
   const blogPosts = [
     {
       title: 'Hagia Sophia: A Complete Guide for First-Time Visitors',
