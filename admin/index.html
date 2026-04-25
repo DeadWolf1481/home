@@ -646,40 +646,45 @@ async function renderCustomers() {
   const mc = document.getElementById('mainContent');
   mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
   try {
-    const data = await api('/api/reservations?limit=100');
+    const data = await api('/api/customers-tracking?limit=200');
     const rows = data.data || [];
+
+    // Stats
+    const stepCount = { homepage: 0, results: 0, form_filled: 0, completed: 0 };
+    rows.forEach(r => {
+      if (r.current_step === 'homepage') stepCount.homepage++;
+      else if (r.current_step === 'results') stepCount.results++;
+      else if (r.current_step === 'form_filled') stepCount.form_filled++;
+      else if (r.current_step === 'completed') stepCount.completed++;
+    });
 
     mc.innerHTML = `
       <div class="section-header">
         <div class="section-header-left">
-          <h2>Customers</h2>
-          <p>Customers who filled in their details during reservation.</p>
+          <h2>Customer Journey Tracking</h2>
+          <p>Real-time tracking of visitors from entry to completed booking.</p>
         </div>
+      </div>
+      <div class="stats-grid" style="margin-bottom:1.5rem">
+        <div class="stat-card"><div class="stat-label" style="color:var(--text2)">🏠 Visited Site</div><div class="stat-value">${stepCount.homepage}</div><div class="stat-sub">Entered & left</div></div>
+        <div class="stat-card"><div class="stat-label" style="color:var(--blue)">🔍 Viewed Results</div><div class="stat-value">${stepCount.results}</div><div class="stat-sub">Searched vehicles</div></div>
+        <div class="stat-card"><div class="stat-label" style="color:var(--yellow)">📝 Filled Form</div><div class="stat-value">${stepCount.form_filled}</div><div class="stat-sub">Started booking</div></div>
+        <div class="stat-card"><div class="stat-label" style="color:var(--green)">✅ Completed</div><div class="stat-value">${stepCount.completed}</div><div class="stat-sub">Booking submitted</div></div>
       </div>
       <div class="table-card">
         <div class="table-toolbar">
-          <div class="table-show">Show
-            <select onchange="loadCustomerRows(this.value)">
-              <option>10</option><option selected>50</option><option>100</option>
-            </select>
-          </div>
           <div class="table-toolbar-right">
-            <input class="table-search" placeholder="Search name, email, phone..." id="custSearch" oninput="filterCustomers()" />
+            <input class="table-search" placeholder="Search session or action..." id="custSearch" oninput="filterCustomers()" />
           </div>
         </div>
         <div style="overflow-x:auto">
         <table id="custTable">
           <thead><tr>
             <th>ID ↓</th>
-            <th>Transfer No</th>
-            <th>Order Type</th>
-            <th>Full Name</th>
-            <th>Phone</th>
-            <th>E-Mail</th>
-            <th>Vehicle</th>
-            <th>Order Status</th>
-            <th>Date</th>
-            <th>View</th>
+            <th>Session</th>
+            <th>Current Step</th>
+            <th>Last Action</th>
+            <th>Last Seen</th>
           </tr></thead>
           <tbody id="custTbody"></tbody>
         </table>
@@ -694,49 +699,42 @@ async function renderCustomers() {
   }
 }
 
+function getStepBadge(step) {
+  const map = {
+    homepage:    { label: '🏠 Homepage',    bg: 'rgba(139,148,158,0.15)', color: 'var(--text2)' },
+    results:     { label: '🔍 Results',     bg: 'rgba(46,168,240,0.15)',  color: 'var(--blue)'  },
+    form_filled: { label: '📝 Form Filled', bg: 'rgba(210,153,34,0.15)', color: 'var(--yellow)' },
+    completed:   { label: '✅ Completed',   bg: 'rgba(63,185,80,0.15)',  color: 'var(--green)'  },
+  };
+  const s = map[step] || { label: step, bg: 'rgba(139,148,158,0.15)', color: 'var(--text2)' };
+  return `<span style="background:${s.bg};color:${s.color};border-radius:5px;padding:3px 10px;font-size:12px;font-weight:600">${s.label}</span>`;
+}
+
 function renderCustomerRows(rows) {
   const tbody = document.getElementById('custTbody');
   if (!tbody) return;
-  document.getElementById('custCount').textContent = `${rows.length} record${rows.length !== 1 ? 's' : ''}`;
+  document.getElementById('custCount').textContent = `${rows.length} session${rows.length !== 1 ? 's' : ''}`;
 
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--text2)">No customers yet</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No tracking data yet. Visitors will appear here automatically.</td></tr>';
     return;
   }
 
-  const statusMap = {
-    pending:   { label: 'Pending',   color: 'badge-yellow' },
-    approved:  { label: 'Approved',  color: 'badge-green'  },
-    cancelled: { label: 'Cancelled', color: 'badge-red'    },
-  };
-
-  tbody.innerHTML = rows.map(r => {
-    const st = statusMap[r.status] || { label: r.status, color: 'badge-gray' };
-    const ref = r.reference ? r.reference.slice(0,6).toUpperCase() : '—';
-    return `<tr>
-      <td>${r.id}</td>
-      <td style="font-family:monospace;font-size:12px;color:var(--blue);font-weight:700">${ref}</td>
-      <td><span class="badge badge-blue">Transfer</span></td>
-      <td style="font-weight:600">${r.customer_name}</td>
-      <td style="font-size:12px">${r.phone || '—'}</td>
-      <td style="font-size:12px;color:var(--text2)">${r.email || '—'}</td>
-      <td style="font-size:12px;color:var(--text2)">${r.vehicle?.name || '—'}</td>
-      <td><span class="badge ${st.color}">${st.label}</span></td>
-      <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.created_at)}</td>
-      <td>
-        <button class="btn btn-ghost btn-sm" onclick="viewReservation(${r.id})" title="View Detail">→</button>
-      </td>
-    </tr>`;
-  }).join('');
+  tbody.innerHTML = rows.map(r => `<tr>
+    <td>${r.id}</td>
+    <td style="font-family:monospace;font-size:11px;color:var(--text2)">${r.session_id?.slice(0,18) || '—'}</td>
+    <td>${getStepBadge(r.current_step)}</td>
+    <td style="font-size:12px;color:var(--text2)">${r.last_action || '—'}</td>
+    <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.updated_at)}</td>
+  </tr>`).join('');
 }
 
 function filterCustomers() {
   const q = document.getElementById('custSearch')?.value.toLowerCase() || '';
   const filtered = (window._allCustomers || []).filter(r =>
-    r.customer_name?.toLowerCase().includes(q) ||
-    r.email?.toLowerCase().includes(q) ||
-    r.phone?.toLowerCase().includes(q) ||
-    r.reference?.toLowerCase().includes(q)
+    r.session_id?.toLowerCase().includes(q) ||
+    r.last_action?.toLowerCase().includes(q) ||
+    r.current_step?.toLowerCase().includes(q)
   );
   renderCustomerRows(filtered);
 }

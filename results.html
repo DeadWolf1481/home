@@ -332,6 +332,20 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 var API_BASE = 'https://home-production-6910.up.railway.app';
 var BOOKING_API_URL = API_BASE + '/api/booking';
 
+// ─── Session Tracking ─────────────────────────────────────────────────────────
+var _sid = localStorage.getItem('att_session');
+if (!_sid) {
+  _sid = 'sess-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
+  localStorage.setItem('att_session', _sid);
+}
+function track(step, action) {
+  fetch(API_BASE + '/api/customers-tracking', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: _sid, current_step: step, last_action: action })
+  }).catch(function(){});
+}
+
 // ─── URL Params + SessionStorage ─────────────────────────────────────────────
 var params = new URLSearchParams(window.location.search);
 var _stored = {};
@@ -434,6 +448,9 @@ function openBooking(vehicleId) {
   selectedVehicle = (window._VEHICLES || []).find(function(v){ return v.id === vehicleId; });
   if (!selectedVehicle) return;
 
+  // Track form opened
+  track('form_filled', 'Selected vehicle: ' + selectedVehicle.name);
+
   document.getElementById('modalVehicleName').textContent  = selectedVehicle.name;
   document.getElementById('modalVehiclePrice').textContent = '€' + selectedVehicle.price;
   document.getElementById('modalVehicleCap').textContent   = 'Up to ' + selectedVehicle.passenger_capacity + ' pax · ' + selectedVehicle.luggage_capacity + ' bags';
@@ -519,8 +536,9 @@ function submitBooking() {
     return res.json();
   })
   .then(function(data) {
-    // Backend should return { success: true, reference: "ATT-XXXX" }
     var ref = (data && data.reference) ? data.reference : ('ATT-' + Math.random().toString(36).substring(2,8).toUpperCase());
+    // Track completed
+    track('completed', 'Booking completed: ' + ref);
     document.getElementById('successRef').textContent = 'Booking Reference: ' + ref;
     document.getElementById('formView').style.display = 'none';
     document.getElementById('successView').classList.add('show');
