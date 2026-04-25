@@ -33,7 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 app.locals.prisma = prisma;
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
-const adminPath = path.join('/app', 'admin');
+const adminPath = path.join(__dirname, '..', 'admin');
 console.log('Admin path:', adminPath);
 app.use('/admin', express.static(adminPath));
 app.get('/admin', (req, res) => {
