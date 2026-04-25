@@ -641,49 +641,104 @@ async function deleteReservation(id) {
   });
 }
 
-// ─── CUSTOMERS TRACKING ───────────────────────────────────────────────────────
+// ─── CUSTOMERS (Reservation-based tracking) ───────────────────────────────────
 async function renderCustomers() {
   const mc = document.getElementById('mainContent');
   mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
   try {
-    const data = await api('/api/customers-tracking?limit=100');
+    const data = await api('/api/reservations?limit=100');
     const rows = data.data || [];
-
-    const stepCount = { homepage: 0, vehicle_selected: 0, form_filled: 0, completed: 0 };
-    rows.forEach(r => { if (stepCount[r.current_step] !== undefined) stepCount[r.current_step]++; });
 
     mc.innerHTML = `
       <div class="section-header">
         <div class="section-header-left">
-          <h2>Customer Journey Tracking</h2>
-          <p>Real-time user behavior on the website.</p>
+          <h2>Customers</h2>
+          <p>Customers who filled in their details during reservation.</p>
         </div>
-      </div>
-      <div class="stats-grid" style="margin-bottom:1.5rem">
-        <div class="stat-card stat-gray"><div class="stat-label">Visited Site</div><div class="stat-value">${stepCount.homepage}</div></div>
-        <div class="stat-card stat-blue"><div class="stat-label">Selected Vehicle</div><div class="stat-value">${stepCount.vehicle_selected}</div></div>
-        <div class="stat-card stat-yellow"><div class="stat-label">Filled Form</div><div class="stat-value">${stepCount.form_filled}</div></div>
-        <div class="stat-card stat-green"><div class="stat-label">Completed</div><div class="stat-value">${stepCount.completed}</div></div>
       </div>
       <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-show">Show
+            <select onchange="loadCustomerRows(this.value)">
+              <option>10</option><option selected>50</option><option>100</option>
+            </select>
+          </div>
+          <div class="table-toolbar-right">
+            <input class="table-search" placeholder="Search name, email, phone..." id="custSearch" oninput="filterCustomers()" />
+          </div>
+        </div>
         <div style="overflow-x:auto">
-        <table>
-          <thead><tr><th>Session</th><th>Step</th><th>Last Action</th><th>IP</th><th>Updated</th></tr></thead>
-          <tbody>
-            ${rows.length ? rows.map(r => `<tr>
-              <td style="font-family:monospace;font-size:11px;color:var(--text2)">${r.session_id?.slice(0,16)}…</td>
-              <td><span class="step-badge step-${r.current_step.replace('_selected','').replace('_filled','')}">${r.current_step}</span></td>
-              <td style="font-size:12px;color:var(--text2)">${r.last_action || '—'}</td>
-              <td style="font-size:11px;color:var(--text3)">${r.ip_address || '—'}</td>
-              <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.updated_at)}</td>
-            </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No tracking data yet</td></tr>'}
-          </tbody>
+        <table id="custTable">
+          <thead><tr>
+            <th>ID ↓</th>
+            <th>Transfer No</th>
+            <th>Order Type</th>
+            <th>Full Name</th>
+            <th>Phone</th>
+            <th>E-Mail</th>
+            <th>Vehicle</th>
+            <th>Order Status</th>
+            <th>Date</th>
+            <th>View</th>
+          </tr></thead>
+          <tbody id="custTbody"></tbody>
         </table>
         </div>
+        <div class="table-footer"><span id="custCount">—</span></div>
       </div>`;
+
+    window._allCustomers = rows;
+    renderCustomerRows(rows);
   } catch (err) {
     mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
   }
+}
+
+function renderCustomerRows(rows) {
+  const tbody = document.getElementById('custTbody');
+  if (!tbody) return;
+  document.getElementById('custCount').textContent = `${rows.length} record${rows.length !== 1 ? 's' : ''}`;
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--text2)">No customers yet</td></tr>';
+    return;
+  }
+
+  const statusMap = {
+    pending:   { label: 'Pending',   color: 'badge-yellow' },
+    approved:  { label: 'Approved',  color: 'badge-green'  },
+    cancelled: { label: 'Cancelled', color: 'badge-red'    },
+  };
+
+  tbody.innerHTML = rows.map(r => {
+    const st = statusMap[r.status] || { label: r.status, color: 'badge-gray' };
+    const ref = r.reference ? r.reference.slice(0,6).toUpperCase() : '—';
+    return `<tr>
+      <td>${r.id}</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--blue);font-weight:700">${ref}</td>
+      <td><span class="badge badge-blue">Transfer</span></td>
+      <td style="font-weight:600">${r.customer_name}</td>
+      <td style="font-size:12px">${r.phone || '—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${r.email || '—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${r.vehicle?.name || '—'}</td>
+      <td><span class="badge ${st.color}">${st.label}</span></td>
+      <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.created_at)}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="viewReservation(${r.id})" title="View Detail">→</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterCustomers() {
+  const q = document.getElementById('custSearch')?.value.toLowerCase() || '';
+  const filtered = (window._allCustomers || []).filter(r =>
+    r.customer_name?.toLowerCase().includes(q) ||
+    r.email?.toLowerCase().includes(q) ||
+    r.phone?.toLowerCase().includes(q) ||
+    r.reference?.toLowerCase().includes(q)
+  );
+  renderCustomerRows(filtered);
 }
 
 // ─── VEHICLES ─────────────────────────────────────────────────────────────────
