@@ -111,4 +111,15 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// DELETE /api/customers-tracking/:id — admin only
+router.delete('/:id', auth, async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    await prisma.customerTracking.delete({ where: { id: parseInt(req.params.id) } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

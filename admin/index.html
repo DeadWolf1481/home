@@ -270,7 +270,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     </div>
     <div class="nav-item" onclick="switchSection('content')" data-section="content">
       <div class="nav-item-title">CONTENT</div>
-      <div class="nav-item-sub">Tours, Blog, Pages</div>
+      <div class="nav-item-sub">Blog, FAQ, Pages</div>
     </div>
     <div class="nav-item" onclick="switchSection('vehicles')" data-section="vehicles">
       <div class="nav-item-title">VEHICLES</div>
@@ -280,13 +280,13 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <div class="nav-item-title">ACCOUNTING</div>
       <div class="nav-item-sub">Revenue</div>
     </div>
-    <div class="nav-item" onclick="switchSection('messages')" data-section="messages">
-      <div class="nav-item-title">MESSAGES</div>
-      <div class="nav-item-sub">Contact &amp; Inbox</div>
-    </div>
     <div class="nav-item" onclick="switchSection('settings')" data-section="settings">
       <div class="nav-item-title">SETTINGS</div>
-      <div class="nav-item-sub">FAQ &amp; Pages</div>
+      <div class="nav-item-sub">General &amp; Users</div>
+    </div>
+    <div class="nav-item" onclick="switchSection('other')" data-section="other">
+      <div class="nav-item-title">OTHER</div>
+      <div class="nav-item-sub">Other</div>
     </div>
   </div>
 
@@ -450,8 +450,8 @@ const SECTIONS = {
     render: (sub) => sub === 'Customers' ? renderCustomers() : renderReservations(),
   },
   content: {
-    subs: ['Tours', 'Blog', 'Pages'],
-    render: (sub) => sub === 'Tours' ? renderTours() : sub === 'Blog' ? renderBlog() : renderPages(),
+    subs: ['Blog', 'FAQ', 'Pages'],
+    render: (sub) => sub === 'Blog' ? renderBlog() : sub === 'FAQ' ? renderFaq() : renderPages(),
   },
   vehicles: {
     subs: ['Vehicles'],
@@ -461,13 +461,13 @@ const SECTIONS = {
     subs: ['Revenue'],
     render: () => renderAccounting(),
   },
-  messages: {
-    subs: ['Contact Messages'],
-    render: () => renderMessages(),
-  },
   settings: {
-    subs: ['FAQ', 'Pages'],
-    render: (sub) => sub === 'Pages' ? renderPages() : renderFaq(),
+    subs: ['General', 'Users', 'Mail Templates', 'Extra Price Settings'],
+    render: (sub) => renderSettings(sub),
+  },
+  other: {
+    subs: ['Other'],
+    render: () => renderOther(),
   },
 };
 
@@ -686,6 +686,7 @@ async function renderCustomers() {
             <th>Current Step</th>
             <th>Last Action</th>
             <th>Last Seen</th>
+            <th></th>
           </tr></thead>
           <tbody id="custTbody"></tbody>
         </table>
@@ -728,6 +729,7 @@ function renderCustomerRows(rows) {
     <td>${getStepBadge(r.current_step)}</td>
     <td style="font-size:12px;color:var(--text2)">${r.last_action || '—'}</td>
     <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.updated_at)}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="deleteTracking(${r.id})">🗑</button></td>
   </tr>`).join('');
 }
 
@@ -736,9 +738,21 @@ function filterCustomers() {
   const filtered = (window._allCustomers || []).filter(r =>
     r.session_id?.toLowerCase().includes(q) ||
     r.last_action?.toLowerCase().includes(q) ||
-    r.current_step?.toLowerCase().includes(q)
+    r.current_step?.toLowerCase().includes(q) ||
+    r.ip_address?.toLowerCase().includes(q) ||
+    r.location?.toLowerCase().includes(q)
   );
   renderCustomerRows(filtered);
+}
+
+async function deleteTracking(id) {
+  openConfirm('Delete Record', 'This tracking record will be permanently deleted.', async () => {
+    try {
+      await api(`/api/customers-tracking/${id}`, { method: 'DELETE' });
+      toast('Record deleted');
+      renderCustomers();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
 }
 
 // ─── VEHICLES ─────────────────────────────────────────────────────────────────
@@ -858,106 +872,6 @@ async function deleteVehicle(id) {
 }
 
 // ─── TOURS ────────────────────────────────────────────────────────────────────
-async function renderTours() {
-  const mc = document.getElementById('mainContent');
-  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
-  try {
-    const tours = await api('/api/tours');
-    mc.innerHTML = `
-      <div class="section-header">
-        <div class="section-header-left"><h2>Tours</h2><p>Manage tour packages.</p></div>
-        <button class="btn btn-primary" onclick="openTourModal()">＋ Add Tour</button>
-      </div>
-      <div class="table-card">
-        <div class="table-toolbar">
-          <div class="table-toolbar-right"><input class="table-search" placeholder="Search…" oninput="filterTable(this,'tourTable')" /></div>
-        </div>
-        <div style="overflow-x:auto">
-        <table id="tourTable">
-          <thead><tr><th>ID ↓</th><th>Tour Name</th><th>Duration</th><th>Max People</th><th>KM Limit</th><th>Price</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
-          <tbody>
-            ${tours.length ? tours.map(t => `<tr>
-              <td>${t.id}</td><td><b>${t.name}</b><br><span style="font-size:11px;color:var(--text2)">${t.description?.slice(0,50) || ''}</span></td>
-              <td>${t.duration}</td><td>${t.max_people}</td><td>${t.km_limit ? t.km_limit + ' km' : '—'}</td>
-              <td>€${t.price}</td><td>${statusBadge(t.status)}</td>
-              <td style="font-size:11px;color:var(--text2)">${fmtDate(t.created_at)}</td>
-              <td>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <button class="btn btn-ghost btn-sm" onclick="openTourModal(${JSON.stringify(t).replace(/"/g,'&quot;')})">✏️ Edit</button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteTour(${t.id})" title="Delete">🗑</button>
-                </div>
-              </td>
-            </tr>`).join('') : '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text2)">No tours yet</td></tr>'}
-          </tbody>
-        </table>
-        </div>
-        <div class="table-footer"><span>${tours.length} tour${tours.length !== 1 ? 's' : ''}</span></div>
-      </div>`;
-  } catch (err) {
-    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
-  }
-}
-
-function openTourModal(t = null) {
-  const isEdit = !!t;
-  openModal(isEdit ? 'Edit Tour' : 'Add Tour', `
-    <div class="form-group"><label class="form-label">Tour Name *</label>
-      <input class="form-input" id="tName" value="${t?.name || ''}" /></div>
-    <div class="form-group"><label class="form-label">Description</label>
-      <textarea class="form-textarea" id="tDesc">${t?.description || ''}</textarea></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Duration *</label>
-        <input class="form-input" id="tDur" value="${t?.duration || ''}" placeholder="5 hours" /></div>
-      <div class="form-group"><label class="form-label">Max People *</label>
-        <input class="form-input" id="tMax" type="number" value="${t?.max_people || ''}" /></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">KM Limit</label>
-        <input class="form-input" id="tKm" type="number" value="${t?.km_limit || ''}" /></div>
-      <div class="form-group"><label class="form-label">Price (€) *</label>
-        <input class="form-input" id="tPrice" type="number" value="${t?.price || ''}" /></div>
-    </div>
-    <div class="form-group"><label class="form-label">Status</label>
-      <select class="form-select" id="tStatus">
-        <option value="active" ${t?.status === 'active' ? 'selected' : ''}>Active</option>
-        <option value="passive" ${t?.status === 'passive' ? 'selected' : ''}>Passive</option>
-      </select></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="saveTour(${isEdit ? t.id : 'null'})">${isEdit ? 'Save' : 'Add Tour'}</button>`
-  );
-}
-
-async function saveTour(id) {
-  const body = {
-    name: document.getElementById('tName').value.trim(),
-    description: document.getElementById('tDesc').value.trim(),
-    duration: document.getElementById('tDur').value.trim(),
-    max_people: document.getElementById('tMax').value,
-    km_limit: document.getElementById('tKm').value || null,
-    price: document.getElementById('tPrice').value,
-    status: document.getElementById('tStatus').value,
-  };
-  if (!body.name || !body.duration || !body.max_people || !body.price)
-    return toast('Fill required fields', 'error');
-  try {
-    if (id) await api(`/api/tours/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-    else await api('/api/tours', { method: 'POST', body: JSON.stringify(body) });
-    toast(id ? 'Tour updated' : 'Tour added');
-    closeModalDirect();
-    renderTours();
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-async function deleteTour(id) {
-  openConfirm('Delete Tour', 'This tour will be permanently deleted.', async () => {
-    try {
-      await api(`/api/tours/${id}`, { method: 'DELETE' });
-      toast('Tour deleted');
-      renderTours();
-    } catch (err) { toast('Error: ' + err.message, 'error'); }
-  });
-}
-
 // ─── BLOG ─────────────────────────────────────────────────────────────────────
 async function renderBlog() {
   const mc = document.getElementById('mainContent');
@@ -1233,15 +1147,160 @@ async function renderAccounting() {
   }
 }
 
-// ─── MESSAGES ─────────────────────────────────────────────────────────────────
-async function renderMessages() {
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function renderSettings(sub) {
   const mc = document.getElementById('mainContent');
-  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
-  try {
-    const messages = await api('/api/contact');
+
+  if (sub === 'General') {
     mc.innerHTML = `
       <div class="section-header">
-        <div class="section-header-left"><h2>Contact Messages</h2><p>Messages from the website contact form.</p></div>
+        <div class="section-header-left"><h2>General Settings</h2><p>Basic site configuration.</p></div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:2rem;max-width:700px">
+        <div class="form-group"><label class="form-label">Company Name</label>
+          <input class="form-input" id="set-company" value="BEKPEN ULUSLARARASI TURİZM TİCARET LİMİTED ŞİRKETİ" /></div>
+        <div class="form-group"><label class="form-label">Site Title</label>
+          <input class="form-input" id="set-title" value="Airports Transfer Turkey | VIP Airport Transfer Service Istanbul" /></div>
+        <div class="form-group"><label class="form-label">Phone</label>
+          <input class="form-input" id="set-phone" value="+90 544 102 1414" /></div>
+        <div class="form-group"><label class="form-label">Email</label>
+          <input class="form-input" id="set-email" value="bekpenturizm@gmail.com" /></div>
+        <div class="form-group"><label class="form-label">Address</label>
+          <textarea class="form-textarea" id="set-address" style="min-height:80px">Esenyalı Mah. Mezkur Sk. Nizamettin Otluoğlu Apt. NO:26 A Pendik / Istanbul</textarea></div>
+        <div class="form-group"><label class="form-label">WhatsApp Number</label>
+          <input class="form-input" id="set-wa" value="+905441021414" /></div>
+        <div class="form-group"><label class="form-label">TURSAB License No</label>
+          <input class="form-input" id="set-tursab" value="14563" /></div>
+        <div class="form-group"><label class="form-label">MERSIS No</label>
+          <input class="form-input" id="set-mersis" value="0161095459600001" /></div>
+        <button class="btn btn-primary" onclick="toast('Settings saved (coming soon)')">Save Changes</button>
+      </div>`;
+  } else if (sub === 'Users') {
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Users</h2><p>Admin panel users.</p></div>
+      </div>
+      <div class="table-card">
+        <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+          <tbody id="usersTbody"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">Loading...</td></tr></tbody>
+        </table>
+        </div>
+      </div>`;
+    api('/api/auth/me').then(user => {
+      document.getElementById('usersTbody').innerHTML = `<tr>
+        <td>${user.id}</td>
+        <td>${user.email}</td>
+        <td><span class="badge badge-blue">${user.role}</span></td>
+        <td style="font-size:12px;color:var(--text2)">${fmtDate(user.created_at)}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openChangePasswordModal()">🔑 Change Password</button></td>
+      </tr>`;
+    }).catch(() => {});
+  } else if (sub === 'Mail Templates') {
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Mail Templates</h2><p>Email templates sent to customers.</p></div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:2rem;max-width:700px">
+        <div class="form-group"><label class="form-label">Booking Confirmation Email Subject</label>
+          <input class="form-input" value="Your transfer booking is confirmed — Airports Transfer Turkey" /></div>
+        <div class="form-group"><label class="form-label">Booking Confirmation Email Body</label>
+          <textarea class="form-textarea" style="min-height:160px">Dear {customer_name},
+
+Your transfer booking has been confirmed.
+
+Reference: {reference}
+Route: {from} → {to}
+Date: {date}
+Vehicle: {vehicle}
+
+Thank you for choosing Airports Transfer Turkey.
++90 544 102 1414</textarea></div>
+        <button class="btn btn-primary" onclick="toast('Mail template saved (SMTP integration coming soon)')">Save Template</button>
+        <p style="margin-top:1rem;font-size:12px;color:var(--text2)">⚠️ SMTP integration required to send emails. Configure your mail server to activate.</p>
+      </div>`;
+  } else if (sub === 'Extra Price Settings') {
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Extra Price Settings</h2><p>Additional charges configuration.</p></div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:2rem;max-width:700px">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Night Surcharge (%)</label>
+            <input class="form-input" type="number" value="0" placeholder="e.g. 20" /></div>
+          <div class="form-group"><label class="form-label">Night Hours (From)</label>
+            <input class="form-input" type="number" value="23" placeholder="23" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Night Hours (Until)</label>
+            <input class="form-input" type="number" value="6" placeholder="6" /></div>
+          <div class="form-group"><label class="form-label">Child Seat Fee (€)</label>
+            <input class="form-input" type="number" value="0" placeholder="0" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Extra Stop Fee (€)</label>
+          <input class="form-input" type="number" value="10" placeholder="10" /></div>
+        <button class="btn btn-primary" onclick="toast('Price settings saved (coming soon)')">Save Settings</button>
+      </div>`;
+  }
+}
+
+function openChangePasswordModal() {
+  openModal('Change Password', `
+    <div class="form-group"><label class="form-label">Current Password</label>
+      <input class="form-input" id="cp-current" type="password" /></div>
+    <div class="form-group"><label class="form-label">New Password</label>
+      <input class="form-input" id="cp-new" type="password" /></div>
+    <div class="form-group"><label class="form-label">Confirm New Password</label>
+      <input class="form-input" id="cp-confirm" type="password" /></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="toast('Password change coming soon');closeModalDirect()">Change Password</button>`
+  );
+}
+
+// ─── OTHER ────────────────────────────────────────────────────────────────────
+function renderOther() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="section-header">
+      <div class="section-header-left"><h2>Other</h2><p>Additional tools and information.</p></div>
+    </div>
+    <div style="display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+        <div style="font-size:28px;margin-bottom:0.75rem">📊</div>
+        <div style="font-weight:700;color:var(--text);margin-bottom:0.4rem">Contact Messages</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">View messages sent from the contact form.</div>
+        <button class="btn btn-ghost btn-sm" onclick="renderMessagesInOther()">View Messages</button>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+        <div style="font-size:28px;margin-bottom:0.75rem">🔗</div>
+        <div style="font-weight:700;color:var(--text);margin-bottom:0.4rem">Social Media Links</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">Instagram, Facebook, X, YouTube, TikTok.</div>
+        <a href="https://www.instagram.com/bekpen.turizm/" target="_blank" class="btn btn-ghost btn-sm">Instagram ↗</a>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+        <div style="font-size:28px;margin-bottom:0.75rem">🛡️</div>
+        <div style="font-weight:700;color:var(--text);margin-bottom:0.4rem">TURSAB License</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">License No: 14563</div>
+        <a href="https://www.tursab.org.tr/tr/ddsv" target="_blank" class="btn btn-ghost btn-sm">Verify ↗</a>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+        <div style="font-size:28px;margin-bottom:0.75rem">🌐</div>
+        <div style="font-weight:700;color:var(--text);margin-bottom:0.4rem">Frontend Site</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">View the live website.</div>
+        <a href="https://home-production-2c8a.up.railway.app" target="_blank" class="btn btn-ghost btn-sm">Open Site ↗</a>
+      </div>
+    </div>
+    <div id="messagesSection" style="margin-top:1.5rem"></div>`;
+}
+
+async function renderMessagesInOther() {
+  try {
+    const messages = await api('/api/contact');
+    const el = document.getElementById('messagesSection');
+    el.innerHTML = `
+      <div class="section-header" style="margin-top:1rem">
+        <div class="section-header-left"><h2>Contact Messages</h2></div>
       </div>
       <div class="table-card">
         <div style="overflow-x:auto">
@@ -1255,22 +1314,16 @@ async function renderMessages() {
               <td style="font-size:12px;color:var(--text2)">${m.subject || '—'}</td>
               <td>${statusBadge(m.status)}</td>
               <td style="font-size:11px;color:var(--text2)">${fmtDate(m.created_at)}</td>
-              <td>
-                <div class="actions-wrap">
-                  <div style="display:flex;gap:6px;align-items:center;">
-                    <button class="btn btn-ghost btn-sm" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')})">👁 View</button>
-                    <button class="btn btn-success btn-sm" onclick="markRead(${m.id})">✅</button>
-                  </div>
+              <td style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-sm" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')})">👁</button>
+                <button class="btn btn-success btn-sm" onclick="markRead(${m.id})">✅</button>
               </td>
             </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text2)">No messages yet</td></tr>'}
           </tbody>
         </table>
         </div>
-        <div class="table-footer"><span>${messages.length} message${messages.length !== 1 ? 's' : ''}</span></div>
       </div>`;
-  } catch (err) {
-    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
-  }
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
 }
 
 function viewMessage(m) {
@@ -1296,9 +1349,10 @@ async function markRead(id) {
   try {
     await api(`/api/contact/${id}/read`, { method: 'PUT' });
     toast('Marked as read');
-    renderMessages();
   } catch (err) { toast('Error', 'error'); }
 }
+
+
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function toggleActions(btn) {
