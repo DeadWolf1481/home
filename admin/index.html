@@ -336,6 +336,14 @@ const API_URL = 'https://home-production-6910.up.railway.app';
 let token = localStorage.getItem('att_token') || sessionStorage.getItem('att_token');
 let currentSection = 'reservations';
 let currentSub = '';
+let currentUser = null; // stores logged-in user with role
+
+// Role permissions
+const ROLE_ACCESS = {
+  admin:      ['reservations', 'content', 'vehicles', 'accounting', 'settings', 'other'],
+  accounting: ['reservations', 'accounting', 'other'],
+  editor:     ['content', 'vehicles', 'other'],
+};
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 async function api(path, opts = {}) {
@@ -419,15 +427,18 @@ async function doLogin() {
       body: JSON.stringify({ email, password }),
     });
     token = data.token;
+    currentUser = data.user;
     const remember = document.getElementById('rememberMe').checked;
     if (remember) localStorage.setItem('att_token', token);
     else sessionStorage.setItem('att_token', token);
 
-    document.getElementById('topBarUser').textContent = data.user.email;
+    document.getElementById('topBarUser').textContent = `${data.user.name || data.user.email} (${data.user.role})`;
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     document.getElementById('app').style.flexDirection = 'column';
-    switchSection('reservations');
+    applyRoleNav(data.user.role);
+    const allowed = ROLE_ACCESS[data.user.role] || ROLE_ACCESS.editor;
+    switchSection(allowed[0]);
   } catch (err) {
     errEl.textContent = 'Invalid email or password.';
     errEl.style.display = 'block';
@@ -441,6 +452,14 @@ function doLogout() {
   sessionStorage.removeItem('att_token');
   token = null;
   location.reload();
+}
+
+// ─── ROLE NAV ─────────────────────────────────────────────────────────────────
+function applyRoleNav(role) {
+  const allowed = ROLE_ACCESS[role] || ROLE_ACCESS.editor;
+  document.querySelectorAll('.nav-item[data-section]').forEach(el => {
+    el.style.display = allowed.includes(el.dataset.section) ? '' : 'none';
+  });
 }
 
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
@@ -1178,25 +1197,50 @@ function renderSettings(sub) {
   } else if (sub === 'Users') {
     mc.innerHTML = `
       <div class="section-header">
-        <div class="section-header-left"><h2>Users</h2><p>Admin panel users.</p></div>
+        <div class="section-header-left"><h2>Users</h2><p>Admin panel users and role management.</p></div>
+        <button class="btn btn-primary" onclick="openAddUserModal()">＋ Add User</button>
       </div>
       <div class="table-card">
         <div style="overflow-x:auto">
         <table>
-          <thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
-          <tbody id="usersTbody"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">Loading...</td></tr></tbody>
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Access</th><th>Created</th><th>Actions</th></tr></thead>
+          <tbody id="usersTbody"><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text2)">Loading...</td></tr></tbody>
         </table>
         </div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-top:1rem">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:0.75rem">Role Permissions</div>
+        <div style="display:grid;gap:0.5rem;font-size:12px;color:var(--text2)">
+          <div><span class="badge badge-blue">admin</span> — Full access to all sections</div>
+          <div><span class="badge badge-green">accounting</span> — Reservations + Accounting + Other only</div>
+          <div><span class="badge badge-yellow">editor</span> — Content + Vehicles + Other only</div>
+        </div>
       </div>`;
-    api('/api/auth/me').then(user => {
-      document.getElementById('usersTbody').innerHTML = `<tr>
-        <td>${user.id}</td>
-        <td>${user.email}</td>
-        <td><span class="badge badge-blue">${user.role}</span></td>
-        <td style="font-size:12px;color:var(--text2)">${fmtDate(user.created_at)}</td>
-        <td><button class="btn btn-ghost btn-sm" onclick="openChangePasswordModal()">🔑 Change Password</button></td>
-      </tr>`;
-    }).catch(() => {});
+
+    api('/api/auth/users').then(users => {
+      const roleColors = { admin: 'badge-blue', accounting: 'badge-green', editor: 'badge-yellow' };
+      const roleAccess = {
+        admin: 'All sections',
+        accounting: 'Reservations, Accounting, Other',
+        editor: 'Content, Vehicles, Other',
+      };
+      document.getElementById('usersTbody').innerHTML = users.map(u => `<tr>
+        <td>${u.id}</td>
+        <td>${u.name || '—'}</td>
+        <td style="font-size:12px">${u.email}</td>
+        <td><span class="badge ${roleColors[u.role] || 'badge-gray'}">${u.role}</span></td>
+        <td style="font-size:12px;color:var(--text2)">${roleAccess[u.role] || '—'}</td>
+        <td style="font-size:11px;color:var(--text2)">${fmtDate(u.created_at)}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="openChangePasswordModal(${u.id})">🔑</button>
+            ${currentUser?.role === 'admin' && currentUser?.id !== u.id ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">🗑</button>` : ''}
+          </div>
+        </td>
+      </tr>`).join('');
+    }).catch(err => {
+      document.getElementById('usersTbody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--red)">${err.message}</td></tr>`;
+    });
   } else if (sub === 'Mail Templates') {
     mc.innerHTML = `
       <div class="section-header">
@@ -1245,17 +1289,75 @@ Thank you for choosing Airports Transfer Turkey.
   }
 }
 
-function openChangePasswordModal() {
+function openAddUserModal() {
+  openModal('Add New User', `
+    <div class="form-group"><label class="form-label">Full Name</label>
+      <input class="form-input" id="nu-name" placeholder="John Doe" /></div>
+    <div class="form-group"><label class="form-label">Email *</label>
+      <input class="form-input" id="nu-email" type="email" placeholder="john@example.com" /></div>
+    <div class="form-group"><label class="form-label">Password *</label>
+      <input class="form-input" id="nu-pass" type="password" placeholder="Min 6 characters" /></div>
+    <div class="form-group"><label class="form-label">Role *</label>
+      <select class="form-select" id="nu-role">
+        <option value="editor">Editor — Content & Vehicles</option>
+        <option value="accounting">Accounting — Reservations & Revenue</option>
+        <option value="admin">Admin — Full Access</option>
+      </select></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveNewUser()">Add User</button>`
+  );
+}
+
+async function saveNewUser() {
+  const name  = document.getElementById('nu-name').value.trim();
+  const email = document.getElementById('nu-email').value.trim();
+  const pass  = document.getElementById('nu-pass').value;
+  const role  = document.getElementById('nu-role').value;
+  if (!email || !pass) return toast('Email and password required', 'error');
+  if (pass.length < 6) return toast('Password must be at least 6 characters', 'error');
+  try {
+    await api('/api/auth/users', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password: pass, role }),
+    });
+    toast('User added successfully');
+    closeModalDirect();
+    renderSettings('Users');
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function deleteUser(id) {
+  openConfirm('Delete User', 'This user will be permanently deleted and cannot log in anymore.', async () => {
+    try {
+      await api(`/api/auth/users/${id}`, { method: 'DELETE' });
+      toast('User deleted');
+      renderSettings('Users');
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
+}
+
+function openChangePasswordModal(userId) {
+  const id = userId || currentUser?.id;
   openModal('Change Password', `
-    <div class="form-group"><label class="form-label">Current Password</label>
-      <input class="form-input" id="cp-current" type="password" /></div>
-    <div class="form-group"><label class="form-label">New Password</label>
-      <input class="form-input" id="cp-new" type="password" /></div>
-    <div class="form-group"><label class="form-label">Confirm New Password</label>
+    <div class="form-group"><label class="form-label">New Password *</label>
+      <input class="form-input" id="cp-new" type="password" placeholder="Min 6 characters" /></div>
+    <div class="form-group"><label class="form-label">Confirm New Password *</label>
       <input class="form-input" id="cp-confirm" type="password" /></div>`,
     `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="toast('Password change coming soon');closeModalDirect()">Change Password</button>`
+     <button class="btn btn-primary" onclick="savePassword(${id})">Change Password</button>`
   );
+}
+
+async function savePassword(id) {
+  const np = document.getElementById('cp-new').value;
+  const cp = document.getElementById('cp-confirm').value;
+  if (!np || np.length < 6) return toast('Password must be at least 6 characters', 'error');
+  if (np !== cp) return toast('Passwords do not match', 'error');
+  try {
+    await api(`/api/auth/users/${id}/password`, { method: 'PUT', body: JSON.stringify({ password: np }) });
+    toast('Password changed successfully');
+    closeModalDirect();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
 }
 
 // ─── OTHER ────────────────────────────────────────────────────────────────────
@@ -1389,11 +1491,14 @@ function filterTable(input, tableId) {
 // ─── AUTO LOGIN (if token exists) ─────────────────────────────────────────────
 if (token) {
   api('/api/auth/me').then(user => {
-    document.getElementById('topBarUser').textContent = user.email;
+    currentUser = user;
+    document.getElementById('topBarUser').textContent = `${user.name || user.email} (${user.role})`;
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     document.getElementById('app').style.flexDirection = 'column';
-    switchSection('reservations');
+    applyRoleNav(user.role);
+    const allowed = ROLE_ACCESS[user.role] || ROLE_ACCESS.editor;
+    switchSection(allowed[0]);
   }).catch(() => {
     localStorage.removeItem('att_token');
     sessionStorage.removeItem('att_token');
