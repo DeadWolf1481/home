@@ -33,7 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 app.locals.prisma = prisma;
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
-const adminPath = path.join(__dirname, '..', 'admin');
+const adminPath = path.join('/app', 'admin');
 console.log('Admin path:', adminPath);
 app.use('/admin', express.static(adminPath));
 app.get('/admin', (req, res) => {
@@ -52,6 +52,7 @@ app.use('/api/pages',              require('./routes/pages'));
 app.use('/api/contact',            require('./routes/contact'));
 app.use('/api/booking',            require('./routes/booking'));
 app.use('/api/stats',              require('./routes/stats'));
+app.use('/api/payment-links',      require('./routes/paymentLinks'));
 
 // ── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
