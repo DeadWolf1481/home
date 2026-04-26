@@ -682,6 +682,7 @@ async function renderCustomers() {
           <thead><tr>
             <th>ID ↓</th>
             <th>IP Address</th>
+            <th>Location</th>
             <th>Current Step</th>
             <th>Last Action</th>
             <th>Last Seen</th>
@@ -723,6 +724,7 @@ function renderCustomerRows(rows) {
   tbody.innerHTML = rows.map(r => `<tr>
     <td>${r.id}</td>
     <td style="font-family:monospace;font-size:12px;color:var(--text2)">${r.ip_address || '—'}</td>
+    <td style="font-size:12px;color:var(--text2)">${r.location || '—'}</td>
     <td>${getStepBadge(r.current_step)}</td>
     <td style="font-size:12px;color:var(--text2)">${r.last_action || '—'}</td>
     <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.updated_at)}</td>
