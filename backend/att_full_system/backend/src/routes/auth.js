@@ -86,6 +86,31 @@ router.post('/users', auth, async (req, res) => {
   }
 });
 
+// PUT /api/auth/users/:id — admin only
+router.put('/users/:id', auth, async (req, res) => {
+  if (req.user.role !== 'admin')
+    return res.status(403).json({ error: 'Admin access required' });
+  const prisma = req.app.locals.prisma;
+  const { name, email, role } = req.body;
+  const validRoles = ['admin', 'accounting', 'editor'];
+  if (role && !validRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' });
+  try {
+    const user = await prisma.user.update({
+      where: { id: parseInt(req.params.id) },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(email && { email }),
+        ...(role && { role }),
+      },
+      select: { id: true, email: true, name: true, role: true, created_at: true },
+    });
+    res.json(user);
+  } catch (err) {
+    if (err.code === 'P2002') return res.status(400).json({ error: 'Email already exists' });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // DELETE /api/auth/users/:id — admin only
 router.delete('/users/:id', auth, async (req, res) => {
   if (req.user.role !== 'admin')
