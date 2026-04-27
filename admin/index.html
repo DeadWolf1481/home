@@ -266,7 +266,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   <div class="top-nav">
     <div class="nav-item active" onclick="switchSection('reservations')" data-section="reservations">
       <div class="nav-item-title">RESERVATIONS</div>
-      <div class="nav-item-sub">Transfer &amp; Tour Reservations</div>
+      <div class="nav-item-sub">Transfers &amp; Customers</div>
     </div>
     <div class="nav-item" onclick="switchSection('content')" data-section="content">
       <div class="nav-item-title">CONTENT</div>
@@ -284,9 +284,9 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <div class="nav-item-title">SETTINGS</div>
       <div class="nav-item-sub">General &amp; Users</div>
     </div>
-    <div class="nav-item" onclick="switchSection('other')" data-section="other">
-      <div class="nav-item-title">OTHER</div>
-      <div class="nav-item-sub">Other</div>
+    <div class="nav-item" onclick="switchSection('messages')" data-section="messages">
+      <div class="nav-item-title">MESSAGES</div>
+      <div class="nav-item-sub">Contact Messages</div>
     </div>
   </div>
 
@@ -340,9 +340,9 @@ let currentUser = null; // stores logged-in user with role
 
 // Role permissions
 const ROLE_ACCESS = {
-  admin:      ['reservations', 'content', 'vehicles', 'accounting', 'settings', 'other'],
-  accounting: ['reservations', 'accounting', 'other'],
-  editor:     ['content', 'vehicles', 'other'],
+  admin:      ['reservations', 'content', 'vehicles', 'accounting', 'settings', 'messages'],
+  accounting: ['reservations', 'accounting', 'messages'],
+  editor:     ['content', 'vehicles'],
 };
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
@@ -484,9 +484,9 @@ const SECTIONS = {
     subs: ['General', 'Users', 'Mail Templates', 'Extra Price Settings'],
     render: (sub) => renderSettings(sub),
   },
-  other: {
-    subs: ['Other'],
-    render: () => renderOther(),
+  messages: {
+    subs: ['Contact Messages'],
+    render: () => renderMessages(),
   },
 };
 
@@ -1521,8 +1521,80 @@ async function savePassword(id) {
   } catch (err) { toast('Error: ' + err.message, 'error'); }
 }
 
-// ─── OTHER ────────────────────────────────────────────────────────────────────
-function renderOther() {
+// ─── MESSAGES ─────────────────────────────────────────────────────────────────
+async function renderMessages() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+  try {
+    const messages = await api('/api/contact');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left">
+          <h2>Contact Messages</h2>
+          <p>Messages received from the website contact form.</p>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-show">Show
+            <select onchange="filterMsgCount(this.value)">
+              <option>10</option><option selected>25</option><option>50</option><option>100</option>
+            </select>
+          </div>
+          <div class="table-toolbar-right">
+            <input class="table-search" placeholder="Search..." oninput="filterTable(this,'msgTable')" />
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+        <table id="msgTable">
+          <thead><tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email ↓</th>
+            <th>Subject</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody>
+            ${messages.length ? messages.map(m => `<tr>
+              <td>${m.id}</td>
+              <td style="font-weight:600;white-space:nowrap">${m.name}</td>
+              <td style="font-size:12px">${m.phone || '—'}</td>
+              <td style="font-size:12px;color:var(--blue)">${m.email}</td>
+              <td style="font-size:12px;max-width:180px">${m.subject || '—'}</td>
+              <td style="font-size:12px;color:var(--text2);max-width:280px">${(m.message || '').slice(0, 80)}${m.message?.length > 80 ? '…' : ''}</td>
+              <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(m.created_at)}</td>
+              <td>
+                <div style="display:flex;gap:6px">
+                  <button class="btn btn-ghost btn-sm" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')})">👁</button>
+                  <button class="btn btn-success btn-sm" onclick="markRead(${m.id})" title="Mark as read">✅</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteMessage(${m.id})" title="Delete">🗑</button>
+                </div>
+              </td>
+            </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text2)">No messages yet</td></tr>'}
+          </tbody>
+        </table>
+        </div>
+        <div class="table-footer">
+          <span>${messages.length} message${messages.length !== 1 ? 's' : ''}</span>
+        </div>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+async function deleteMessage(id) {
+  openConfirm('Delete Message', 'This message will be permanently deleted.', async () => {
+    try {
+      await api(`/api/contact/${id}`, { method: 'DELETE' });
+      toast('Message deleted');
+      renderMessages();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
+}
   const mc = document.getElementById('mainContent');
   mc.innerHTML = `
     <div class="section-header">
