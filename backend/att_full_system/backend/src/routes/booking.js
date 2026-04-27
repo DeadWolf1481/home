@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { sendBookingConfirmation } = require('../utils/mailer');
 
 // POST /api/booking — public (called by results.html)
 router.post('/', async (req, res) => {
@@ -55,6 +56,12 @@ router.post('/', async (req, res) => {
         ip_address: req.ip,
       },
     }).catch(() => {});
+
+    // Send confirmation email
+    sendBookingConfirmation({
+      ...reservation,
+      vehicle_name: vehicleRecord?.name || vehicleName || null,
+    }).catch(err => console.error('Mail error:', err));
 
     res.status(201).json({
       success: true,
