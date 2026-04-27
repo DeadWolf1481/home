@@ -1691,10 +1691,11 @@ async function renderMessages() {
               <td style="font-size:12px;color:var(--text2);max-width:280px">${(m.message || '').slice(0, 80)}${m.message?.length > 80 ? '…' : ''}</td>
               <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(m.created_at)}</td>
               <td>
-                <div style="display:flex;gap:6px">
+                <div style="display:flex;gap:6px;align-items:center">
                   <button class="btn btn-ghost btn-sm" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')})" title="View">👁</button>
                   <button class="btn btn-primary btn-sm" onclick="openReplyModal(${JSON.stringify(m).replace(/"/g,'&quot;')})" title="Reply">✉️ Reply</button>
                   <button class="btn btn-danger btn-sm" onclick="deleteMessage(${m.id})" title="Delete">🗑</button>
+                  ${localStorage.getItem('replied_' + m.id) ? '<span title="Reply sent" style="font-size:18px">↩️</span>' : ''}
                 </div>
               </td>
             </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text2)">No messages yet</td></tr>'}
@@ -1714,6 +1715,7 @@ async function deleteMessage(id) {
   openConfirm('Delete Message', 'This message will be permanently deleted.', async () => {
     try {
       await api(`/api/contact/${id}`, { method: 'DELETE' });
+      localStorage.removeItem('replied_' + id);
       toast('Message deleted');
       renderMessages();
     } catch (err) { toast('Error: ' + err.message, 'error'); }
@@ -1783,6 +1785,7 @@ async function sendReply(email, subject, msgId) {
       body: JSON.stringify({ replyText }),
     });
     toast('Reply sent successfully ✉️');
+    localStorage.setItem('replied_' + msgId, '1');
     closeModalDirect();
     renderMessages();
   } catch (err) {
