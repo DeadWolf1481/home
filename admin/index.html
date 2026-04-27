@@ -485,8 +485,8 @@ const SECTIONS = {
     render: (sub) => renderSettings(sub),
   },
   messages: {
-    subs: ['Contact Messages'],
-    render: () => renderMessages(),
+    subs: ['Contact Messages', 'Mail Template'],
+    render: (sub) => sub === 'Mail Template' ? renderMailTemplate() : renderMessages(),
   },
 };
 
@@ -1372,26 +1372,36 @@ function renderSettings(sub) {
   } else if (sub === 'Mail Templates') {
     mc.innerHTML = `
       <div class="section-header">
-        <div class="section-header-left"><h2>Mail Templates</h2><p>Email templates sent to customers.</p></div>
+        <div class="section-header-left"><h2>Mail Templates</h2><p>Edit email templates sent to customers.</p></div>
       </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:2rem;max-width:700px">
-        <div class="form-group"><label class="form-label">Booking Confirmation Email Subject</label>
-          <input class="form-input" value="Your transfer booking is confirmed — Airports Transfer Turkey" /></div>
-        <div class="form-group"><label class="form-label">Booking Confirmation Email Body</label>
-          <textarea class="form-textarea" style="min-height:160px">Dear {customer_name},
+      <div style="display:grid;gap:1rem">
 
-Your transfer booking has been confirmed.
+        <!-- Reply Template -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.25rem">✉️ Contact Reply Template</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:1rem">Used when replying to contact messages. Variables: <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{name}</code></div>
+          <div class="form-group"><label class="form-label">Template Body</label>
+            <textarea class="form-textarea" id="tpl-reply" style="min-height:180px;font-family:monospace;font-size:13px"></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveTemplate('reply')">Save Template</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetTemplate('reply')" style="margin-left:8px">Reset to Default</button>
+        </div>
 
-Reference: {reference}
-Route: {from} → {to}
-Date: {date}
-Vehicle: {vehicle}
+        <!-- Booking Confirmation Template -->
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.25rem">🎉 Booking Confirmation Template</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:1rem">Sent to customers after booking. Variables: <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{name}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{reference}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{from}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{to}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{date}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{vehicle}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{price}</code></div>
+          <div class="form-group"><label class="form-label">Template Body</label>
+            <textarea class="form-textarea" id="tpl-booking" style="min-height:220px;font-family:monospace;font-size:13px"></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveTemplate('booking')">Save Template</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetTemplate('booking')" style="margin-left:8px">Reset to Default</button>
+        </div>
 
-Thank you for choosing Airports Transfer Turkey.
-+90 544 102 1414</textarea></div>
-        <button class="btn btn-primary" onclick="toast('Mail template saved (SMTP integration coming soon)')">Save Template</button>
-        <p style="margin-top:1rem;font-size:12px;color:var(--text2)">⚠️ SMTP integration required to send emails. Configure your mail server to activate.</p>
       </div>`;
+
+    // Load saved templates
+    loadTemplates();
   } else if (sub === 'Extra Price Settings') {
     mc.innerHTML = `
       <div class="section-header">
@@ -1521,6 +1531,120 @@ async function savePassword(id) {
   } catch (err) { toast('Error: ' + err.message, 'error'); }
 }
 
+// ─── MAIL TEMPLATE ────────────────────────────────────────────────────────────
+function renderMailTemplate() {
+  const mc = document.getElementById('mainContent');
+  const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
+  const replyTpl = saved.reply || DEFAULT_TEMPLATES.reply;
+  const bookingTpl = saved.booking || DEFAULT_TEMPLATES.booking;
+  const signatureTpl = saved.signature || 'Best regards,\nAirports Transfer Turkey Team\n+90 544 102 1414\nairportstransferturkey@gmail.com';
+
+  mc.innerHTML = `
+    <div class="section-header">
+      <div class="section-header-left">
+        <h2>Mail Templates</h2>
+        <p>Customize the emails sent to customers. Use variables like <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:12px">{name}</code> to insert dynamic content.</p>
+      </div>
+    </div>
+
+    <!-- Signature -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.4rem">✍️ Email Signature</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:0.75rem">This signature is automatically appended to all emails.</div>
+      <textarea class="form-textarea" id="tpl-signature" style="min-height:100px;font-family:monospace;font-size:13px">${signatureTpl}</textarea>
+    </div>
+
+    <!-- Reply Template -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.4rem">✉️ Contact Reply Template</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:0.5rem">
+        Variables: <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{name}</code> — customer name &nbsp;|&nbsp; <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{replyText}</code> — your reply text
+      </div>
+      <textarea class="form-textarea" id="tpl-reply" style="min-height:180px;font-family:monospace;font-size:13px">${replyTpl}</textarea>
+    </div>
+
+    <!-- Booking Confirmation Template -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.4rem">🎉 Booking Confirmation Template</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:0.5rem">
+        Variables: <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{name}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{reference}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{from}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{to}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{date}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{vehicle}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{price}</code>
+      </div>
+      <textarea class="form-textarea" id="tpl-booking" style="min-height:200px;font-family:monospace;font-size:13px">${bookingTpl}</textarea>
+    </div>
+
+    <div style="display:flex;gap:0.75rem">
+      <button class="btn btn-primary" onclick="saveTemplates()">💾 Save Templates</button>
+      <button class="btn btn-ghost" onclick="resetTemplates()">↺ Reset to Default</button>
+    </div>`;
+}
+
+function saveTemplates() {
+  const templates = {
+    reply: document.getElementById('tpl-reply').value,
+    booking: document.getElementById('tpl-booking').value,
+    signature: document.getElementById('tpl-signature').value,
+  };
+  localStorage.setItem('att_mail_templates', JSON.stringify(templates));
+  toast('Templates saved ✅');
+}
+
+function resetTemplates() {
+  localStorage.removeItem('att_mail_templates');
+  renderMailTemplate();
+  toast('Templates reset to default');
+}
+
+function getTemplate(type) {
+  const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
+  return saved[type] || DEFAULT_TEMPLATES[type] || '';
+}
+
+function getSignature() {
+  const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
+  return saved.signature || 'Best regards,\nAirports Transfer Turkey Team\n+90 544 102 1414\nairportstransferturkey@gmail.com';
+}
+
+// ─── MESSAGES ─────────────────────────────────────────────────────────────────
+const DEFAULT_TEMPLATES = {
+  reply: `Dear {name},\n\nThank you for reaching out to Airports Transfer Turkey.\n\n{replyText}\n\nBest regards,\nAirports Transfer Turkey Team\n+90 544 102 1414\nairportstransferturkey@gmail.com`,
+  booking: `Dear {name},\n\nThank you for choosing Airports Transfer Turkey! We have received your booking.\n\nReference: {reference}\nFrom: {from}\nTo: {to}\nDate: {date}\nVehicle: {vehicle}\nPrice: {price}\n\nFor questions: +90 544 102 1414\n\nBest regards,\nAirports Transfer Turkey Team`,
+};
+
+function loadTemplates() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
+    const replyEl = document.getElementById('tpl-reply');
+    const bookingEl = document.getElementById('tpl-booking');
+    if (replyEl) replyEl.value = saved.reply || DEFAULT_TEMPLATES.reply;
+    if (bookingEl) bookingEl.value = saved.booking || DEFAULT_TEMPLATES.booking;
+  } catch(e) {}
+}
+
+function saveTemplate(type) {
+  try {
+    const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
+    saved[type] = document.getElementById('tpl-' + type).value;
+    localStorage.setItem('att_mail_templates', JSON.stringify(saved));
+    toast('Template saved ✅');
+  } catch(e) { toast('Error saving template', 'error'); }
+}
+
+function resetTemplate(type) {
+  const el = document.getElementById('tpl-' + type);
+  if (el) el.value = DEFAULT_TEMPLATES[type];
+  saveTemplate(type);
+  toast('Template reset to default');
+}
+
+function getTemplate(type, vars) {
+  try {
+    const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
+    let tpl = saved[type] || DEFAULT_TEMPLATES[type];
+    if (vars) Object.keys(vars).forEach(k => { tpl = tpl.replace(new RegExp('{' + k + '}', 'g'), vars[k] || ''); });
+    return tpl;
+  } catch(e) { return ''; }
+}
+
 // ─── MESSAGES ─────────────────────────────────────────────────────────────────
 async function renderMessages() {
   const mc = document.getElementById('mainContent');
@@ -1620,6 +1744,11 @@ function viewMessage(m) {
 }
 
 function openReplyModal(m) {
+  const tpl = getTemplate('reply')
+    .replace('{name}', m.name)
+    .replace('{replyText}', '');
+  const signature = getSignature();
+
   openModal(`Reply to ${m.name}`, `
     <div style="background:var(--bg3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:12px;color:var(--text2)">
       <b style="color:var(--text)">To:</b> ${m.name} &lt;${m.email}&gt;<br>
@@ -1631,7 +1760,10 @@ function openReplyModal(m) {
     </div>
     <div class="form-group">
       <label class="form-label">Your Reply *</label>
-      <textarea class="form-textarea" id="replyText" style="min-height:160px" placeholder="Type your reply here..."></textarea>
+      <textarea class="form-textarea" id="replyText" style="min-height:160px" placeholder="Type your reply here...">${tpl.includes('{replyText}') ? '' : tpl}</textarea>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-top:0.5rem">
+      📝 Signature from <button onclick="switchSection('messages');document.querySelectorAll('.sub-btn')[1]?.click()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;padding:0">Mail Template</button> will be appended automatically.
     </div>`,
     `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
      <button class="btn btn-primary" onclick="sendReply('${m.email}','${(m.subject || 'Your message').replace(/'/g,"\\'")}',${m.id})">✉️ Send Reply</button>`
@@ -1642,20 +1774,22 @@ async function sendReply(email, subject, msgId) {
   const replyText = document.getElementById('replyText').value.trim();
   if (!replyText) return toast('Please write a reply first', 'error');
 
+  const signature = getSignature();
+  const fullText = replyText + (signature ? '\n\n' + signature : '');
+
   const btn = document.querySelector('#modalFooter .btn-primary');
   if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
 
   try {
     await api(`/api/contact/${msgId}/reply`, {
       method: 'POST',
-      body: JSON.stringify({ replyText }),
+      body: JSON.stringify({ replyText: fullText }),
     });
     toast('Reply sent successfully ✉️');
     closeModalDirect();
     renderMessages();
   } catch (err) {
-    // Fallback to mailto if API fails
-    const body = replyText + '\n\n---\nAirports Transfer Turkey\n+90 544 102 1414\nairportstransferturkey@gmail.com';
+    const body = fullText;
     window.open('mailto:' + email + '?subject=' + encodeURIComponent('Re: ' + subject) + '&body=' + encodeURIComponent(body), '_blank');
     toast('Opened in mail client (API error: ' + err.message + ')', 'error');
   } finally {
