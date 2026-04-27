@@ -1774,22 +1774,19 @@ async function sendReply(email, subject, msgId) {
   const replyText = document.getElementById('replyText').value.trim();
   if (!replyText) return toast('Please write a reply first', 'error');
 
-  const signature = getSignature();
-  const fullText = replyText + (signature ? '\n\n' + signature : '');
-
   const btn = document.querySelector('#modalFooter .btn-primary');
   if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
 
   try {
     await api(`/api/contact/${msgId}/reply`, {
       method: 'POST',
-      body: JSON.stringify({ replyText: fullText }),
+      body: JSON.stringify({ replyText }),
     });
     toast('Reply sent successfully ✉️');
     closeModalDirect();
     renderMessages();
   } catch (err) {
-    const body = fullText;
+    const body = replyText;
     window.open('mailto:' + email + '?subject=' + encodeURIComponent('Re: ' + subject) + '&body=' + encodeURIComponent(body), '_blank');
     toast('Opened in mail client (API error: ' + err.message + ')', 'error');
   } finally {
