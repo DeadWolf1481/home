@@ -1568,8 +1568,8 @@ async function renderMessages() {
               <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(m.created_at)}</td>
               <td>
                 <div style="display:flex;gap:6px">
-                  <button class="btn btn-ghost btn-sm" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')})">👁</button>
-                  <button class="btn btn-success btn-sm" onclick="markRead(${m.id})" title="Mark as read">✅</button>
+                  <button class="btn btn-ghost btn-sm" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')})" title="View">👁</button>
+                  <button class="btn btn-primary btn-sm" onclick="openReplyModal(${JSON.stringify(m).replace(/"/g,'&quot;')})" title="Reply">✉️ Reply</button>
                   <button class="btn btn-danger btn-sm" onclick="deleteMessage(${m.id})" title="Delete">🗑</button>
                 </div>
               </td>
@@ -1596,7 +1596,77 @@ async function deleteMessage(id) {
   });
 }
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function viewMessage(m) {
+  openModal('Message Detail', `
+    <div style="display:grid;gap:1rem;font-size:13px">
+      <div style="background:var(--bg3);border-radius:8px;padding:1rem;display:grid;gap:0.5rem">
+        <div style="display:flex;gap:1rem">
+          <div style="flex:1"><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">From</span><br><b style="font-size:15px">${m.name}</b></div>
+          <div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Status</span><br>${statusBadge(m.status)}</div>
+        </div>
+        <div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Email</span><br><a href="mailto:${m.email}" style="color:var(--blue)">${m.email}</a></div>
+        ${m.phone ? `<div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Phone</span><br>${m.phone}</div>` : ''}
+        ${m.subject ? `<div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Subject</span><br><b>${m.subject}</b></div>` : ''}
+        <div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Received</span><br>${fmtDate(m.created_at)}</div>
+      </div>
+      <div>
+        <div style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Message</div>
+        <div style="background:var(--bg3);padding:14px;border-radius:8px;line-height:1.7;border-left:3px solid var(--blue)">${m.message}</div>
+      </div>
+    </div>`,
+    `<button class="btn btn-primary" onclick="closeModalDirect();openReplyModal(${JSON.stringify(m).replace(/"/g,'&quot;')})">✉️ Reply</button>
+     <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>`
+  );
+}
+
+function openReplyModal(m) {
+  openModal(`Reply to ${m.name}`, `
+    <div style="background:var(--bg3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:12px;color:var(--text2)">
+      <b style="color:var(--text)">To:</b> ${m.name} &lt;${m.email}&gt;<br>
+      <b style="color:var(--text)">Re:</b> ${m.subject || 'Your message'}
+    </div>
+    <div style="background:var(--bg3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;border-left:3px solid var(--border)">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Original message:</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">${m.message}</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Your Reply *</label>
+      <textarea class="form-textarea" id="replyText" style="min-height:160px" placeholder="Type your reply here..."></textarea>
+    </div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="sendReply('${m.email}','${(m.subject || 'Your message').replace(/'/g,"\\'")}',${m.id})">✉️ Send Reply</button>`
+  );
+}
+
+async function sendReply(email, subject, msgId) {
+  const replyText = document.getElementById('replyText').value.trim();
+  if (!replyText) return toast('Please write a reply first', 'error');
+
+  const body = replyText
+    + '\n\n---\nAirports Transfer Turkey\n+90 544 102 1414\nbekpenturizm@gmail.com';
+
+  const mailto = 'mailto:' + email
+    + '?subject=' + encodeURIComponent('Re: ' + subject)
+    + '&body=' + encodeURIComponent(body);
+
+  window.open(mailto, '_blank');
+
+  try { await api(`/api/contact/${msgId}/read`, { method: 'PUT' }); } catch(e) {}
+
+  toast('Reply opened in your mail client ✉️');
+  closeModalDirect();
+  renderMessages();
+}
+
+async function markRead(id) {
+  try {
+    await api(`/api/contact/${id}/read`, { method: 'PUT' });
+    toast('Marked as read');
+    renderMessages();
+  } catch (err) { toast('Error', 'error'); }
+}
+
+
 function toggleActions(btn) {
   const menu = btn.nextElementSibling;
   const isOpen = menu.classList.contains('open');
