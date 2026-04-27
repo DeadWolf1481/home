@@ -32,7 +32,7 @@ ${reservation.price ? `<b>Price:</b> <span style="font-size:18px;font-weight:700
 </div>
 </div>
 <div style="background:#0a1628;padding:20px 32px;text-align:center">
-<a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600">💬 WhatsApp: +90 544 102 1414</a>
+<a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;display:inline-block;white-space:nowrap">WhatsApp: +90 544 102 1414</a>
 <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:8px">airportstransferturkey@gmail.com</div>
 </div>
 </div></body></html>`;
@@ -57,7 +57,7 @@ async function sendContactReply(to, name, subject, replyText) {
 <div style="white-space:pre-line;color:#333;line-height:1.7;font-size:14px;background:#f8f9fa;padding:20px;border-radius:8px;border-left:4px solid #f0c040">${replyText}</div>
 </div>
 <div style="background:#0a1628;padding:20px 32px;text-align:center">
-<a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600">💬 WhatsApp: +90 544 102 1414</a>
+<a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;display:inline-block;white-space:nowrap">WhatsApp: +90 544 102 1414</a>
 <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:8px">airportstransferturkey@gmail.com</div>
 </div>
 </div></body></html>`;
