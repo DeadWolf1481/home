@@ -35,7 +35,7 @@ model Vehicle {
 
 model Reservation {
   id               Int      @id @default(autoincrement())
-  reference        String   @unique @default(cuid())
+  reference        String   @unique
   customer_name    String
   email            String
   phone            String
