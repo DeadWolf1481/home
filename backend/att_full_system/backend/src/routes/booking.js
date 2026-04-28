@@ -64,20 +64,30 @@ router.post('/', async (req, res) => {
 
     // Update customer tracking to "completed"
     const sessionId = req.body.session_id || `booking-${reservation.id}`;
-    await prisma.customerTracking.upsert({
-      where: { id: (await prisma.customerTracking.findFirst({ where: { session_id: sessionId }, select: { id: true } }))?.id || 0 },
-      update: {
-        current_step: 'completed',
-        last_action: `Booking submitted: ${reservation.reference}`,
-        ip_address: req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip,
-      },
-      create: {
-        session_id: sessionId,
-        current_step: 'completed',
-        last_action: `Booking submitted: ${reservation.reference}`,
-        ip_address: req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip,
-      },
-    }).catch(() => {});
+    const realIP = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip;
+    const existing = await prisma.customerTracking.findFirst({
+      where: { session_id: sessionId },
+      orderBy: { created_at: 'desc' },
+    });
+    if (existing) {
+      await prisma.customerTracking.update({
+        where: { id: existing.id },
+        data: {
+          current_step: 'completed',
+          last_action: `Booking submitted: ${reservation.reference}`,
+          ip_address: realIP,
+        },
+      }).catch(() => {});
+    } else {
+      await prisma.customerTracking.create({
+        data: {
+          session_id: sessionId,
+          current_step: 'completed',
+          last_action: `Booking submitted: ${reservation.reference}`,
+          ip_address: realIP,
+        },
+      }).catch(() => {});
+    }
 
     // Send confirmation email
     sendBookingConfirmation({
