@@ -43,8 +43,8 @@ async function sendBookingConfirmation(reservation) {
 </td></tr>
 <tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
   <table width="100%"><tr>
-    <td style="color:#888;font-size:15px;width:150px">Date</td>
-    <td style="font-weight:600;font-size:16px;color:#222">${reservation.date}</td>
+    <td style="color:#888;font-size:15px;width:150px;vertical-align:top">Date</td>
+    <td style="font-weight:600;font-size:16px;color:#222;white-space:nowrap">${reservation.date}</td>
   </tr></table>
 </td></tr>
 <tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
