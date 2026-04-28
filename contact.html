@@ -212,8 +212,8 @@ function toggleMenu(){
       <div class="contact-form">
         <input class="cf-input" id="cf-name" type="text" placeholder="Name Surname" />
         <div class="cf-row">
-          <input class="cf-input" id="cf-email" type="email" placeholder="E-Mail" />
-          <input class="cf-input" id="cf-phone" type="tel" placeholder="Phone" />
+          <input class="cf-input" id="cf-email" type="email" placeholder="E-Mail (@gmail.com, @hotmail.com...)" />
+          <input class="cf-input" id="cf-phone" type="tel" placeholder="Phone (numbers only)" pattern="[0-9+\s\-()]+" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9+\s\-()+]/g,'')" />
         </div>
         <input class="cf-input" id="cf-subject" type="text" placeholder="Subject" />
         <textarea class="cf-input cf-textarea" id="cf-message" placeholder="Your Message"></textarea>
@@ -269,6 +269,8 @@ function sendMessage() {
   if (!name && !email && !message) { showCfError('Please fill in your Name, E-Mail and Message.'); return; }
   if (!name)    { showCfError('Please enter your name.'); return; }
   if (!email)   { showCfError('Please enter your e-mail address.'); return; }
+  if (!email.includes('@')) { showCfError('Please enter a valid e-mail address.'); return; }
+  if (phone && !/^[0-9+\s\-()+]+$/.test(phone)) { showCfError('Phone number must contain numbers only.'); return; }
   if (!message) { showCfError('Please write your message before sending.'); return; }
 
   var btn = document.querySelector('.cf-btn');
