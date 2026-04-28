@@ -551,8 +551,7 @@ function submitBooking() {
     return res.json();
   })
   .then(function(data) {
-    var ref = (data && data.reference) ? data.reference : ('ATT-' + Math.random().toString(36).substring(2,8).toUpperCase());
-    // Track completed
+    var ref = (data && data.reference) ? data.reference : 'ATT???';
     track('completed', 'Booking completed: ' + ref);
     document.getElementById('successRef').textContent = 'Booking Reference: ' + ref;
     document.getElementById('formView').style.display = 'none';
@@ -560,26 +559,8 @@ function submitBooking() {
   })
   .catch(function(err) {
     console.error('Booking API error:', err);
-    // Fallback: WhatsApp
-    var waMsg = 'New Booking Request\n'
-      + '──────────────────\n'
-      + 'Vehicle: ' + selectedVehicle.name + ' (€' + selectedVehicle.price + ')\n'
-      + 'From: ' + tripFrom + '\n'
-      + 'To: ' + tripTo + '\n'
-      + 'Date: ' + tripDate + '\n'
-      + 'Passengers: ' + tripPax + ' · Luggage: ' + tripLug + '\n'
-      + '──────────────────\n'
-      + 'Name: ' + name + '\n'
-      + 'Email: ' + email + '\n'
-      + 'Phone: ' + phone + '\n'
-      + (flight ? 'Flight: ' + flight + '\n' : '')
-      + (notes  ? 'Notes: ' + notes + '\n' : '');
-    window.open('https://wa.me/905441021414?text=' + encodeURIComponent(waMsg), '_blank');
-
-    // Show success anyway
-    document.getElementById('successRef').textContent = 'Redirected to WhatsApp — please complete booking there.';
-    document.getElementById('formView').style.display = 'none';
-    document.getElementById('successView').classList.add('show');
+    errEl.textContent = 'Something went wrong. Please try again or contact us via WhatsApp.';
+    errEl.style.display = 'block';
   })
   .finally(function() {
     submitBtn.disabled    = false;
