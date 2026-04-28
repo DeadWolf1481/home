@@ -4,6 +4,20 @@ const { sendBookingConfirmation } = require('../utils/mailer');
 // POST /api/booking — public (called by results.html)
 router.post('/', async (req, res) => {
   const prisma = req.app.locals.prisma;
+
+  // Generate ATT001 style reference
+  async function generateReference() {
+    const last = await prisma.reservation.findFirst({
+      orderBy: { id: 'desc' },
+      select: { reference: true },
+    });
+    let num = 1;
+    if (last?.reference && last.reference.startsWith('ATT')) {
+      const n = parseInt(last.reference.replace('ATT', ''));
+      if (!isNaN(n)) num = n + 1;
+    }
+    return 'ATT' + String(num).padStart(3, '0');
+  }
   const {
     vehicle, vehicleName, price,
     from, to, date, passengers, luggage,
@@ -27,8 +41,10 @@ router.post('/', async (req, res) => {
       });
     }
 
+    const reference = await generateReference();
     const reservation = await prisma.reservation.create({
       data: {
+        reference,
         customer_name: name,
         email,
         phone,
@@ -47,13 +63,19 @@ router.post('/', async (req, res) => {
     });
 
     // Update customer tracking to "completed"
-    await prisma.customerTracking.create({
-      data: {
-        session_id: `booking-${reservation.id}`,
+    const sessionId = req.body.session_id || `booking-${reservation.id}`;
+    await prisma.customerTracking.upsert({
+      where: { id: (await prisma.customerTracking.findFirst({ where: { session_id: sessionId }, select: { id: true } }))?.id || 0 },
+      update: {
         current_step: 'completed',
         last_action: `Booking submitted: ${reservation.reference}`,
-        metadata: JSON.stringify({ reservation_id: reservation.id, vehicle: vehicleName }),
-        ip_address: req.ip,
+        ip_address: req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip,
+      },
+      create: {
+        session_id: sessionId,
+        current_step: 'completed',
+        last_action: `Booking submitted: ${reservation.reference}`,
+        ip_address: req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip,
       },
     }).catch(() => {});
 
