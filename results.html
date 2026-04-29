@@ -257,11 +257,11 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
         <div class="mf-row">
           <div>
             <label class="mf-label">Email <span class="mf-required">*</span></label>
-            <input class="mf-input" id="bf-email" type="email" placeholder="john@example.com" autocomplete="email" />
+            <input class="mf-input" id="bf-email" type="email" placeholder="john@example.com" autocomplete="email" oninput="validateEmailInput(this)" />
           </div>
           <div>
             <label class="mf-label">Phone <span class="mf-required">*</span></label>
-            <input class="mf-input" id="bf-phone" type="tel" placeholder="+1 555 000 0000" autocomplete="tel" />
+            <input class="mf-input" id="bf-phone" type="tel" placeholder="+1 555 000 0000" autocomplete="tel" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9+\s\-()+]/g,'')" />
           </div>
         </div>
         <div>
@@ -488,6 +488,15 @@ function closeModalOutside(e) {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 }
 
+function validateEmailInput(el) {
+  var val = el.value.trim();
+  if (val && (!val.includes('@') || !val.includes('.'))) {
+    el.style.borderColor = '#e05c5c';
+  } else {
+    el.style.borderColor = '';
+  }
+}
+
 function clearErrors() {
   ['bf-name','bf-email','bf-phone'].forEach(function(id){
     document.getElementById(id).classList.remove('error');
@@ -509,11 +518,27 @@ function submitBooking() {
   // Validation
   var errors = [];
   if (!name)  { errors.push('bf-name');  }
-  if (!email) { errors.push('bf-email'); }
+  if (!email || !email.includes('@') || !email.includes('.')) { errors.push('bf-email'); }
   if (!phone) { errors.push('bf-phone'); }
   errors.forEach(function(id){ document.getElementById(id).classList.add('error'); });
   if (errors.length) {
-    errEl.textContent = 'Please fill in all required fields.';
+    if (!email.includes('@') || !email.includes('.')) {
+      errEl.textContent = 'Please enter a valid email address (e.g. john@gmail.com).';
+    } else {
+      errEl.textContent = 'Please fill in all required fields.';
+    }
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!email.includes('@') || !email.includes('.')) {
+    document.getElementById('bf-email').classList.add('error');
+    errEl.textContent = 'Please enter a valid email address.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!/^[0-9+\s\-()+]+$/.test(phone)) {
+    document.getElementById('bf-phone').classList.add('error');
+    errEl.textContent = 'Phone number must contain numbers only.';
     errEl.style.display = 'block';
     return;
   }
@@ -559,8 +584,21 @@ function submitBooking() {
   })
   .catch(function(err) {
     console.error('Booking API error:', err);
-    errEl.textContent = 'Something went wrong. Please try again or contact us via WhatsApp.';
-    errEl.style.display = 'block';
+    var waMsg = 'New Booking Request\n'
+      + 'Vehicle: ' + selectedVehicle.name + ' (€' + selectedVehicle.price + ')\n'
+      + 'From: ' + tripFrom + '\n'
+      + 'To: ' + tripTo + '\n'
+      + 'Date: ' + tripDate + '\n'
+      + 'Passengers: ' + tripPax + ' · Luggage: ' + tripLug + '\n'
+      + 'Name: ' + name + '\n'
+      + 'Email: ' + email + '\n'
+      + 'Phone: ' + phone + '\n'
+      + (flight ? 'Flight: ' + flight + '\n' : '')
+      + (notes  ? 'Notes: ' + notes + '\n' : '');
+    window.open('https://wa.me/905441021414?text=' + encodeURIComponent(waMsg), '_blank');
+    document.getElementById('successRef').textContent = 'Your request has been sent via WhatsApp.';
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('successView').classList.add('show');
   })
   .finally(function() {
     submitBtn.disabled    = false;
