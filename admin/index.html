@@ -1403,29 +1403,29 @@ function renderSettings(sub) {
     // Load saved templates
     loadTemplates();
   } else if (sub === 'Extra Price Settings') {
+    const saved = JSON.parse(localStorage.getItem('att_extra_prices') || '[]');
     mc.innerHTML = `
       <div class="section-header">
-        <div class="section-header-left"><h2>Extra Price Settings</h2><p>Additional charges configuration.</p></div>
+        <div class="section-header-left"><h2>Extra Price Settings</h2><p>Additional charges added on top of base transfer price.</p></div>
+        <button class="btn btn-primary" onclick="openAddExtraPrice()">＋ Add Extra Price</button>
       </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:2rem;max-width:700px">
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Night Surcharge (%)</label>
-            <input class="form-input" type="number" value="0" placeholder="e.g. 20" /></div>
-          <div class="form-group"><label class="form-label">Night Hours (From)</label>
-            <input class="form-input" type="number" value="23" placeholder="23" /></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Night Hours (Until)</label>
-            <input class="form-input" type="number" value="6" placeholder="6" /></div>
-          <div class="form-group"><label class="form-label">Child Seat Fee (€)</label>
-            <input class="form-input" type="number" value="0" placeholder="0" /></div>
-        </div>
-        <div class="form-group"><label class="form-label">Extra Stop Fee (€)</label>
-          <input class="form-input" type="number" value="10" placeholder="10" /></div>
-        <button class="btn btn-primary" onclick="toast('Price settings saved (coming soon)')">Save Settings</button>
+      <div class="table-card">
+        <table id="extraPriceTable">
+          <thead><tr><th>Name</th><th>Type</th><th>Amount</th><th>Description</th><th></th></tr></thead>
+          <tbody id="extraPriceTbody">
+            ${saved.length ? saved.map((p, i) => `<tr>
+              <td style="font-weight:600">${p.name}</td>
+              <td><span class="badge badge-blue">${p.type}</span></td>
+              <td style="font-weight:700;color:var(--gold)">${p.type === 'percent' ? p.amount + '%' : '€' + p.amount}</td>
+              <td style="font-size:12px;color:var(--text2)">${p.description || '—'}</td>
+              <td><button class="btn btn-danger btn-sm" onclick="deleteExtraPrice(${i})">🗑</button></td>
+            </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No extra prices yet. Click + Add to create one.</td></tr>'}
+          </tbody>
+        </table>
       </div>`;
   }
 }
+
 
 function openEditUserModal(u) {
   openModal('Edit User', `
@@ -1529,6 +1529,50 @@ async function savePassword(id) {
     toast('Password changed successfully');
     closeModalDirect();
   } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+function openAddExtraPrice() {
+  openModal('Add Extra Price', `
+    <div class="form-group"><label class="form-label">Name *</label>
+      <input class="form-input" id="ep-name" placeholder="e.g. Night Surcharge, Child Seat" /></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Type *</label>
+        <select class="form-select" id="ep-type">
+          <option value="fixed">Fixed Amount (€)</option>
+          <option value="percent">Percentage (%)</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">Amount *</label>
+        <input class="form-input" id="ep-amount" type="number" placeholder="e.g. 10" /></div>
+    </div>
+    <div class="form-group"><label class="form-label">Description</label>
+      <input class="form-input" id="ep-desc" placeholder="Optional description..." /></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveExtraPrice()">Add</button>`
+  );
+}
+
+function saveExtraPrice() {
+  const name   = document.getElementById('ep-name').value.trim();
+  const type   = document.getElementById('ep-type').value;
+  const amount = document.getElementById('ep-amount').value;
+  const desc   = document.getElementById('ep-desc').value.trim();
+  if (!name || !amount) return toast('Name and amount required', 'error');
+  const saved = JSON.parse(localStorage.getItem('att_extra_prices') || '[]');
+  saved.push({ name, type, amount: parseFloat(amount), description: desc });
+  localStorage.setItem('att_extra_prices', JSON.stringify(saved));
+  toast('Extra price added');
+  closeModalDirect();
+  renderSettings('Extra Price Settings');
+}
+
+function deleteExtraPrice(index) {
+  openConfirm('Delete Extra Price', 'This will be permanently removed.', () => {
+    const saved = JSON.parse(localStorage.getItem('att_extra_prices') || '[]');
+    saved.splice(index, 1);
+    localStorage.setItem('att_extra_prices', JSON.stringify(saved));
+    toast('Deleted');
+    renderSettings('Extra Price Settings');
+  });
 }
 
 // ─── MAIL TEMPLATE ────────────────────────────────────────────────────────────
