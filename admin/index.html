@@ -909,8 +909,9 @@ function renderBlogDetailPages() {
     <div class="section-header">
       <div class="section-header-left">
         <h2>Blog Detail Pages</h2>
-        <p>Edit the content of each static blog page. Changes are saved locally and shown as reference.</p>
+        <p>Edit the content of each static blog page.</p>
       </div>
+      <button class="btn btn-primary" onclick="openNewBlogPageModal()">＋ New Blog Page</button>
     </div>
     <div style="display:grid;gap:0.75rem;margin-bottom:1.5rem">
       ${BLOG_PAGES.map(p => `
@@ -957,6 +958,161 @@ function renderBlogDetailPages() {
           </div>
         </div>`).join('')}
     </div>`;
+}
+
+function openNewBlogPageModal() {
+  openModal('New Blog Page', `
+    <div class="form-group"><label class="form-label">Page Name * <span style="font-size:11px;color:var(--text2)">(e.g. "istanbul-food-guide" → blog-istanbul-food-guide.html)</span></label>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="color:var(--text2);font-size:13px;white-space:nowrap">blog-</span>
+        <input class="form-input" id="nbp-name" placeholder="istanbul-food-guide" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')" />
+        <span style="color:var(--text2);font-size:13px;white-space:nowrap">.html</span>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Page Title *</label>
+      <input class="form-input" id="nbp-title" placeholder="Istanbul Food Guide: Best Places to Eat" /></div>
+    <div class="form-group"><label class="form-label">Label (category)</label>
+      <input class="form-input" id="nbp-label" placeholder="Food & Culture" /></div>
+    <div class="form-group"><label class="form-label">Introduction *</label>
+      <textarea class="form-textarea" id="nbp-intro" style="min-height:100px" placeholder="Opening paragraph..."></textarea></div>
+    <div class="form-group"><label class="form-label">Main Content *</label>
+      <textarea class="form-textarea" id="nbp-content" style="min-height:180px" placeholder="Full article content..."></textarea></div>
+    <div class="form-group"><label class="form-label">Hero Image URL</label>
+      <input class="form-input" id="nbp-img" placeholder="https://..." /></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="createNewBlogPage()">Create Page</button>`
+  );
+}
+
+async function createNewBlogPage() {
+  const name    = document.getElementById('nbp-name').value.trim();
+  const title   = document.getElementById('nbp-title').value.trim();
+  const label   = document.getElementById('nbp-label').value.trim() || 'Blog';
+  const intro   = document.getElementById('nbp-intro').value.trim();
+  const content = document.getElementById('nbp-content').value.trim();
+  const image   = document.getElementById('nbp-img').value.trim();
+
+  if (!name || !title || !intro || !content) return toast('Please fill required fields', 'error');
+
+  const fileKey = 'blog-' + name;
+
+  // Save to localStorage
+  const saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
+  saved[fileKey] = { title, subtitle: label, intro, content, image };
+  localStorage.setItem('att_blog_details', JSON.stringify(saved));
+
+  // Add to BLOG_PAGES list in memory
+  const exists = BLOG_PAGES.find(p => p.file === fileKey);
+  if (!exists) {
+    BLOG_PAGES.push({ file: fileKey, label: title, emoji: '📝' });
+  }
+
+  // Show instructions to create actual HTML file
+  closeModalDirect();
+  toast('Blog page created! Download the template file to add to GitHub.');
+
+  // Generate downloadable HTML
+  const html = generateBlogHTML(fileKey, title, label, intro, content, image);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileKey + '.html';
+  a.click();
+  URL.revokeObjectURL(url);
+
+  renderBlogDetailPages();
+}
+
+function generateBlogHTML(fileKey, title, label, intro, content, image) {
+  const contentSections = content.split('\n\n').map(p => p.trim()).filter(Boolean).map(p =>
+    `<div class="art-section"><p>${p.replace(/\n/g, '<br>')}</p></div>`
+  ).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>${title} | Airports Transfer Turkey</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 66px; }
+.nav { display: flex; align-items: center; padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.96); backdrop-filter: blur(12px); }
+.nav-logo { font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #f0c040; cursor: pointer; }
+.nav-links { display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); }
+.nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; }
+.nav-links a:hover { color: #f0c040; }
+.hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: none; border: none; padding: 4px; margin-left: auto; }
+.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }
+@media(max-width:1150px) { .hamburger { display: flex !important; } .nav-links { display: none !important; } }
+.article-wrap { max-width: 760px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+.back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 13px; color: #9ab4cc; text-decoration: none; margin-bottom: 2rem; }
+.back-link:hover { color: #f0c040; }
+.art-label { font-size: 11px; font-weight: 700; color: #f0c040; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem; }
+.art-title { font-size: 34px; font-weight: 700; color: #dde6f0; line-height: 1.25; margin-bottom: 1rem; }
+.art-meta { display: flex; gap: 1rem; font-size: 13px; color: #7a9ab5; margin-bottom: 2rem; }
+.art-hero { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; margin-bottom: 2rem; background: #1a3a5c; }
+.art-intro { font-size: 17px; color: #c0d0e0; line-height: 1.75; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+.art-section { margin-bottom: 2rem; }
+.art-section h2 { font-size: 20px; font-weight: 700; color: #dde6f0; margin-bottom: 0.75rem; }
+.art-section p { font-size: 15px; color: #b0c4d8; line-height: 1.8; }
+.cta-box { background: #1a3a5c; border: 0.5px solid #2e5070; border-radius: 12px; padding: 1.75rem; margin-top: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.cta-box-text h3 { font-size: 17px; font-weight: 700; color: #dde6f0; margin-bottom: 0.3rem; }
+.cta-box-text p { font-size: 14px; color: #9ab4cc; }
+.cta-box-btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 11px 24px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.cta-box-btn:hover { background: #d4a820; }
+.footer-rich { background: #07101e; padding: 2rem; text-align: center; color: rgba(255,255,255,0.5); font-size: 13px; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo" onclick="location.href='index.html'">AIRPORTS TRANSFER TURKEY</div>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about-us.html">About Us</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <button class="hamburger" onclick="this.classList.toggle('open')"><span></span><span></span><span></span></button>
+</nav>
+
+<div class="article-wrap">
+  <a href="blog.html" class="back-link">← Back to Blog</a>
+  <div class="art-label" id="artLabel">${label}</div>
+  <h1 class="art-title" id="artTitle">${title}</h1>
+  <div class="art-meta"><span>📅 ${new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}</span></div>
+  ${image ? `<img class="art-hero" src="${image}" alt="${title}" onerror="this.style.display='none'" />` : ''}
+  <p class="art-intro" id="artIntro">${intro}</p>
+  ${contentSections}
+  <div class="cta-box">
+    <div class="cta-box-text">
+      <h3>Visiting Istanbul? We'll Handle the Transfer.</h3>
+      <p>Fixed prices · Flight tracking · Meet &amp; greet · No prepayment</p>
+    </div>
+    <a href="index.html" class="cta-box-btn">Book a Transfer →</a>
+  </div>
+</div>
+
+<footer class="footer-rich">
+  © 2026 Airports Transfer Turkey. All rights reserved.
+</footer>
+<script src="whatsapp.js"></script>
+<script>
+(function(){
+  var key = '${fileKey}';
+  try {
+    var saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
+    var d = saved[key];
+    if (!d) return;
+    if (d.title) document.getElementById('artTitle').textContent = d.title;
+    if (d.subtitle) document.getElementById('artLabel').textContent = d.subtitle;
+    if (d.intro) document.getElementById('artIntro').textContent = d.intro;
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>`;
 }
 
 function toggleBlogDetailEdit(file) {

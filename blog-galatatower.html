@@ -184,5 +184,36 @@ function toggleMenu(){
 })();
 </script>
 <script src="whatsapp.js"></script>
+<script>
+(function(){
+  var key = 'blog-galatatower';
+  try {
+    var saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
+    var d = saved[key];
+    if (!d) return;
+    var t = document.querySelector('.art-title');
+    var intro = document.querySelector('.art-intro');
+    var hero = document.querySelector('.art-hero');
+    if (t && d.title) t.textContent = d.title;
+    if (intro && d.intro) intro.textContent = d.intro;
+    if (hero && d.image) { hero.src = d.image; }
+    if (d.subtitle) {
+      var sub = document.querySelector('.art-label');
+      if (sub && d.subtitle) sub.textContent = d.subtitle;
+    }
+    if (d.content) {
+      var sections = document.querySelectorAll('.art-section');
+      sections.forEach(function(s){ s.style.display = 'none'; });
+      var wrap = document.querySelector('.article-wrap');
+      var cta = document.querySelector('.cta-box');
+      var div = document.createElement('div');
+      div.className = 'art-section';
+      div.innerHTML = '<p style="font-size:15px;color:#b0c4d8;line-height:1.8;white-space:pre-line">' + d.content + '</p>';
+      if (cta) wrap.insertBefore(div, cta);
+      else wrap.appendChild(div);
+    }
+  } catch(e) {}
+})();
+</script>
 </body>
 </html>
