@@ -1349,8 +1349,23 @@ fetch(API_BASE + '/api/blog?status=active')
     var grid = document.getElementById('homeBlogGrid');
     var shown = posts.slice(0, 3);
     if (!shown.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ab4cc;">No posts yet.</div>'; return; }
+
+    // Map slug keywords to static HTML pages
+    function getBlogUrl(post) {
+      var title = (post.title || '').toLowerCase();
+      var slug = (post.slug || '').toLowerCase();
+      if (title.includes('hagia') || slug.includes('hagia')) return 'blog-hagiasophia.html';
+      if (title.includes('grand bazaar') || title.includes('bazaar') || slug.includes('bazaar')) return 'blog-grandbazaar.html';
+      if (title.includes('bosphorus') || slug.includes('bosphorus')) return 'blog-bosphorus.html';
+      if (title.includes('topkapi') || slug.includes('topkapi')) return 'blog-topkapi.html';
+      if (title.includes('galata') || slug.includes('galata')) return 'blog-galatatower.html';
+      if (title.includes('sultanahmet') || slug.includes('sultanahmet')) return 'blog-sultanahmet.html';
+      return 'blog.html';
+    }
+
     grid.innerHTML = shown.map(function(p){
-      return '<div class="blog-card" onclick="window.location.href=\'blog.html\'" style="cursor:pointer;">' +
+      var url = getBlogUrl(p);
+      return '<div class="blog-card" onclick="window.location.href=\'' + url + '\'" style="cursor:pointer;">' +
         '<div class="blog-img">'+(p.image_url ? '<img src="'+p.image_url+'" alt="'+p.title+'" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" />' : '')+'</div>' +
         '<div class="blog-body">' +
           '<div class="blog-tag">Blog</div>' +

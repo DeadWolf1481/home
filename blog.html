@@ -444,7 +444,18 @@ fetch(API_BASE + '/api/blog?status=active')
       return;
     }
     listing.innerHTML = posts.map(function(post, i) {
-      return '<div class="blog-list-card" onclick="window.location.href=\'blog-detail.html?slug=' + post.slug + '\'">' +
+      function getBlogUrl(post) {
+        var title = (post.title || '').toLowerCase();
+        var slug = (post.slug || '').toLowerCase();
+        if (title.includes('hagia') || slug.includes('hagia')) return 'blog-hagiasophia.html';
+        if (title.includes('grand bazaar') || title.includes('bazaar') || slug.includes('bazaar')) return 'blog-grandbazaar.html';
+        if (title.includes('bosphorus') || slug.includes('bosphorus')) return 'blog-bosphorus.html';
+        if (title.includes('topkapi') || slug.includes('topkapi')) return 'blog-topkapi.html';
+        if (title.includes('galata') || slug.includes('galata')) return 'blog-galatatower.html';
+        if (title.includes('sultanahmet') || slug.includes('sultanahmet')) return 'blog-sultanahmet.html';
+        return 'blog.html';
+      }
+      return '<div class="blog-list-card" onclick="window.location.href=\'' + getBlogUrl(post) + '\'">' +
         (post.image_url ? '<div class="blog-list-img"><img src="' + post.image_url + '" alt="' + post.title + '" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" /></div>' : '<div class="blog-list-img" style="background:#2a3f55;"></div>') +
         '<div class="blog-list-body">' +
           '<div class="blog-list-tag">Blog</div>' +
