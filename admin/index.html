@@ -469,8 +469,8 @@ const SECTIONS = {
     render: (sub) => sub === 'Customers' ? renderCustomers() : renderReservations(),
   },
   content: {
-    subs: ['Blog', 'FAQ', 'Pages'],
-    render: (sub) => sub === 'Blog' ? renderBlog() : sub === 'FAQ' ? renderFaq() : renderPages(),
+    subs: ['Blog', 'Blog Detail Pages', 'FAQ', 'Pages'],
+    render: (sub) => sub === 'Blog' ? renderBlog() : sub === 'FAQ' ? renderFaq() : sub === 'Blog Detail Pages' ? renderBlogDetailPages() : renderPages(),
   },
   vehicles: {
     subs: ['Vehicles'],
@@ -891,6 +891,95 @@ async function deleteVehicle(id) {
 }
 
 // ─── TOURS ────────────────────────────────────────────────────────────────────
+// ─── BLOG DETAIL PAGES ────────────────────────────────────────────────────────
+const BLOG_PAGES = [
+  { file: 'blog-hagiasophia', label: 'Hagia Sophia', emoji: '🕌' },
+  { file: 'blog-grandbazaar', label: 'Grand Bazaar', emoji: '🏪' },
+  { file: 'blog-bosphorus',   label: 'Bosphorus',    emoji: '🚢' },
+  { file: 'blog-topkapi',     label: 'Topkapi Palace', emoji: '🏰' },
+  { file: 'blog-galatatower', label: 'Galata Tower',  emoji: '🗼' },
+  { file: 'blog-sultanahmet', label: 'Sultanahmet',   emoji: '🕍' },
+];
+
+function renderBlogDetailPages() {
+  const mc = document.getElementById('mainContent');
+  const saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
+
+  mc.innerHTML = `
+    <div class="section-header">
+      <div class="section-header-left">
+        <h2>Blog Detail Pages</h2>
+        <p>Edit the content of each static blog page. Changes are saved locally and shown as reference.</p>
+      </div>
+    </div>
+    <div style="display:grid;gap:0.75rem;margin-bottom:1.5rem">
+      ${BLOG_PAGES.map(p => `
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="toggleBlogDetailEdit('${p.file}')">
+            <div style="display:flex;align-items:center;gap:0.75rem">
+              <span style="font-size:22px">${p.emoji}</span>
+              <div>
+                <div style="font-weight:700;color:var(--text);font-size:14px">${p.label}</div>
+                <div style="font-size:12px;color:var(--text2)">${p.file}.html</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <a href="${p.file}.html" target="_blank" class="btn btn-ghost btn-sm">👁 Preview</a>
+              <span id="arrow-${p.file}" style="color:var(--text2);font-size:18px;transition:transform 0.2s">▾</span>
+            </div>
+          </div>
+          <div id="edit-${p.file}" style="display:none;padding:0 1.25rem 1.25rem;border-top:1px solid var(--border)">
+            <div class="form-group" style="margin-top:1rem">
+              <label class="form-label">Page Title</label>
+              <input class="form-input" id="bdt-title-${p.file}" value="${(saved[p.file]?.title || p.label + ': Istanbul Guide')}" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hero Subtitle</label>
+              <input class="form-input" id="bdt-subtitle-${p.file}" value="${(saved[p.file]?.subtitle || 'Your complete guide to ' + p.label + ' in Istanbul')}" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Introduction Text</label>
+              <textarea class="form-textarea" id="bdt-intro-${p.file}" style="min-height:120px">${(saved[p.file]?.intro || '')}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Main Content</label>
+              <textarea class="form-textarea" id="bdt-content-${p.file}" style="min-height:200px">${(saved[p.file]?.content || '')}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hero Image URL</label>
+              <input class="form-input" id="bdt-img-${p.file}" value="${(saved[p.file]?.image || '')}" placeholder="https://..." />
+            </div>
+            <div style="display:flex;gap:0.75rem;margin-top:0.75rem">
+              <button class="btn btn-primary" onclick="saveBlogDetail('${p.file}')">💾 Save</button>
+              <a href="${p.file}.html" target="_blank" class="btn btn-ghost">Open Page ↗</a>
+            </div>
+            <p style="font-size:12px;color:var(--text2);margin-top:0.75rem">⚠️ Changes are saved in your browser. To update the actual HTML file, you need to edit <b>${p.file}.html</b> in GitHub.</p>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function toggleBlogDetailEdit(file) {
+  const el = document.getElementById('edit-' + file);
+  const arrow = document.getElementById('arrow-' + file);
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
+function saveBlogDetail(file) {
+  const saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
+  saved[file] = {
+    title:    document.getElementById('bdt-title-' + file).value,
+    subtitle: document.getElementById('bdt-subtitle-' + file).value,
+    intro:    document.getElementById('bdt-intro-' + file).value,
+    content:  document.getElementById('bdt-content-' + file).value,
+    image:    document.getElementById('bdt-img-' + file).value,
+  };
+  localStorage.setItem('att_blog_details', JSON.stringify(saved));
+  toast('Saved! Edit the HTML file on GitHub to apply changes permanently.');
+}
+
 // ─── BLOG ─────────────────────────────────────────────────────────────────────
 async function renderBlog() {
   const mc = document.getElementById('mainContent');
