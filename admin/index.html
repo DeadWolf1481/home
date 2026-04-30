@@ -1298,29 +1298,38 @@ function renderSettings(sub) {
   const mc = document.getElementById('mainContent');
 
   if (sub === 'General') {
-    mc.innerHTML = `
-      <div class="section-header">
-        <div class="section-header-left"><h2>General Settings</h2><p>Basic site configuration.</p></div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:2rem;max-width:700px">
-        <div class="form-group"><label class="form-label">Company Name</label>
-          <input class="form-input" id="set-company" value="BEKPEN ULUSLARARASI TURİZM TİCARET LİMİTED ŞİRKETİ" /></div>
-        <div class="form-group"><label class="form-label">Site Title</label>
-          <input class="form-input" id="set-title" value="Airports Transfer Turkey | VIP Airport Transfer Service Istanbul" /></div>
-        <div class="form-group"><label class="form-label">Phone</label>
-          <input class="form-input" id="set-phone" value="+90 544 102 1414" /></div>
-        <div class="form-group"><label class="form-label">Email</label>
-          <input class="form-input" id="set-email" value="bekpenturizm@gmail.com" /></div>
-        <div class="form-group"><label class="form-label">Address</label>
-          <textarea class="form-textarea" id="set-address" style="min-height:80px">Esenyalı Mah. Mezkur Sk. Nizamettin Otluoğlu Apt. NO:26 A Pendik / Istanbul</textarea></div>
-        <div class="form-group"><label class="form-label">WhatsApp Number</label>
-          <input class="form-input" id="set-wa" value="+905441021414" /></div>
-        <div class="form-group"><label class="form-label">TURSAB License No</label>
-          <input class="form-input" id="set-tursab" value="14563" /></div>
-        <div class="form-group"><label class="form-label">MERSIS No</label>
-          <input class="form-input" id="set-mersis" value="0161095459600001" /></div>
-        <button class="btn btn-primary" onclick="toast('Settings saved (coming soon)')">Save Changes</button>
-      </div>`;
+    mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+    api('/api/settings').then(s => {
+      mc.innerHTML = `
+        <div class="section-header">
+          <div class="section-header-left"><h2>General Settings</h2><p>Basic site configuration. Changes reflect on the frontend immediately.</p></div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:2rem;max-width:700px">
+          <div class="form-group"><label class="form-label">Company Name</label>
+            <input class="form-input" id="set-company" value="${s.company_name || ''}" /></div>
+          <div class="form-group"><label class="form-label">Site Title</label>
+            <input class="form-input" id="set-title" value="${s.site_title || ''}" /></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Phone</label>
+              <input class="form-input" id="set-phone" value="${s.phone || ''}" /></div>
+            <div class="form-group"><label class="form-label">WhatsApp</label>
+              <input class="form-input" id="set-wa" value="${s.whatsapp || ''}" /></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email</label>
+            <input class="form-input" id="set-email" value="${s.email || ''}" /></div>
+          <div class="form-group"><label class="form-label">Address</label>
+            <textarea class="form-textarea" id="set-address" style="min-height:80px">${s.address || ''}</textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">TURSAB License No</label>
+              <input class="form-input" id="set-tursab" value="${s.tursab || ''}" /></div>
+            <div class="form-group"><label class="form-label">MERSIS No</label>
+              <input class="form-input" id="set-mersis" value="${s.mersis || ''}" /></div>
+          </div>
+          <button class="btn btn-primary" onclick="saveGeneralSettings()">💾 Save Changes</button>
+        </div>`;
+    }).catch(() => {
+      mc.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Could not load settings</p></div>';
+    });
   } else if (sub === 'Users') {
     mc.innerHTML = `
       <div class="section-header">
@@ -1424,8 +1433,8 @@ function renderSettings(sub) {
         </table>
       </div>`;
   }
+  }
 }
-
 
 function openEditUserModal(u) {
   openModal('Edit User', `
@@ -1528,6 +1537,23 @@ async function savePassword(id) {
     await api(`/api/auth/users/${id}/password`, { method: 'PUT', body: JSON.stringify({ password: np }) });
     toast('Password changed successfully');
     closeModalDirect();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function saveGeneralSettings() {
+  const body = {
+    company_name: document.getElementById('set-company').value.trim(),
+    site_title:   document.getElementById('set-title').value.trim(),
+    phone:        document.getElementById('set-phone').value.trim(),
+    email:        document.getElementById('set-email').value.trim(),
+    whatsapp:     document.getElementById('set-wa').value.trim(),
+    address:      document.getElementById('set-address').value.trim(),
+    tursab:       document.getElementById('set-tursab').value.trim(),
+    mersis:       document.getElementById('set-mersis').value.trim(),
+  };
+  try {
+    await api('/api/settings', { method: 'PUT', body: JSON.stringify(body) });
+    toast('Settings saved ✅ — frontend will reflect changes on next load');
   } catch (err) { toast('Error: ' + err.message, 'error'); }
 }
 

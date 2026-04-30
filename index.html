@@ -1253,6 +1253,26 @@ function track(step, action) {
 // Track homepage visit
 track('homepage', 'Visited homepage');
 
+// ─── Load General Settings → Update Footer ────────────────────────────────────
+fetch(API_BASE + '/api/settings')
+  .then(function(r){ return r.json(); })
+  .then(function(s){
+    // Update footer phone
+    document.querySelectorAll('a[href^="tel:"]').forEach(function(el){
+      if (s.phone) { el.href = 'tel:' + s.phone.replace(/\s/g,''); el.childNodes[el.childNodes.length-1].textContent = ' ' + s.phone; }
+    });
+    // Update footer email
+    document.querySelectorAll('a[href^="mailto:"]').forEach(function(el){
+      if (s.email) { el.href = 'mailto:' + s.email; el.childNodes[el.childNodes.length-1].textContent = ' ' + s.email; }
+    });
+    // Update WhatsApp links
+    if (s.whatsapp) {
+      document.querySelectorAll('a[href^="https://wa.me/"]').forEach(function(el){
+        el.href = 'https://wa.me/' + s.whatsapp.replace(/[^0-9]/g,'');
+      });
+    }
+  }).catch(function(){});
+
 // ─── Google Places Autocomplete ───────────────────────────────────────────────
 var _placesReady = false;
 function initPlaces() {
