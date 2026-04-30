@@ -187,37 +187,6 @@ function toggleMenu(){
 <script>
 (function(){
   var key = 'blog-galatatower';
-  try {
-    var saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
-    var d = saved[key];
-    if (!d) return;
-    var t = document.querySelector('.art-title');
-    var intro = document.querySelector('.art-intro');
-    var hero = document.querySelector('.art-hero');
-    if (t && d.title) t.textContent = d.title;
-    if (intro && d.intro) intro.textContent = d.intro;
-    if (hero && d.image) { hero.src = d.image; }
-    if (d.subtitle) {
-      var sub = document.querySelector('.art-label');
-      if (sub && d.subtitle) sub.textContent = d.subtitle;
-    }
-    if (d.content) {
-      var sections = document.querySelectorAll('.art-section');
-      sections.forEach(function(s){ s.style.display = 'none'; });
-      var wrap = document.querySelector('.article-wrap');
-      var cta = document.querySelector('.cta-box');
-      var div = document.createElement('div');
-      div.className = 'art-section';
-      div.innerHTML = '<p style="font-size:15px;color:#b0c4d8;line-height:1.8;white-space:pre-line">' + d.content + '</p>';
-      if (cta) wrap.insertBefore(div, cta);
-      else wrap.appendChild(div);
-    }
-  } catch(e) {}
-})();
-</script>
-<script>
-(function(){
-  var key = 'blog-galatatower';
   fetch('https://home-production-6910.up.railway.app/api/settings/blog-pages/' + key)
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -234,14 +203,22 @@ function toggleMenu(){
         document.querySelectorAll('.art-section').forEach(function(s){ s.style.display='none'; });
         var wrap = document.querySelector('.article-wrap');
         var cta = document.querySelector('.cta-box');
-        var div = document.createElement('div');
-        div.className = 'art-section';
-        var html = d.content.split('\n\n').map(function(p){
-          return '<p style="font-size:15px;color:#b0c4d8;line-height:1.8;margin-bottom:1rem">' + p.replace(/\n/g,'<br>') + '</p>';
-        }).join('');
-        div.innerHTML = html;
-        if (cta) wrap.insertBefore(div, cta);
-        else wrap.appendChild(div);
+        var container = document.createElement('div');
+        var parts = d.content.split('\n\n');
+        parts.forEach(function(part){
+          part = part.trim();
+          if (!part) return;
+          var sec = document.createElement('div');
+          sec.className = 'art-section';
+          if (part.startsWith('## ')) {
+            sec.innerHTML = '<h2>' + part.slice(3) + '</h2>';
+          } else {
+            sec.innerHTML = '<p>' + part.replace(/\n/g,'<br>') + '</p>';
+          }
+          container.appendChild(sec);
+        });
+        if (cta) wrap.insertBefore(container, cta);
+        else wrap.appendChild(container);
       }
     }).catch(function(){});
 })();
