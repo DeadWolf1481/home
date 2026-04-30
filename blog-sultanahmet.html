@@ -215,5 +215,36 @@ function toggleMenu(){
   } catch(e) {}
 })();
 </script>
+<script>
+(function(){
+  var key = 'blog-sultanahmet';
+  fetch('https://home-production-6910.up.railway.app/api/settings/blog-pages/' + key)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (!d) return;
+      var t = document.querySelector('.art-title');
+      var intro = document.querySelector('.art-intro');
+      var hero = document.querySelector('.art-hero');
+      var label = document.querySelector('.art-label');
+      if (t && d.title) t.textContent = d.title;
+      if (intro && d.intro) intro.textContent = d.intro;
+      if (label && d.subtitle) label.textContent = d.subtitle;
+      if (hero && d.image) hero.src = d.image;
+      if (d.content) {
+        document.querySelectorAll('.art-section').forEach(function(s){ s.style.display='none'; });
+        var wrap = document.querySelector('.article-wrap');
+        var cta = document.querySelector('.cta-box');
+        var div = document.createElement('div');
+        div.className = 'art-section';
+        var html = d.content.split('\n\n').map(function(p){
+          return '<p style="font-size:15px;color:#b0c4d8;line-height:1.8;margin-bottom:1rem">' + p.replace(/\n/g,'<br>') + '</p>';
+        }).join('');
+        div.innerHTML = html;
+        if (cta) wrap.insertBefore(div, cta);
+        else wrap.appendChild(div);
+      }
+    }).catch(function(){});
+})();
+</script>
 </body>
 </html>

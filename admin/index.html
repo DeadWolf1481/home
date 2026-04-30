@@ -901,15 +901,33 @@ const BLOG_PAGES = [
   { file: 'blog-sultanahmet', label: 'Sultanahmet',   emoji: '🕍' },
 ];
 
-function renderBlogDetailPages() {
+async function renderBlogDetailPages() {
   const mc = document.getElementById('mainContent');
-  const saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
+  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+
+  let saved = {};
+  try { saved = await api('/api/settings/blog-pages'); } catch(e) { saved = {}; }
+
+  const DEFAULTS = {
+    'blog-hagiasophia': { title: "Hagia Sophia: Istanbul's Greatest Monument", subtitle: 'History', intro: "Few buildings in the world carry as much history as Hagia Sophia. For nearly 1,500 years, this extraordinary structure has stood at the heart of Istanbul.", content: "Completed in 537 AD under Emperor Justinian I, Hagia Sophia was for nearly a thousand years the largest cathedral in the world.\n\nAfter the Ottoman conquest of Constantinople in 1453, Sultan Mehmed II converted it into a mosque.\n\nHagia Sophia is located in Sultanahmet. Entry is free. Plan your visit early to avoid crowds.", image: 'pngler/hagiasophia.png' },
+    'blog-grandbazaar': { title: 'Grand Bazaar: The Ultimate Shopping Experience', subtitle: 'Shopping', intro: "With over 4,000 shops across 61 covered streets, the Grand Bazaar is one of the world's oldest and largest covered markets.", content: "The Grand Bazaar has been the commercial heart of Istanbul since 1461.\n\nBargaining is expected — start at roughly half the asking price. Allow at least 2-3 hours to explore.", image: 'pngler/grandbaazar.png' },
+    'blog-bosphorus': { title: 'Bosphorus Cruise: What You Need to Know', subtitle: 'Travel Tips', intro: "The Bosphorus strait separates Europe and Asia and offers some of Istanbul's most spectacular scenery.", content: "A Bosphorus cruise is one of the best ways to experience Istanbul.\n\nSunset cruises are particularly popular. Both airports are well-connected to the Bosphorus waterfront by private transfer.", image: 'pngler/bosphorus.png' },
+    'blog-topkapi': { title: 'Topkapi Palace: Inside the Heart of the Ottoman Empire', subtitle: 'History', intro: "For nearly 400 years, Topkapi Palace was the centre of the Ottoman Empire.", content: "Topkapi Palace was built by Sultan Mehmed II in the 1450s.\n\nDon't miss the Treasury and the Harem. Book tickets online. Closed on Tuesdays.", image: 'pngler/topkapi.png' },
+    'blog-galatatower': { title: 'Galata Tower: Best Views in Istanbul', subtitle: 'Sightseeing', intro: "Rising above the rooftops of Beyoğlu, the Galata Tower offers the finest panoramic view of Istanbul.", content: "The Galata Tower dates from 1348. The observation gallery at 63 metres offers panoramic views.\n\nBook tickets online — queues can be long in high season.", image: 'pngler/galata.png' },
+    'blog-sultanahmet': { title: 'Sultanahmet: The Heart of Historic Istanbul', subtitle: 'History', intro: "Sultanahmet is the historic peninsula at the heart of old Istanbul, home to the world's most remarkable monuments.", content: "The Sultanahmet district contains Hagia Sophia, the Blue Mosque, Topkapi Palace, and the Grand Bazaar all within walking distance.", image: 'pngler/sultanahmet.png' },
+  };
+
+  function getVal(key, field) {
+    if (saved[key] && saved[key][field] !== undefined) return saved[key][field];
+    if (DEFAULTS[key] && DEFAULTS[key][field] !== undefined) return DEFAULTS[key][field];
+    return '';
+  }
 
   mc.innerHTML = `
     <div class="section-header">
       <div class="section-header-left">
         <h2>Blog Detail Pages</h2>
-        <p>Edit the content of each static blog page.</p>
+        <p>Edit blog page content. Saved to database — changes reflect on the site immediately.</p>
       </div>
       <button class="btn btn-primary" onclick="openNewBlogPageModal()">＋ New Blog Page</button>
     </div>
@@ -926,115 +944,39 @@ function renderBlogDetailPages() {
             </div>
             <div style="display:flex;gap:8px;align-items:center">
               <a href="${p.file}.html" target="_blank" class="btn btn-ghost btn-sm">👁 Preview</a>
-              <span id="arrow-${p.file}" style="color:var(--text2);font-size:18px;transition:transform 0.2s">▾</span>
+              <span id="arrow-${p.file}" style="color:var(--text2);font-size:18px">▾</span>
             </div>
           </div>
           <div id="edit-${p.file}" style="display:none;padding:0 1.25rem 1.25rem;border-top:1px solid var(--border)">
             <div class="form-group" style="margin-top:1rem">
               <label class="form-label">Page Title</label>
-              <input class="form-input" id="bdt-title-${p.file}" value="${(saved[p.file]?.title || p.label + ': Istanbul Guide')}" />
+              <input class="form-input" id="bdt-title-${p.file}" value="${getVal(p.file,'title').replace(/"/g,'&quot;')}" />
             </div>
             <div class="form-group">
-              <label class="form-label">Hero Subtitle</label>
-              <input class="form-input" id="bdt-subtitle-${p.file}" value="${(saved[p.file]?.subtitle || 'Your complete guide to ' + p.label + ' in Istanbul')}" />
+              <label class="form-label">Category Label</label>
+              <input class="form-input" id="bdt-subtitle-${p.file}" value="${getVal(p.file,'subtitle').replace(/"/g,'&quot;')}" />
             </div>
             <div class="form-group">
-              <label class="form-label">Introduction Text</label>
-              <textarea class="form-textarea" id="bdt-intro-${p.file}" style="min-height:120px">${(saved[p.file]?.intro || '')}</textarea>
+              <label class="form-label">Introduction</label>
+              <textarea class="form-textarea" id="bdt-intro-${p.file}" style="min-height:100px">${getVal(p.file,'intro')}</textarea>
             </div>
             <div class="form-group">
-              <label class="form-label">Main Content</label>
-              <textarea class="form-textarea" id="bdt-content-${p.file}" style="min-height:200px">${(saved[p.file]?.content || '')}</textarea>
+              <label class="form-label">Main Content <span style="font-size:11px;color:var(--text2)">(separate paragraphs with blank line)</span></label>
+              <textarea class="form-textarea" id="bdt-content-${p.file}" style="min-height:200px">${getVal(p.file,'content')}</textarea>
             </div>
             <div class="form-group">
               <label class="form-label">Hero Image URL</label>
-              <input class="form-input" id="bdt-img-${p.file}" value="${(saved[p.file]?.image || '')}" placeholder="https://..." />
+              <input class="form-input" id="bdt-img-${p.file}" value="${getVal(p.file,'image').replace(/"/g,'&quot;')}" />
             </div>
             <div style="display:flex;gap:0.75rem;margin-top:0.75rem">
-              <button class="btn btn-primary" onclick="saveBlogDetail('${p.file}')">💾 Save</button>
+              <button class="btn btn-primary" onclick="saveBlogDetail('${p.file}')">💾 Save Changes</button>
               <a href="${p.file}.html" target="_blank" class="btn btn-ghost">Open Page ↗</a>
             </div>
-            <p style="font-size:12px;color:var(--text2);margin-top:0.75rem">⚠️ Changes are saved in your browser. To update the actual HTML file, you need to edit <b>${p.file}.html</b> in GitHub.</p>
           </div>
         </div>`).join('')}
     </div>`;
 }
 
-function openNewBlogPageModal() {
-  openModal('New Blog Page', `
-    <div class="form-group"><label class="form-label">Page Name * <span style="font-size:11px;color:var(--text2)">(e.g. "istanbul-food-guide" → blog-istanbul-food-guide.html)</span></label>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="color:var(--text2);font-size:13px;white-space:nowrap">blog-</span>
-        <input class="form-input" id="nbp-name" placeholder="istanbul-food-guide" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')" />
-        <span style="color:var(--text2);font-size:13px;white-space:nowrap">.html</span>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">Page Title *</label>
-      <input class="form-input" id="nbp-title" placeholder="Istanbul Food Guide: Best Places to Eat" /></div>
-    <div class="form-group"><label class="form-label">Label (category)</label>
-      <input class="form-input" id="nbp-label" placeholder="Food & Culture" /></div>
-    <div class="form-group"><label class="form-label">Introduction *</label>
-      <textarea class="form-textarea" id="nbp-intro" style="min-height:100px" placeholder="Opening paragraph..."></textarea></div>
-    <div class="form-group"><label class="form-label">Main Content *</label>
-      <textarea class="form-textarea" id="nbp-content" style="min-height:180px" placeholder="Full article content..."></textarea></div>
-    <div class="form-group"><label class="form-label">Hero Image URL</label>
-      <input class="form-input" id="nbp-img" placeholder="https://..." /></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="createNewBlogPage()">Create Page</button>`
-  );
-}
-
-async function createNewBlogPage() {
-  const name    = document.getElementById('nbp-name').value.trim();
-  const title   = document.getElementById('nbp-title').value.trim();
-  const label   = document.getElementById('nbp-label').value.trim() || 'Blog';
-  const intro   = document.getElementById('nbp-intro').value.trim();
-  const content = document.getElementById('nbp-content').value.trim();
-  const image   = document.getElementById('nbp-img').value.trim();
-
-  if (!name || !title || !intro || !content) return toast('Please fill required fields', 'error');
-
-  const fileKey = 'blog-' + name;
-
-  // Save to localStorage
-  const saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
-  saved[fileKey] = { title, subtitle: label, intro, content, image };
-  localStorage.setItem('att_blog_details', JSON.stringify(saved));
-
-  // Add to BLOG_PAGES list in memory
-  const exists = BLOG_PAGES.find(p => p.file === fileKey);
-  if (!exists) {
-    BLOG_PAGES.push({ file: fileKey, label: title, emoji: '📝' });
-  }
-
-  // Show instructions to create actual HTML file
-  closeModalDirect();
-  toast('Blog page created! Download the template file to add to GitHub.');
-
-  // Generate downloadable HTML
-  const html = generateBlogHTML(fileKey, title, label, intro, content, image);
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileKey + '.html';
-  a.click();
-  URL.revokeObjectURL(url);
-
-  renderBlogDetailPages();
-}
-
-function generateBlogHTML(fileKey, title, label, intro, content, image) {
-  var sc = 'script', st = 'style';
-  var contentSections = content.split('\n\n').map(function(p){ return p.trim(); }).filter(Boolean).map(function(p){
-    return '<div class="art-section"><p>' + p.replace(/\n/g,'<br>') + '</p></div>';
-  }).join('\n');
-  var dateStr = new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
-  var imgHtml = image ? '<img class="art-hero" src="' + image + '" alt="' + title + '" onerror="this.style.display=\'none\'" />' : '';
-  var loaderScript = '(function(){var key="' + fileKey + '";try{var s=JSON.parse(localStorage.getItem("att_blog_details")||"{}");var d=s[key];if(!d)return;if(d.title)document.getElementById("artTitle").textContent=d.title;if(d.subtitle)document.getElementById("artLabel").textContent=d.subtitle;if(d.intro)document.getElementById("artIntro").textContent=d.intro;}catch(e){}})();';
-
-  return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n<title>' + title + ' | Airports Transfer Turkey</title>\n<' + st + '>\n* { box-sizing: border-box; margin: 0; padding: 0; }\nbody { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 66px; }\n.nav { display: flex; align-items: center; padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.96); backdrop-filter: blur(12px); }\n.nav-logo { font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #f0c040; cursor: pointer; }\n.nav-links { display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); }\n.nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; }\n.nav-links a:hover { color: #f0c040; }\n.hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: none; border: none; padding: 4px; margin-left: auto; }\n.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }\n@media(max-width:1150px) { .hamburger { display: flex !important; } .nav-links { display: none !important; } }\n.article-wrap { max-width: 760px; margin: 0 auto; padding: 3rem 2rem 5rem; }\n.back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 13px; color: #9ab4cc; text-decoration: none; margin-bottom: 2rem; }\n.back-link:hover { color: #f0c040; }\n.art-label { font-size: 11px; font-weight: 700; color: #f0c040; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem; }\n.art-title { font-size: 34px; font-weight: 700; color: #dde6f0; line-height: 1.25; margin-bottom: 1rem; }\n.art-meta { display: flex; gap: 1rem; font-size: 13px; color: #7a9ab5; margin-bottom: 2rem; }\n.art-hero { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; margin-bottom: 2rem; background: #1a3a5c; }\n.art-intro { font-size: 17px; color: #c0d0e0; line-height: 1.75; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 0.5px solid rgba(255,255,255,0.08); }\n.art-section { margin-bottom: 2rem; }\n.art-section p { font-size: 15px; color: #b0c4d8; line-height: 1.8; }\n.cta-box { background: #1a3a5c; border: 0.5px solid #2e5070; border-radius: 12px; padding: 1.75rem; margin-top: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }\n.cta-box-text h3 { font-size: 17px; font-weight: 700; color: #dde6f0; margin-bottom: 0.3rem; }\n.cta-box-text p { font-size: 14px; color: #9ab4cc; }\n.cta-box-btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 11px 24px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; white-space: nowrap; }\n.footer-rich { background: #07101e; padding: 2rem; text-align: center; color: rgba(255,255,255,0.5); font-size: 13px; }\n</' + st + '>\n</head>\n<body>\n<nav class="nav">\n  <div class="nav-logo" onclick="location.href=\'index.html\'">AIRPORTS TRANSFER TURKEY</div>\n  <ul class="nav-links">\n    <li><a href="index.html">Home</a></li>\n    <li><a href="about-us.html">About Us</a></li>\n    <li><a href="blog.html">Blog</a></li>\n    <li><a href="contact.html">Contact</a></li>\n  </ul>\n  <button class="hamburger" onclick="this.classList.toggle(\'open\')"><span></span><span></span><span></span></button>\n</nav>\n<div class="article-wrap">\n  <a href="blog.html" class="back-link">← Back to Blog</a>\n  <div class="art-label" id="artLabel">' + label + '</div>\n  <h1 class="art-title" id="artTitle">' + title + '</h1>\n  <div class="art-meta"><span>📅 ' + dateStr + '</span></div>\n  ' + imgHtml + '\n  <p class="art-intro" id="artIntro">' + intro + '</p>\n  ' + contentSections + '\n  <div class="cta-box">\n    <div class="cta-box-text">\n      <h3>Visiting Istanbul? We\'ll Handle the Transfer.</h3>\n      <p>Fixed prices · Flight tracking · Meet &amp; greet · No prepayment</p>\n    </div>\n    <a href="index.html" class="cta-box-btn">Book a Transfer →</a>\n  </div>\n</div>\n<footer class="footer-rich">© 2026 Airports Transfer Turkey. All rights reserved.</footer>\n<' + sc + ' src="whatsapp.js"></' + sc + '>\n<' + sc + '>' + loaderScript + '</' + sc + '>\n</body>\n</html>';
-}
 
 function toggleBlogDetailEdit(file) {
   const el = document.getElementById('edit-' + file);
@@ -1044,17 +986,18 @@ function toggleBlogDetailEdit(file) {
   arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
 }
 
-function saveBlogDetail(file) {
-  const saved = JSON.parse(localStorage.getItem('att_blog_details') || '{}');
-  saved[file] = {
+async function saveBlogDetail(file) {
+  const data = {
     title:    document.getElementById('bdt-title-' + file).value,
     subtitle: document.getElementById('bdt-subtitle-' + file).value,
     intro:    document.getElementById('bdt-intro-' + file).value,
     content:  document.getElementById('bdt-content-' + file).value,
     image:    document.getElementById('bdt-img-' + file).value,
   };
-  localStorage.setItem('att_blog_details', JSON.stringify(saved));
-  toast('Saved! Edit the HTML file on GitHub to apply changes permanently.');
+  try {
+    await api('/api/settings/blog-pages/' + file, { method: 'PUT', body: JSON.stringify(data) });
+    toast('Saved! Changes are now live on the blog page ✅');
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
 }
 
 // ─── BLOG ─────────────────────────────────────────────────────────────────────
