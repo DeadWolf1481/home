@@ -93,3 +93,26 @@ router.put('/blog-pages/:key', auth, async (req, res) => {
 });
 
 module.exports = router;
+
+// GET /api/settings/travel-tips — get all travel tips
+router.get('/travel-tips', async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    const page = await prisma.page.findUnique({ where: { page_name: 'travel_tips' } });
+    if (!page) return res.json([]);
+    res.json(JSON.parse(page.content || '[]'));
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// PUT /api/settings/travel-tips — save travel tips
+router.put('/travel-tips', auth, async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    await prisma.page.upsert({
+      where: { page_name: 'travel_tips' },
+      update: { content: JSON.stringify(req.body) },
+      create: { page_name: 'travel_tips', title: 'Travel Tips', content: JSON.stringify(req.body) },
+    });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
