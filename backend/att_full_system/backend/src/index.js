@@ -53,6 +53,7 @@ app.use('/api/contact',            require('./routes/contact'));
 app.use('/api/booking',            require('./routes/booking'));
 app.use('/api/stats',              require('./routes/stats'));
 app.use('/api/payment-links',      require('./routes/paymentLinks'));
+app.use('/api/settings',           require('./routes/settings'));
 
 // ── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
