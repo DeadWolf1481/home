@@ -1382,12 +1382,16 @@ fetch(API_BASE + '/api/blog?status=active')
   })
   .catch(function(){
     var grid = document.getElementById('homeBlogGrid');
-    grid.innerHTML = [
-      {img:'pngler/hagiasophia.png',tag:'History',title:'Hagia Sophia: A Guide for First-Time Visitors',exc:'Everything you need to know before visiting.',meta:'5 min read'},
-      {img:'pngler/grandbaazar.png',tag:'Shopping',title:'Grand Bazaar: The Ultimate Shopping Experience',exc:'Explore 4,000 shops in one of the world\'s oldest markets.',meta:'4 min read'},
-      {img:'pngler/bosphorus.png',tag:'Travel Tips',title:'Istanbul Airport to Bosphorus',exc:'Getting from Istanbul Airport doesn\'t have to be stressful.',meta:'3 min read'},
-    ].map(function(b){
-      return '<div class="blog-card" onclick="window.location.href=\'blog.html\'" style="cursor:pointer;"><div class="blog-img"><img src="'+b.img+'" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" /></div><div class="blog-body"><div class="blog-tag">'+b.tag+'</div><div class="blog-title">'+b.title+'</div><div class="blog-excerpt">'+b.exc+'</div><div class="blog-meta">'+b.meta+'</div></div></div>';
+    var allPages = [
+      {href:'blog-hagiasophia.html',   img:'pngler/hagiasophia.png',  tag:'History',      title:'Hagia Sophia: Istanbul\'s Greatest Monument',          exc:'For nearly 1,500 years this extraordinary structure has stood at the heart of Istanbul.'},
+      {href:'blog-grandbazaar.html',   img:'pngler/grandbaazar.png',  tag:'Shopping',     title:'Grand Bazaar: The Ultimate Shopping Experience',       exc:'Explore 4,000 shops in one of the world\'s oldest covered markets.'},
+      {href:'blog-bosphorus.html',     img:'pngler/bosphorus.png',    tag:'Sightseeing',  title:'The Bosphorus: Where Europe Meets Asia',                exc:'The strait that separates two continents and defines a city unlike any other.'},
+      {href:'blog-bluemosque.html',    img:'pngler/sultanahmet.png',  tag:'History',      title:'Blue Mosque: Istanbul\'s Most Iconic Landmark',         exc:'Its six minarets and 20,000 İznik tiles define the Istanbul skyline.'},
+      {href:'blog-galatabridge.html',  img:'',                        tag:'Sightseeing',  title:'Galata Bridge: The Heart of Istanbul',                  exc:'Fishermen, ferries, and the city revealing itself in all directions.'},
+      {href:'blog-basilicacistern.html',img:'',                       tag:'History',      title:'Basilica Cistern: Istanbul\'s Underground Wonder',      exc:'A vast Byzantine reservoir with 336 columns and two Medusa heads.'},
+    ];
+    grid.innerHTML = allPages.slice(0,3).map(function(b){
+      return '<div class="blog-card" onclick="window.location.href=\''+b.href+'\'" style="cursor:pointer;"><div class="blog-img" style="display:flex;align-items:center;justify-content:center;background:#2a3f55">'+(b.img?'<img src="'+b.img+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML=\'📖\'" />':'<span style="font-size:48px">📖</span>')+'</div><div class="blog-body"><div class="blog-tag">'+b.tag+'</div><div class="blog-title">'+b.title+'</div><div class="blog-excerpt">'+b.exc+'</div></div></div>';
     }).join('');
   });
 </script>

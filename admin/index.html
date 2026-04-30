@@ -1039,12 +1039,17 @@ function previewTravelTip(id) {
 
 
 const BLOG_PAGES = [
-  { file: 'blog-hagiasophia', label: 'Hagia Sophia', emoji: '🕌' },
-  { file: 'blog-grandbazaar', label: 'Grand Bazaar', emoji: '🏪' },
-  { file: 'blog-bosphorus',   label: 'Bosphorus',    emoji: '🚢' },
-  { file: 'blog-topkapi',     label: 'Topkapi Palace', emoji: '🏰' },
-  { file: 'blog-galatatower', label: 'Galata Tower',  emoji: '🗼' },
-  { file: 'blog-sultanahmet', label: 'Sultanahmet',   emoji: '🕍' },
+  { file: 'blog-hagiasophia', label: 'Hagia Sophia',      emoji: '🕌', defaultStatus: 'active'  },
+  { file: 'blog-grandbazaar', label: 'Grand Bazaar',       emoji: '🏪', defaultStatus: 'active'  },
+  { file: 'blog-bosphorus',   label: 'Bosphorus',          emoji: '🚢', defaultStatus: 'active'  },
+  { file: 'blog-topkapi',     label: 'Topkapi Palace',     emoji: '🏰', defaultStatus: 'active'  },
+  { file: 'blog-galatatower', label: 'Galata Tower',       emoji: '🗼', defaultStatus: 'active'  },
+  { file: 'blog-sultanahmet', label: 'Sultanahmet',        emoji: '🕍', defaultStatus: 'active'  },
+  { file: 'blog-bluemosque',  label: 'Blue Mosque',        emoji: '🕌', defaultStatus: 'active'  },
+  { file: 'blog-galatabridge',label: 'Galata Bridge',      emoji: '🌉', defaultStatus: 'active'  },
+  { file: 'blog-basilicacistern', label: 'Basilica Cistern', emoji: '🏛️', defaultStatus: 'active' },
+  { file: 'blog-dolmabahce',  label: 'Dolmabahçe Palace',  emoji: '🏛', defaultStatus: 'passive' },
+  { file: 'blog-princessislands', label: "Princes' Islands", emoji: '🏝️', defaultStatus: 'passive' },
 ];
 
 async function renderBlogDetailPages() {
@@ -1069,6 +1074,32 @@ async function renderBlogDetailPages() {
     return '';
   }
 
+  function getStatus(key) {
+    if (saved[key] && saved[key].status) return saved[key].status;
+    const page = BLOG_PAGES.find(p => p.file === key);
+    return page ? (page.defaultStatus || 'active') : 'active';
+  }
+
+  async function togglePageStatus(key) {
+    const current = getStatus(key);
+    const newStatus = current === 'active' ? 'passive' : 'active';
+    const data = {
+      title:    document.getElementById('bdt-title-' + key)?.value || getVal(key,'title'),
+      subtitle: document.getElementById('bdt-subtitle-' + key)?.value || getVal(key,'subtitle'),
+      intro:    document.getElementById('bdt-intro-' + key)?.value || getVal(key,'intro'),
+      content:  document.getElementById('bdt-content-' + key)?.value || getVal(key,'content'),
+      image:    document.getElementById('bdt-img-' + key)?.value || getVal(key,'image'),
+      status:   newStatus,
+    };
+    try {
+      await api('/api/settings/blog-pages/' + key, { method: 'PUT', body: JSON.stringify(data) });
+      toast((newStatus === 'active' ? '✅ Activated' : '⏸ Deactivated') + ': ' + key);
+      renderBlogDetailPages();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  }
+
+  window._togglePageStatus = togglePageStatus;
+
   mc.innerHTML = `
     <div class="section-header">
       <div class="section-header-left">
@@ -1088,9 +1119,13 @@ async function renderBlogDetailPages() {
                 <div style="font-size:12px;color:var(--text2)">${p.file}.html</div>
               </div>
             </div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <a href="${p.file}.html" target="_blank" class="btn btn-ghost btn-sm">👁 Preview</a>
-              <span id="arrow-${p.file}" style="color:var(--text2);font-size:18px">▾</span>
+            <div style="display:flex;gap:8px;align-items:center" onclick="event.stopPropagation()">
+              ${getStatus(p.file) === 'active' 
+                ? '<span class="badge badge-green" style="margin-right:4px">Active</span>' 
+                : '<span class="badge badge-gray" style="margin-right:4px">Passive</span>'}
+              <button class="btn btn-ghost btn-sm" onclick="window._togglePageStatus('${p.file}')">${getStatus(p.file) === 'active' ? '⏸' : '▶'}</button>
+              <a href="${p.file}.html" target="_blank" class="btn btn-ghost btn-sm">👁</a>
+              <span id="arrow-${p.file}" style="color:var(--text2);font-size:18px" onclick="toggleBlogDetailEdit('${p.file}')">▾</span>
             </div>
           </div>
           <div id="edit-${p.file}" style="display:none;padding:0 1.25rem 1.25rem;border-top:1px solid var(--border)">
