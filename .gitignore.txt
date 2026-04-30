@@ -1,3 +1,4 @@
 node_modules/
 .env
 *.log
+backend/att_full_system/backend/node_modules/
