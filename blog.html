@@ -435,58 +435,58 @@ function toggleMenu() {
 // ─── Load blogs from API ──────────────────────────────────────────────────────
 var API_BASE = 'https://home-production-6910.up.railway.app';
 
-fetch(API_BASE + '/api/blog?status=active')
-  .then(function(res) { return res.json(); })
-  .then(function(posts) {
+var ALL_BLOG_PAGES = [
+  { file: 'blog-hagiasophia',     img: 'pngler/hagiasophia.png',  tag: 'History',     title: "Hagia Sophia: Istanbul's Greatest Monument",        excerpt: 'For nearly 1,500 years this extraordinary structure has stood at the heart of Istanbul.' },
+  { file: 'blog-grandbazaar',     img: 'pngler/grandbaazar.png',  tag: 'Shopping',    title: 'Grand Bazaar: The Ultimate Shopping Experience',    excerpt: 'Explore 4,000 shops in one of the world\'s oldest covered markets.' },
+  { file: 'blog-bosphorus',       img: 'pngler/bosphorus.png',    tag: 'Sightseeing', title: 'The Bosphorus: Where Europe Meets Asia',            excerpt: 'The strait that separates two continents and defines a city unlike any other.' },
+  { file: 'blog-topkapi',         img: 'pngler/topkapi.png',      tag: 'History',     title: 'Topkapi Palace: Heart of the Ottoman Empire',       excerpt: 'For nearly 400 years the administrative centre of one of history\'s greatest empires.' },
+  { file: 'blog-galatatower',     img: 'pngler/galatatower.png',  tag: 'Sightseeing', title: "Galata Tower: Istanbul's Most Iconic Viewpoint",    excerpt: 'Rising above Beyoğlu, offering the finest panoramic view of Istanbul.' },
+  { file: 'blog-sultanahmet',     img: 'pngler/sultanahmet.png',  tag: 'History',     title: "Sultanahmet: Istanbul's Historic Heart",            excerpt: 'More world-class monuments per square kilometre than almost anywhere on earth.' },
+  { file: 'blog-bluemosque',      img: 'pngler/sultanahmet.png',  tag: 'History',     title: "Blue Mosque: Istanbul's Most Iconic Landmark",      excerpt: 'Its six minarets and 20,000 İznik tiles define the Istanbul skyline.' },
+  { file: 'blog-galatabridge',    img: '',                         tag: 'Sightseeing', title: 'Galata Bridge: The Heart of Istanbul',              excerpt: 'Fishermen, ferries, and the city revealing itself in all directions.' },
+  { file: 'blog-basilicacistern', img: '',                         tag: 'History',     title: "Basilica Cistern: Istanbul's Underground Wonder",   excerpt: 'A vast Byzantine reservoir with 336 columns and two Medusa heads.' },
+  { file: 'blog-dolmabahce',      img: '',                         tag: 'History',     title: 'Dolmabahçe Palace: Ottoman Grandeur',               excerpt: 'The most lavish expression of Ottoman imperial power ever built.' },
+  { file: 'blog-princessislands', img: '',                         tag: 'Day Trips',   title: "Princes' Islands: Istanbul's Car-Free Escape",      excerpt: 'Car-free, peaceful islands just an hour by ferry from Istanbul.' },
+];
+
+function renderBlogCard(p, data, idx) {
+  var d = data || {};
+  var title = d.title || p.title;
+  var img = d.image || p.img;
+  var excerpt = d.intro ? d.intro.slice(0, 150) + '…' : p.excerpt;
+  var tag = d.subtitle || p.tag;
+  var imgHtml = img
+    ? '<img src="' + img + '" alt="' + title + '" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" />'
+    : '';
+  return '<div class="blog-list-card" onclick="window.location.href=\'' + p.file + '.html\'">' +
+    '<div class="blog-list-img" style="background:#2a3f55">' + imgHtml + '</div>' +
+    '<div class="blog-list-body">' +
+      '<div class="blog-list-tag">' + tag + '</div>' +
+      '<div class="blog-list-title">' + title + '</div>' +
+      '<div class="blog-list-excerpt">' + excerpt + '</div>' +
+    '</div>' +
+  '</div>' + (idx === 0 ? '<div id="nav-trigger"></div>' : '');
+}
+
+fetch(API_BASE + '/api/settings/blog-pages')
+  .then(function(r){ return r.json(); })
+  .then(function(saved){
     var listing = document.getElementById('blogListing');
-    if (!posts.length) {
+    var active = ALL_BLOG_PAGES.filter(function(p){
+      return !saved[p.file] || saved[p.file].status !== 'passive';
+    });
+    if (!active.length) {
       listing.innerHTML = '<div style="text-align:center;padding:3rem;color:#9ab4cc;">No blog posts yet.</div>';
       return;
     }
-    listing.innerHTML = posts.map(function(post, i) {
-      function getBlogUrl(post) {
-        var title = (post.title || '').toLowerCase();
-        var slug = (post.slug || '').toLowerCase();
-        if (title.includes('hagia') || slug.includes('hagia')) return 'blog-hagiasophia.html';
-        if (title.includes('grand bazaar') || title.includes('bazaar') || slug.includes('bazaar')) return 'blog-grandbazaar.html';
-        if (title.includes('bosphorus') || slug.includes('bosphorus')) return 'blog-bosphorus.html';
-        if (title.includes('topkapi') || slug.includes('topkapi')) return 'blog-topkapi.html';
-        if (title.includes('galata') || slug.includes('galata')) return 'blog-galatatower.html';
-        if (title.includes('sultanahmet') || slug.includes('sultanahmet')) return 'blog-sultanahmet.html';
-        return 'blog.html';
-      }
-      return '<div class="blog-list-card" onclick="window.location.href=\'' + getBlogUrl(post) + '\'">' +
-        (post.image_url ? '<div class="blog-list-img"><img src="' + post.image_url + '" alt="' + post.title + '" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" /></div>' : '<div class="blog-list-img" style="background:#2a3f55;"></div>') +
-        '<div class="blog-list-body">' +
-          '<div class="blog-list-tag">Blog</div>' +
-          '<div class="blog-list-title">' + post.title + '</div>' +
-          '<div class="blog-list-excerpt">' + (post.excerpt || post.content.slice(0, 150) + '…') + '</div>' +
-          '<div class="blog-list-meta">' + new Date(post.created_at).toLocaleDateString('en-GB') + '</div>' +
-        '</div>' +
-      '</div>' +
-      (i === 0 ? '<div id="nav-trigger"></div>' : '');
+    listing.innerHTML = active.map(function(p, i){
+      return renderBlogCard(p, saved[p.file], i);
     }).join('');
   })
-  .catch(function() {
-    // Fallback to static cards if API fails
+  .catch(function(){
     var listing = document.getElementById('blogListing');
-    listing.innerHTML = [
-      { href:'blog-hagiasophia.html', img:'pngler/hagiasophia.png', tag:'History', title:'Hagia Sophia: A Guide for First-Time Visitors', excerpt:'Everything you need to know before visiting one of Istanbul\'s most iconic landmarks.', meta:'5 min read' },
-      { href:'blog-grandbazaar.html', img:'pngler/grandbaazar.png', tag:'Shopping', title:'Grand Bazaar: The Ultimate Shopping Experience', excerpt:'Explore 4,000 shops in one of the world\'s oldest covered markets.', meta:'4 min read' },
-      { href:'blog-bosphorus.html', img:'pngler/bosphorus.png', tag:'Travel Tips', title:'Istanbul Airport to Bosphorus: Your Transfer Guide', excerpt:'Getting from Istanbul Airport to the Bosphorus area doesn\'t have to be stressful.', meta:'3 min read' },
-      { href:'blog-topkapi.html', img:'pngler/topkapi.png', tag:'History', title:'Topkapi Palace: Inside the Heart of the Ottoman Empire', excerpt:'Discover the palace that ruled an empire for over 400 years.', meta:'6 min read' },
-      { href:'blog-sultanahmet.html', img:'pngler/sultanahmet.png', tag:'Culture', title:'Sultanahmet: Exploring the Historic Heart of Istanbul', excerpt:'The Blue Mosque, the Hippodrome, underground cisterns.', meta:'5 min read' },
-      { href:'blog-galatatower.html', img:'pngler/galatatower.png', tag:'Views', title:'Galata Tower: The Best Panoramic View in Istanbul', excerpt:'Standing 67 metres tall, Galata Tower offers spectacular views.', meta:'3 min read' },
-    ].map(function(b, i) {
-      return '<div class="blog-list-card" onclick="window.location.href=\'' + b.href + '\'">' +
-        '<div class="blog-list-img"><img src="' + b.img + '" onerror="this.parentElement.style.background=\'#2a3f55\';this.style.display=\'none\';" /></div>' +
-        '<div class="blog-list-body">' +
-          '<div class="blog-list-tag">' + b.tag + '</div>' +
-          '<div class="blog-list-title">' + b.title + '</div>' +
-          '<div class="blog-list-excerpt">' + b.excerpt + '</div>' +
-          '<div class="blog-list-meta">' + b.meta + '</div>' +
-        '</div>' +
-      '</div>' + (i === 0 ? '<div id="nav-trigger"></div>' : '');
+    listing.innerHTML = ALL_BLOG_PAGES.slice(0, 6).map(function(p, i){
+      return renderBlogCard(p, null, i);
     }).join('');
   });
 </script>
