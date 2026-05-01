@@ -1375,7 +1375,7 @@ fetch(API_BASE + '/api/settings/blog-pages')
       return !saved[p.file] || saved[p.file].status !== 'passive';
     });
     var rotationEnabled = !saved['__rotation__'] || saved['__rotation__'].enabled !== false;
-    var shown = rotationEnabled ? getDailyBlogs(active) : active.slice(0, 3);
+    var shown = rotationEnabled ? getDailyBlogs(active).slice(0, 3) : active.slice(0, 3);
     if (!shown.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ab4cc;">No posts yet.</div>'; return; }
     grid.innerHTML = shown.map(function(p){
       var d = saved[p.file] || {};

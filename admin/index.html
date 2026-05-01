@@ -948,8 +948,20 @@ async function renderBlogDetailPages() {
     };
     try {
       await api('/api/settings/blog-pages/' + key, { method: 'PUT', body: JSON.stringify(data) });
-      toast((newStatus === 'active' ? '✅ Activated' : '⏸ Deactivated') + ': ' + key);
-      renderBlogDetailPages();
+      // Update saved object in memory
+      if (!saved[key]) saved[key] = {};
+      saved[key].status = newStatus;
+      // Update just the button and badge without full re-render
+      const btn = document.querySelector(`button[onclick="window._togglePageStatus('${key}')"]`);
+      if (btn) {
+        btn.textContent = newStatus === 'active' ? '⏸' : '▶';
+        const badge = btn.previousElementSibling;
+        if (badge && badge.classList.contains('badge')) {
+          badge.className = 'badge ' + (newStatus === 'active' ? 'badge-green' : 'badge-gray');
+          badge.textContent = newStatus === 'active' ? 'Active' : 'Passive';
+        }
+      }
+      toast((newStatus === 'active' ? '✅ Active' : '⏸ Passive') + ': ' + key);
     } catch (err) { toast('Error: ' + err.message, 'error'); }
   }
 
