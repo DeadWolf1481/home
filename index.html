@@ -1343,7 +1343,7 @@ fetch(API_BASE + '/api/faq')
   });
 
 // ─── Load Blog ────────────────────────────────────────────────────────────────
-// ─── Load Blog Pages (from blog-pages API) ────────────────────────────────────
+// ─── Load Blog Pages with Daily Rotation ─────────────────────────────────────
 var ALL_BLOG_PAGES = [
   { file: 'blog-hagiasophia',    title: "Hagia Sophia: Istanbul's Greatest Monument",      tag: 'History',     img: 'pngler/hagiasophia.png',  exc: 'For nearly 1,500 years this extraordinary structure has stood at the heart of Istanbul.' },
   { file: 'blog-grandbazaar',    title: 'Grand Bazaar: The Ultimate Shopping Experience',  tag: 'Shopping',    img: 'pngler/grandbaazar.png',  exc: 'Explore 4,000 shops in one of the world\'s oldest covered markets.' },
@@ -1358,15 +1358,27 @@ var ALL_BLOG_PAGES = [
   { file: 'blog-princessislands',title: "Princes' Islands: Istanbul's Car-Free Escape",    tag: 'Day Trips',   img: '',                        exc: 'Car-free, peaceful islands just an hour by ferry from Istanbul.' },
 ];
 
+function getDailyBlogs(activePages) {
+  var today = new Date();
+  var seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  var arr = activePages.slice();
+  for (var i = arr.length - 1; i > 0; i--) {
+    seed = (seed * 1664525 + 1013904223) & 0xffffffff;
+    var j = Math.abs(seed) % (i + 1);
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr.slice(0, 3);
+}
+
 fetch(API_BASE + '/api/settings/blog-pages')
   .then(function(r){ return r.json(); })
   .then(function(saved){
     var grid = document.getElementById('homeBlogGrid');
-    // Filter only active pages
     var active = ALL_BLOG_PAGES.filter(function(p){
       return !saved[p.file] || saved[p.file].status !== 'passive';
     });
-    var shown = active.slice(0, 3);
+    var rotationEnabled = !saved['__rotation__'] || saved['__rotation__'].enabled !== false;
+    var shown = rotationEnabled ? getDailyBlogs(active) : active.slice(0, 3);
     if (!shown.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ab4cc;">No posts yet.</div>'; return; }
     grid.innerHTML = shown.map(function(p){
       var d = saved[p.file] || {};
@@ -1386,7 +1398,7 @@ fetch(API_BASE + '/api/settings/blog-pages')
   })
   .catch(function(){
     var grid = document.getElementById('homeBlogGrid');
-    var shown = ALL_BLOG_PAGES.slice(0, 3);
+    var shown = getDailyBlogs(ALL_BLOG_PAGES);
     grid.innerHTML = shown.map(function(p){
       var imgHtml = p.img ? '<img src="' + p.img + '" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML=\'📖\'" />' : '<span style="font-size:48px">📖</span>';
       return '<div class="blog-card" onclick="window.location.href=\'' + p.file + '.html\'" style="cursor:pointer;">' +
