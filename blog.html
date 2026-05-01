@@ -468,6 +468,15 @@ function renderBlogCard(p, data, idx) {
   '</div>' + (idx === 0 ? '<div id="nav-trigger"></div>' : '');
 }
 
+function getDailyBlogs(activePages) {
+  var arr = activePages.slice();
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr;
+}
+
 fetch(API_BASE + '/api/settings/blog-pages')
   .then(function(r){ return r.json(); })
   .then(function(saved){
@@ -479,15 +488,34 @@ fetch(API_BASE + '/api/settings/blog-pages')
       listing.innerHTML = '<div style="text-align:center;padding:3rem;color:#9ab4cc;">No blog posts yet.</div>';
       return;
     }
-    listing.innerHTML = active.map(function(p, i){
+
+    var rotationEnabled = !saved['__rotation__'] || saved['__rotation__'].enabled !== false;
+    var shuffled = rotationEnabled ? getDailyBlogs(active) : active;
+
+    // Today's 3 + 1 bonus
+    var daily3 = shuffled.slice(0, 3);
+    var bonus = shuffled.length > 3 ? shuffled[3] : null;
+
+    var html = daily3.map(function(p, i){
       return renderBlogCard(p, saved[p.file], i);
     }).join('');
+
+    if (bonus) {
+      html += renderBlogCard(bonus, saved[bonus.file], 99);
+    }
+
+    listing.innerHTML = html;
   })
   .catch(function(){
     var listing = document.getElementById('blogListing');
-    listing.innerHTML = ALL_BLOG_PAGES.slice(0, 6).map(function(p, i){
-      return renderBlogCard(p, null, i);
-    }).join('');
+    var shuffled = getDailyBlogs(ALL_BLOG_PAGES);
+    var daily3 = shuffled.slice(0, 3);
+    var bonus = shuffled[3] || null;
+    var html = daily3.map(function(p, i){ return renderBlogCard(p, null, i); }).join('');
+    if (bonus) {
+      html += renderBlogCard(bonus, null, 99);
+    }
+    listing.innerHTML = html;
   });
 </script>
 <script src="whatsapp.js"></script>
