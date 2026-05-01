@@ -411,6 +411,69 @@ fetch(API_BASE + '/api/vehicles?status=active')
       var paxOk  = v.passenger_capacity >= tripPax;
       var lugOk  = v.luggage_capacity >= tripLug;
 
+      // ─── Extra Price Calculation ───────────────────────────────────────────
+      var basePrice = parseFloat(v.price) || 0;
+      var finalPrice = basePrice;
+      var priceNote = 'fixed price · all-inclusive';
+      var surcharges = [];
+
+      try {
+        var rules = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
+
+        // Night surcharge — tripDate format: "15 Jan 2026 23:00"
+        if (rules.night && rules.night.enabled && tripDate) {
+          var timePart = tripDate.split(' ').pop(); // "23:00"
+          var hour = parseInt(timePart.split(':')[0]);
+          var nFrom = rules.night.from !== undefined ? parseInt(rules.night.from) : 23;
+          var nTo   = rules.night.to   !== undefined ? parseInt(rules.night.to)   : 6;
+          var isNight = nFrom > nTo ? (hour >= nFrom || hour < nTo) : (hour >= nFrom && hour < nTo);
+          if (!isNaN(hour) && isNight) {
+            var add = basePrice * (rules.night.percent / 100);
+            finalPrice += add;
+            surcharges.push('🌙 Night +' + rules.night.percent + '%');
+          }
+        }
+
+        // Last minute surcharge — tripDate format: "15 Jan 2026 23:00"
+        if (rules.lastMinute && rules.lastMinute.enabled && tripDate) {
+          try {
+            var transferDate = new Date(tripDate.replace(/(\d+) (\w+) (\d+) (\d+:\d+)/, '$2 $1 $3 $4'));
+            var hoursUntil = (transferDate - Date.now()) / (1000 * 60 * 60);
+            if (hoursUntil > 0 && hoursUntil < rules.lastMinute.hours) {
+              var add2 = basePrice * (rules.lastMinute.percent / 100);
+              finalPrice += add2;
+              surcharges.push('⚡ Last minute +' + rules.lastMinute.percent + '%');
+            }
+          } catch(e2) {}
+        }
+
+        // Location rules
+        if (rules.location && rules.location.length) {
+          rules.location.forEach(function(r) {
+            var kw = r.keyword.toLowerCase();
+            var fromMatch = r.field === 'from' || r.field === 'both';
+            var toMatch = r.field === 'to' || r.field === 'both';
+            var matched = (fromMatch && tripFrom.toLowerCase().includes(kw)) ||
+                          (toMatch && tripTo.toLowerCase().includes(kw));
+            if (matched) {
+              var adj = r.unit === 'percent' ? basePrice * (r.value / 100) : r.value;
+              if (r.type === 'discount') { finalPrice -= adj; surcharges.push('📍 ' + r.keyword + ' −' + r.value + (r.unit === 'percent' ? '%' : '€')); }
+              else { finalPrice += adj; surcharges.push('📍 ' + r.keyword + ' +' + r.value + (r.unit === 'percent' ? '%' : '€')); }
+            }
+          });
+        }
+      } catch(e) {}
+
+      finalPrice = Math.max(0, Math.round(finalPrice));
+      var displayPrice = finalPrice !== basePrice
+        ? '<span style="text-decoration:line-through;color:#9ab4cc;font-size:14px;margin-right:4px">€' + basePrice + '</span>€' + finalPrice
+        : '€' + basePrice;
+      if (surcharges.length) priceNote = surcharges.join(' · ');
+
+      // Store adjusted price on vehicle object
+      v._finalPrice = finalPrice;
+      // ──────────────────────────────────────────────────────────────────────
+
       var pillsHtml = '<span class="vc-pill">👤 Up to ' + v.passenger_capacity + ' pax</span>'
                     + '<span class="vc-pill">🧳 Up to ' + v.luggage_capacity + ' bags</span>';
 
@@ -435,14 +498,13 @@ fetch(API_BASE + '/api/vehicles?status=active')
           capWarning +
           '<div class="vc-bottom">' +
             '<div>' +
-              '<div class="vc-price">€' + v.price + '</div>' +
-              '<div class="vc-price-note">fixed price · all-inclusive</div>' +
+              '<div class="vc-price">' + displayPrice + '</div>' +
+              '<div class="vc-price-note">' + priceNote + '</div>' +
             '</div>' +
             '<button class="vc-select-btn" onclick="openBooking(' + v.id + ')">Select →</button>' +
           '</div>' +
         '</div>';
 
-      // Store vehicle data for booking modal
       card.dataset.vehicle = JSON.stringify(v);
       grid.appendChild(card);
     });
@@ -465,8 +527,9 @@ function openBooking(vehicleId) {
   // Track form opened
   track('form_filled', 'Selected vehicle: ' + selectedVehicle.name);
 
+  var displayPrice = selectedVehicle._finalPrice || selectedVehicle.price;
   document.getElementById('modalVehicleName').textContent  = selectedVehicle.name;
-  document.getElementById('modalVehiclePrice').textContent = '€' + selectedVehicle.price;
+  document.getElementById('modalVehiclePrice').textContent = '€' + displayPrice;
   document.getElementById('modalVehicleCap').textContent   = 'Up to ' + selectedVehicle.passenger_capacity + ' pax · ' + selectedVehicle.luggage_capacity + ' bags';
 
   // Reset views
