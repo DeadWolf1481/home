@@ -1663,23 +1663,87 @@ function renderSettings(sub) {
     // Load saved templates
     loadTemplates();
   } else if (sub === 'Extra Price Settings') {
-    const saved = JSON.parse(localStorage.getItem('att_extra_prices') || '[]');
+    const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
+    const locationRules = saved.location || [];
+    const nightRule = saved.night || { enabled: false, from: 23, to: 6, percent: 20 };
+    const lastMinuteRule = saved.lastMinute || { enabled: false, hours: 12, percent: 10 };
+
     mc.innerHTML = `
       <div class="section-header">
-        <div class="section-header-left"><h2>Extra Price Settings</h2><p>Additional charges added on top of base transfer price.</p></div>
-        <button class="btn btn-primary" onclick="openAddExtraPrice()">＋ Add Extra Price</button>
+        <div class="section-header-left"><h2>Extra Price Settings</h2><p>Define automatic price adjustments based on location, time, or booking window.</p></div>
       </div>
-      <div class="table-card">
-        <table id="extraPriceTable">
-          <thead><tr><th>Name</th><th>Type</th><th>Amount</th><th>Description</th><th></th></tr></thead>
-          <tbody id="extraPriceTbody">
-            ${saved.length ? saved.map((p, i) => `<tr>
-              <td style="font-weight:600">${p.name}</td>
-              <td><span class="badge badge-blue">${p.type}</span></td>
-              <td style="font-weight:700;color:var(--gold)">${p.type === 'percent' ? p.amount + '%' : '€' + p.amount}</td>
-              <td style="font-size:12px;color:var(--text2)">${p.description || '—'}</td>
-              <td><button class="btn btn-danger btn-sm" onclick="deleteExtraPrice(${i})">🗑</button></td>
-            </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No extra prices yet. Click + Add to create one.</td></tr>'}
+
+      <!-- Night Surcharge -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <div>
+            <div style="font-weight:700;color:var(--text);font-size:15px">🌙 Night Surcharge</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Add surcharge for transfers during night hours</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="night-enabled" ${nightRule.enabled ? 'checked' : ''} onchange="saveExtraPrices()" style="width:16px;height:16px;accent-color:var(--blue)" />
+            <span style="font-size:13px;color:var(--text2)">Enabled</span>
+          </label>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">From (hour)</label>
+            <input class="form-input" id="night-from" type="number" min="0" max="23" value="${nightRule.from}" placeholder="23" onchange="saveExtraPrices()" /></div>
+          <div class="form-group"><label class="form-label">To (hour)</label>
+            <input class="form-input" id="night-to" type="number" min="0" max="23" value="${nightRule.to}" placeholder="6" onchange="saveExtraPrices()" /></div>
+          <div class="form-group"><label class="form-label">Surcharge %</label>
+            <input class="form-input" id="night-percent" type="number" min="0" value="${nightRule.percent}" placeholder="20" onchange="saveExtraPrices()" /></div>
+        </div>
+        <div style="font-size:12px;color:var(--text2)">Example: Transfer at 02:00 → price × 1.${String(nightRule.percent).padStart(2,'0')}</div>
+      </div>
+
+      <!-- Last Minute -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <div>
+            <div style="font-weight:700;color:var(--text);font-size:15px">⚡ Last Minute Surcharge</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Add surcharge for bookings made within X hours of transfer</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="lm-enabled" ${lastMinuteRule.enabled ? 'checked' : ''} onchange="saveExtraPrices()" style="width:16px;height:16px;accent-color:var(--blue)" />
+            <span style="font-size:13px;color:var(--text2)">Enabled</span>
+          </label>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Within X hours</label>
+            <input class="form-input" id="lm-hours" type="number" min="1" value="${lastMinuteRule.hours}" placeholder="12" onchange="saveExtraPrices()" /></div>
+          <div class="form-group"><label class="form-label">Surcharge %</label>
+            <input class="form-input" id="lm-percent" type="number" min="0" value="${lastMinuteRule.percent}" placeholder="10" onchange="saveExtraPrices()" /></div>
+        </div>
+        <div style="font-size:12px;color:var(--text2)">Example: Booking within ${lastMinuteRule.hours}h → price +${lastMinuteRule.percent}%</div>
+      </div>
+
+      <!-- Location Rules -->
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <div>
+            <div style="font-weight:700;color:var(--text);font-size:15px">📍 Location-Based Rules</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:3px">Adjust price when From or To matches a specific location keyword</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddLocationRule()">＋ Add Rule</button>
+        </div>
+        <table style="width:100%;border-collapse:collapse" id="locationRulesTable">
+          <thead><tr>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Applies When</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Location Contains</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Adjustment</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Example</th>
+            <th style="padding:8px 12px;border-bottom:1px solid var(--border)"></th>
+          </tr></thead>
+          <tbody id="locationRulesTbody">
+            ${locationRules.length ? locationRules.map((r, i) => `<tr>
+              <td style="padding:10px 12px;font-size:13px">${r.field === 'from' ? '📤 From' : r.field === 'to' ? '📥 To' : '📍 From or To'}</td>
+              <td style="padding:10px 12px;font-size:13px;font-weight:600;color:var(--blue)">"${r.keyword}"</td>
+              <td style="padding:10px 12px;font-size:13px;font-weight:700;color:${r.type === 'discount' ? 'var(--green)' : 'var(--yellow)'}">
+                ${r.type === 'discount' ? '−' : '+'}${r.value}${r.unit === 'percent' ? '%' : '€'}
+              </td>
+              <td style="padding:10px 12px;font-size:12px;color:var(--text2)">${r.example || '—'}</td>
+              <td style="padding:10px 12px"><button class="btn btn-danger btn-sm" onclick="deleteLocationRule(${i})">🗑</button></td>
+            </tr>`).join('') : '<tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text2)">No location rules yet. Add one above.</td></tr>'}
           </tbody>
         </table>
       </div>`;
@@ -1807,45 +1871,81 @@ async function saveGeneralSettings() {
   } catch (err) { toast('Error: ' + err.message, 'error'); }
 }
 
-function openAddExtraPrice() {
-  openModal('Add Extra Price', `
-    <div class="form-group"><label class="form-label">Name *</label>
-      <input class="form-input" id="ep-name" placeholder="e.g. Night Surcharge, Child Seat" /></div>
+function saveExtraPrices() {
+  const data = {
+    night: {
+      enabled: document.getElementById('night-enabled')?.checked || false,
+      from: parseInt(document.getElementById('night-from')?.value) || 23,
+      to: parseInt(document.getElementById('night-to')?.value) || 6,
+      percent: parseInt(document.getElementById('night-percent')?.value) || 20,
+    },
+    lastMinute: {
+      enabled: document.getElementById('lm-enabled')?.checked || false,
+      hours: parseInt(document.getElementById('lm-hours')?.value) || 12,
+      percent: parseInt(document.getElementById('lm-percent')?.value) || 10,
+    },
+    location: JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}').location || [],
+  };
+  localStorage.setItem('att_extra_prices_v2', JSON.stringify(data));
+  toast('Saved ✅');
+}
+
+function openAddLocationRule() {
+  openModal('Add Location Rule', `
+    <div class="form-group"><label class="form-label">Applies When *</label>
+      <select class="form-select" id="lr-field">
+        <option value="from">From location contains...</option>
+        <option value="to">To location contains...</option>
+        <option value="both">From OR To location contains...</option>
+      </select></div>
+    <div class="form-group"><label class="form-label">Location Keyword * <span style="font-size:11px;color:var(--text2)">(case-insensitive)</span></label>
+      <input class="form-input" id="lr-keyword" placeholder="e.g. Sabiha, Antalya, Bodrum" /></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Type *</label>
-        <select class="form-select" id="ep-type">
-          <option value="fixed">Fixed Amount (€)</option>
-          <option value="percent">Percentage (%)</option>
+        <select class="form-select" id="lr-type">
+          <option value="surcharge">Surcharge (more expensive)</option>
+          <option value="discount">Discount (cheaper)</option>
         </select></div>
-      <div class="form-group"><label class="form-label">Amount *</label>
-        <input class="form-input" id="ep-amount" type="number" placeholder="e.g. 10" /></div>
+      <div class="form-group"><label class="form-label">Unit *</label>
+        <select class="form-select" id="lr-unit">
+          <option value="percent">Percentage (%)</option>
+          <option value="fixed">Fixed amount (€)</option>
+        </select></div>
     </div>
-    <div class="form-group"><label class="form-label">Description</label>
-      <input class="form-input" id="ep-desc" placeholder="Optional description..." /></div>`,
+    <div class="form-group"><label class="form-label">Value *</label>
+      <input class="form-input" id="lr-value" type="number" min="0" placeholder="e.g. 10" /></div>
+    <div class="form-group"><label class="form-label">Example <span style="font-size:11px;color:var(--text2)">(optional, for your reference)</span></label>
+      <input class="form-input" id="lr-example" placeholder="e.g. SAW airport → +€5 vs IST" /></div>`,
     `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="saveExtraPrice()">Add</button>`
+     <button class="btn btn-primary" onclick="saveLocationRule()">Add Rule</button>`
   );
 }
 
-function saveExtraPrice() {
-  const name   = document.getElementById('ep-name').value.trim();
-  const type   = document.getElementById('ep-type').value;
-  const amount = document.getElementById('ep-amount').value;
-  const desc   = document.getElementById('ep-desc').value.trim();
-  if (!name || !amount) return toast('Name and amount required', 'error');
-  const saved = JSON.parse(localStorage.getItem('att_extra_prices') || '[]');
-  saved.push({ name, type, amount: parseFloat(amount), description: desc });
-  localStorage.setItem('att_extra_prices', JSON.stringify(saved));
-  toast('Extra price added');
+function saveLocationRule() {
+  const keyword = document.getElementById('lr-keyword').value.trim();
+  const value = document.getElementById('lr-value').value;
+  if (!keyword || !value) return toast('Keyword and value required', 'error');
+  const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
+  if (!saved.location) saved.location = [];
+  saved.location.push({
+    field:   document.getElementById('lr-field').value,
+    keyword,
+    type:    document.getElementById('lr-type').value,
+    unit:    document.getElementById('lr-unit').value,
+    value:   parseFloat(value),
+    example: document.getElementById('lr-example').value.trim(),
+  });
+  localStorage.setItem('att_extra_prices_v2', JSON.stringify(saved));
+  toast('Rule added ✅');
   closeModalDirect();
   renderSettings('Extra Price Settings');
 }
 
-function deleteExtraPrice(index) {
-  openConfirm('Delete Extra Price', 'This will be permanently removed.', () => {
-    const saved = JSON.parse(localStorage.getItem('att_extra_prices') || '[]');
-    saved.splice(index, 1);
-    localStorage.setItem('att_extra_prices', JSON.stringify(saved));
+function deleteLocationRule(index) {
+  openConfirm('Delete Rule', 'This rule will be removed.', () => {
+    const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
+    if (saved.location) saved.location.splice(index, 1);
+    localStorage.setItem('att_extra_prices_v2', JSON.stringify(saved));
     toast('Deleted');
     renderSettings('Extra Price Settings');
   });
