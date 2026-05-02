@@ -2038,7 +2038,7 @@ function getSignature() {
 
 // ─── MESSAGES ─────────────────────────────────────────────────────────────────
 const DEFAULT_TEMPLATES = {
-  reply: `Dear {name},\n\nThank you for reaching out to Airports Transfer Turkey.\n\n{replyText}\n\nBest regards,\nAirports Transfer Turkey Team\n+90 544 102 1414\nairportstransferturkey@gmail.com`,
+  reply: `Thank you for reaching out to Airports Transfer Turkey.\n\n{replyText}`,
   booking: `Dear {name},\n\nThank you for choosing Airports Transfer Turkey! We have received your booking.\n\nReference: {reference}\nFrom: {from}\nTo: {to}\nDate: {date}\nVehicle: {vehicle}\nPrice: {price}\n\nFor questions: +90 544 102 1414\n\nBest regards,\nAirports Transfer Turkey Team`,
 };
 
@@ -2178,10 +2178,7 @@ function viewMessage(m) {
 }
 
 function openReplyModal(m) {
-  const tpl = getTemplate('reply')
-    .replace('{name}', m.name)
-    .replace('{replyText}', '');
-  const signature = getSignature();
+  const tpl = '';
 
   openModal(`Reply to ${m.name}`, `
     <div style="background:var(--bg3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:12px;color:var(--text2)">

@@ -109,18 +109,29 @@ async function sendContactReply(to, name, subject, replyText) {
 
 <tr><td bgcolor="#0a1628" style="padding:30px 40px;text-align:center">
 <div style="font-size:22px;font-weight:bold;color:#f0c040;letter-spacing:2px">AIRPORTS TRANSFER TURKEY</div>
+<div style="font-size:14px;color:#aaa;margin-top:6px">Professional Airport Transfer Service</div>
 </td></tr>
 
 <tr><td style="padding:30px 40px">
-<div style="font-size:16px;color:#444;margin-bottom:20px">Dear <b>${name}</b>,</div>
+<div style="font-size:16px;color:#444;line-height:1.6;margin-bottom:20px">Dear <b>${name}</b>,</div>
+<div style="font-size:16px;color:#333;line-height:1.8;white-space:pre-line">${replyText}</div>
+</td></tr>
+
+<tr><td style="padding:0 40px 30px">
 <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #f0c040;border-radius:0 10px 10px 0"><tr>
-<td style="padding:24px 28px;font-size:16px;color:#333;line-height:1.8;white-space:pre-line">${replyText}</td>
+<td style="padding:16px 20px;font-size:14px;color:#555;line-height:1.7">
+<b style="color:#0a1628">Airports Transfer Turkey Team</b><br>
+📞 +90 544 102 1414<br>
+✉️ airportstransferturkey@gmail.com<br>
+🌐 airportstransferturkey.com
+</td>
 </tr></table>
 </td></tr>
 
 <tr><td bgcolor="#0a1628" style="padding:28px 40px;text-align:center">
 <a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;display:inline-block">WhatsApp: +90 544 102 1414</a>
 <div style="color:#888;font-size:14px;margin-top:12px">airportstransferturkey@gmail.com</div>
+<div style="color:#555;font-size:13px;margin-top:6px">BEKPEN ULUSLARARASI TURİZM TİCARET LİMİTED ŞİRKETİ · TURSAB: 14563</div>
 </td></tr>
 
 </table>
