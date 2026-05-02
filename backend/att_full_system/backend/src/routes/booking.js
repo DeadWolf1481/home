@@ -1,17 +1,19 @@
 const router = require('express').Router();
-const { sendBookingConfirmation } = require('../utils/mailer');
+const { sendBookingConfirmation, sendAdminBookingNotification } = require('../utils/mailer');
 
 async function generateReference(prisma) {
-  const last = await prisma.reservation.findFirst({
-    orderBy: { id: 'desc' },
+  // Find the highest existing ATT number
+  const all = await prisma.reservation.findMany({
     select: { reference: true },
   });
-  let num = 1;
-  if (last?.reference && last.reference.startsWith('ATT')) {
-    const n = parseInt(last.reference.replace('ATT', ''));
-    if (!isNaN(n)) num = n + 1;
-  }
-  return 'ATT' + String(num).padStart(3, '0');
+  let maxNum = 0;
+  all.forEach(r => {
+    if (r.reference && r.reference.startsWith('ATT')) {
+      const n = parseInt(r.reference.replace('ATT', ''));
+      if (!isNaN(n) && n > maxNum) maxNum = n;
+    }
+  });
+  return 'ATT' + String(maxNum + 1).padStart(3, '0');
 }
 
 // POST /api/booking
@@ -75,11 +77,17 @@ router.post('/', async (req, res) => {
       }).catch(() => {});
     }
 
-    // Send confirmation email
+    // Send confirmation email to customer
     sendBookingConfirmation({
       ...reservation,
       vehicle_name: vehicleRecord?.name || vehicleName || null,
     }).catch(err => console.error('Mail error:', err));
+
+    // Send notification email to admin
+    sendAdminBookingNotification({
+      ...reservation,
+      vehicle_name: vehicleRecord?.name || vehicleName || null,
+    }).catch(err => console.error('Admin mail error:', err));
 
     res.status(201).json({
       success: true,

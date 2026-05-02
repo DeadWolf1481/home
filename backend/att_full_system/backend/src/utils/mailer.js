@@ -135,4 +135,104 @@ async function sendContactReply(to, name, subject, replyText) {
   });
 }
 
-module.exports = { sendBookingConfirmation, sendContactReply };
+async function sendAdminBookingNotification(reservation) {
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,sans-serif;font-size:16px">
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f4f8"><tr><td style="padding:30px 0" align="center">
+<table width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="border-radius:12px;overflow:hidden">
+
+<tr><td bgcolor="#0a1628" style="padding:30px 40px;text-align:center">
+<div style="font-size:22px;font-weight:bold;color:#f0c040;letter-spacing:2px">AIRPORTS TRANSFER TURKEY</div>
+<div style="font-size:14px;color:#aaa;margin-top:6px">🚨 New Booking Received</div>
+</td></tr>
+
+<tr><td style="padding:30px 40px">
+<div style="font-size:20px;font-weight:bold;color:#0a1628;margin-bottom:16px">New Booking: ${reservation.reference}</div>
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-radius:10px;border:1px solid #e0e8f0">
+<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Customer</td>
+    <td style="font-weight:bold;font-size:15px;color:#222">${reservation.customer_name}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Email</td>
+    <td style="font-size:15px;color:#1565c0">${reservation.email}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Phone</td>
+    <td style="font-weight:bold;font-size:15px;color:#222">${reservation.phone}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">From</td>
+    <td style="font-size:15px;color:#222">${reservation.pickup_location}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">To</td>
+    <td style="font-size:15px;color:#222">${reservation.dropoff_location}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Date</td>
+    <td style="font-weight:bold;font-size:15px;color:#222">${reservation.date}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Vehicle</td>
+    <td style="font-size:15px;color:#222">${reservation.vehicle_name || '—'}</td>
+  </tr></table>
+</td></tr>
+<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Passengers</td>
+    <td style="font-size:15px;color:#222">${reservation.passengers} pax · ${reservation.luggage} bags</td>
+  </tr></table>
+</td></tr>
+${reservation.flight_number ? `<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Flight</td>
+    <td style="font-size:15px;color:#222">${reservation.flight_number}</td>
+  </tr></table>
+</td></tr>` : ''}
+${reservation.notes ? `<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Notes</td>
+    <td style="font-size:15px;color:#222">${reservation.notes}</td>
+  </tr></table>
+</td></tr>` : ''}
+<tr><td style="padding:14px 24px">
+  <table width="100%"><tr>
+    <td style="color:#888;font-size:14px;width:140px">Price</td>
+    <td style="font-weight:bold;font-size:22px;color:#0a1628">€${reservation.price || '—'}</td>
+  </tr></table>
+</td></tr>
+</table>
+</td></tr>
+
+<tr><td bgcolor="#0a1628" style="padding:20px 40px;text-align:center">
+<a href="https://home-production-6910.up.railway.app/admin" style="background:#f0c040;color:#0a1628;text-decoration:none;padding:12px 30px;border-radius:25px;font-size:15px;font-weight:bold;display:inline-block">Open Admin Panel</a>
+</td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`;
+
+  return resend.emails.send({
+    from: FROM,
+    to: 'bekpenturizm@gmail.com',
+    subject: `🚐 New Booking: ${reservation.reference} — ${reservation.customer_name}`,
+    html,
+  });
+}
+
+module.exports = { sendBookingConfirmation, sendContactReply, sendAdminBookingNotification };
