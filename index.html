@@ -581,7 +581,7 @@ body { padding-top: 0; }
 <div style="background:#2a3f55;">
 
   <!-- About / Features -->
-  <div class="section" id="about">
+  <div class="section" id="about" style="scroll-margin-top:80px">
     <div class="section-label">Why Choose Us?</div>
     <h2 class="section-title">Service That Makes a Difference</h2>
     <p class="section-sub">We offer a comfortable and safe travel experience from the airport to your hotel.</p>
@@ -612,7 +612,7 @@ body { padding-top: 0; }
   <div class="divider"></div>
 
   <!-- Vehicles -->
-  <div class="section" id="vehicles">
+  <div class="section" id="vehicles" style="scroll-margin-top:80px">
     <div class="section-label">Our Fleet</div>
     <h2 class="section-title">The Right Vehicle for Every Need</h2>
     <div class="vehicles-grid" id="vehiclesGrid">
@@ -623,7 +623,7 @@ body { padding-top: 0; }
   <div class="divider"></div>
 
   <!-- How It Works -->
-  <div class="section" id="how">
+  <div class="section" id="how" style="scroll-margin-top:80px">
     <div class="section-label">Simple Process</div>
     <h2 class="section-title">How It Works</h2>
     <div class="how-grid">
@@ -652,7 +652,7 @@ body { padding-top: 0; }
 
 
   <!-- FAQ -->
-  <div class="section" id="faq">
+  <div class="section" id="faq" style="scroll-margin-top:80px">
     <div class="section-label">Got Questions?</div>
     <h2 class="section-title">Frequently Asked Questions</h2>
     <div class="faq-list" id="faqList">
@@ -663,7 +663,7 @@ body { padding-top: 0; }
   <div class="divider"></div>
 
   <!-- Blog -->
-  <div class="section" id="blog">
+  <div class="section" id="blog" style="scroll-margin-top:80px">
     <div class="section-label">Blog</div>
     <h2 class="section-title">Istanbul Travel Guide</h2>
     <div class="blog-grid" id="homeBlogGrid">
@@ -1059,11 +1059,7 @@ function smoothTo(e, id) {
   e.preventDefault();
   if (id === 'hero') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   var el = document.getElementById(id);
-  if (el) {
-    var navH = document.querySelector('.nav') ? document.querySelector('.nav').offsetHeight : 66;
-    var top = el.getBoundingClientRect().top + window.pageYOffset - navH - 16;
-    window.scrollTo({ top: top, behavior: 'smooth' });
-  }
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function toggleMenu() {
@@ -1098,11 +1094,7 @@ function mobileNav(e, id) {
     menu.style.display = 'none';
     if (id === 'hero') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     var el = document.getElementById(id);
-    if (el) {
-      var navH = document.querySelector('.nav') ? document.querySelector('.nav').offsetHeight : 66;
-      var top = el.getBoundingClientRect().top + window.pageYOffset - navH - 16;
-      window.scrollTo({ top: top, behavior: 'smooth' });
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 400);
 }
 
