@@ -1790,7 +1790,7 @@ function renderSettings(sub) {
                 <td style="font-size:12px">${a.phone}</td>
                 <td style="font-size:12px">${a.bank_name || '—'}</td>
                 <td style="font-size:11px;font-family:monospace;color:var(--text2)">${a.bank_iban || '—'}</td>
-                <td>${a.status === 'approved' ? '<span class="badge badge-green">Approved</span>' : a.status === 'rejected' ? '<span class="badge badge-red">Rejected</span>' : '<span class="badge badge-yellow">Pending</span>'}</td>
+                <td>${a.status === 'approved' ? '<span class="badge badge-green">✅ Approved</span>' : a.status === 'rejected' ? '<span class="badge badge-red">❌ Rejected</span>' : '<span class="badge badge-yellow">⏳ Pending</span>'}</td>
                 <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(a.created_at)}</td>
                 <td>
                   <div style="display:flex;gap:6px">
@@ -1950,8 +1950,8 @@ async function viewDriverApp(id) {
         ${docImg('Interior 3', 'car_interior_3')}
         ${docImg('Interior 4', 'car_interior_4')}
       </div>`,
-      `<button class="btn btn-success" onclick="setDriverStatus(${a.id},'approved');closeModalDirect()">✅ Approve</button>
-       <button class="btn btn-danger" onclick="setDriverStatus(${a.id},'rejected');closeModalDirect()">❌ Reject</button>
+      `<button class="btn btn-success" onclick="setDriverStatus(${id},'approved');closeModalDirect()">✅ Approve</button>
+       <button class="btn btn-danger" onclick="setDriverStatus(${id},'rejected');closeModalDirect()">❌ Reject</button>
        <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>`,
       true
     );
