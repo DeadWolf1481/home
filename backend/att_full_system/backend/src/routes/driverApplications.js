@@ -89,17 +89,19 @@ router.put('/:id/status', auth, async (req, res) => {
     const app = rows[0];
 
     if (status === 'approved') {
-      await resend.emails.send({
-        from: FROM, to: app.email,
+      const mailResult = await resend.emails.send({
+        from: FROM, to: [app.email, 'bekpenturizm@gmail.com'],
         subject: '✅ Your Driver Application Has Been Approved — Airports Transfer Turkey',
         html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,sans-serif"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f4f8"><tr><td style="padding:30px 0" align="center"><table width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="border-radius:12px;overflow:hidden"><tr><td bgcolor="#0a1628" style="padding:30px 40px;text-align:center"><div style="font-size:22px;font-weight:bold;color:#f0c040;letter-spacing:2px">AIRPORTS TRANSFER TURKEY</div></td></tr><tr><td style="padding:30px 40px"><div style="font-size:16px;color:#444;margin-bottom:16px">Dear <b>${app.full_name}</b>,</div><div style="font-size:16px;color:#333;line-height:1.8;margin-bottom:20px">We are pleased to inform you that your driver application has been <b style="color:#2e7d32">approved</b>. Welcome to the Airports Transfer Turkey team!</div><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #f0c040;border-radius:0 10px 10px 0"><tr><td style="padding:16px 20px;font-size:15px;color:#333;line-height:1.8">You can now log in to the driver panel to view your assigned transfers.<br><br>For any questions, contact us via WhatsApp.</td></tr></table>${admin_notes ? `<div style="margin-top:16px;padding:14px;background:#fff8e1;border-left:4px solid #ffc107;font-size:14px;color:#555">${admin_notes}</div>` : ''}</td></tr><tr><td bgcolor="#0a1628" style="padding:28px 40px;text-align:center"><a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;display:inline-block">WhatsApp: +90 544 102 1414</a></td></tr></table></td></tr></table></body></html>`,
-      }).catch(e => console.error('Mail error:', e));
+      });
+      console.log('Approval mail result:', JSON.stringify(mailResult));
     } else if (status === 'rejected') {
-      await resend.emails.send({
-        from: FROM, to: app.email,
+      const mailResult = await resend.emails.send({
+        from: FROM, to: [app.email, 'bekpenturizm@gmail.com'],
         subject: 'Driver Application Update — Airports Transfer Turkey',
         html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,sans-serif"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f4f8"><tr><td style="padding:30px 0" align="center"><table width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="border-radius:12px;overflow:hidden"><tr><td bgcolor="#0a1628" style="padding:30px 40px;text-align:center"><div style="font-size:22px;font-weight:bold;color:#f0c040;letter-spacing:2px">AIRPORTS TRANSFER TURKEY</div></td></tr><tr><td style="padding:30px 40px"><div style="font-size:16px;color:#444;margin-bottom:16px">Dear <b>${app.full_name}</b>,</div><div style="font-size:16px;color:#333;line-height:1.8;margin-bottom:20px">Thank you for applying. Unfortunately, we are unable to approve your application at this time.</div>${admin_notes ? `<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #e53935;border-radius:0 10px 10px 0"><tr><td style="padding:16px 20px;font-size:14px;color:#555">${admin_notes}</td></tr></table>` : ''}</td></tr><tr><td bgcolor="#0a1628" style="padding:28px 40px;text-align:center"><a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;display:inline-block">WhatsApp: +90 544 102 1414</a></td></tr></table></td></tr></table></body></html>`,
-      }).catch(e => console.error('Mail error:', e));
+      });
+      console.log('Rejection mail result:', JSON.stringify(mailResult));
     }
 
     res.json({ success: true, status });
