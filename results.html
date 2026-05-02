@@ -613,7 +613,7 @@ function submitBooking() {
   var payload = {
     vehicle:    selectedVehicle.id,
     vehicleName: selectedVehicle.name,
-    price:      selectedVehicle.price,
+    price:      selectedVehicle._finalPrice || selectedVehicle.price,
     from:       tripFrom,
     to:         tripTo,
     date:       tripDate,
@@ -641,6 +641,26 @@ function submitBooking() {
   .then(function(data) {
     var ref = (data && data.reference) ? data.reference : 'ATT???';
     track('completed', 'Booking completed: ' + ref);
+
+    // Also notify via contact API so it appears in Messages tab
+    var finalP = selectedVehicle._finalPrice || selectedVehicle.price;
+    fetch(API_BASE + '/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        phone: phone,
+        subject: '🚐 New Booking: ' + ref,
+        message: 'Vehicle: ' + selectedVehicle.name + ' · €' + finalP + '\n'
+               + 'From: ' + tripFrom + '\nTo: ' + tripTo + '\nDate: ' + tripDate + '\n'
+               + 'Passengers: ' + tripPax + ' · Luggage: ' + tripLug + '\n'
+               + (flight ? 'Flight: ' + flight + '\n' : '')
+               + (notes  ? 'Notes: ' + notes : ''),
+        source: 'booking'
+      })
+    }).catch(function(){});
+
     document.getElementById('successRef').textContent = 'Booking Reference: ' + ref;
     document.getElementById('formView').style.display = 'none';
     document.getElementById('successView').classList.add('show');
