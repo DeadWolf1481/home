@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Driver Application | Airports Transfer Turkey</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+.header { background: #0a1628; border-bottom: 1px solid #21262d; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+.header-logo { font-size: 18px; font-weight: 700; color: #f0c040; letter-spacing: 1px; }
+.header-sub { font-size: 13px; color: #8b949e; }
+.container { max-width: 760px; margin: 0 auto; padding: 2rem; }
+.progress { display: flex; gap: 0; margin-bottom: 2rem; border-radius: 10px; overflow: hidden; border: 1px solid #21262d; }
+.step { flex: 1; padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 600; color: #8b949e; background: #161b22; border-right: 1px solid #21262d; cursor: default; transition: all 0.2s; }
+.step:last-child { border-right: none; }
+.step.active { background: #1c2a3a; color: #2ea8f0; }
+.step.done { background: #1a2e1a; color: #3fb950; }
+.card { background: #161b22; border: 1px solid #21262d; border-radius: 12px; padding: 1.75rem; margin-bottom: 1.25rem; }
+.card-title { font-size: 16px; font-weight: 700; color: #e6edf3; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+.card-sub { font-size: 12px; color: #8b949e; margin-bottom: 1.25rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; font-size: 12px; font-weight: 600; color: #8b949e; margin-bottom: 5px; }
+.form-label .req { color: #f85149; }
+.form-input { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 9px 12px; color: #e6edf3; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-color: #2ea8f0; }
+.form-input.error { border-color: #f85149; }
+.upload-area { border: 2px dashed #30363d; border-radius: 8px; padding: 1.25rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.upload-area:hover { border-color: #2ea8f0; background: rgba(46,168,240,0.04); }
+.upload-area.has-file { border-color: #3fb950; border-style: solid; background: rgba(63,185,80,0.06); }
+.upload-area.error { border-color: #f85149; }
+.upload-icon { font-size: 28px; margin-bottom: 6px; }
+.upload-text { font-size: 12px; color: #8b949e; }
+.upload-name { font-size: 12px; color: #3fb950; font-weight: 600; margin-top: 4px; }
+.upload-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.upload-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+.example-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 6px; border: 1px solid #21262d; background: #0d1117; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.btn { width: 100%; padding: 13px; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: #2ea8f0; color: white; }
+.btn-primary:hover { background: #1a7fc1; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-next { background: #2ea8f0; color: white; padding: 11px 28px; width: auto; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; float: right; }
+.btn-back { background: #21262d; color: #8b949e; padding: 11px 28px; width: auto; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; float: left; }
+.nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+.error-msg { background: rgba(248,81,73,0.12); border: 1px solid rgba(248,81,73,0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #f85149; margin-bottom: 1rem; display: none; }
+.success-screen { text-align: center; padding: 3rem 2rem; display: none; }
+.success-icon { font-size: 60px; margin-bottom: 1rem; }
+.success-title { font-size: 24px; font-weight: 700; color: #3fb950; margin-bottom: 0.75rem; }
+.success-sub { font-size: 15px; color: #8b949e; line-height: 1.7; }
+.section-page { display: none; }
+.section-page.active { display: block; }
+@media(max-width:600px) { .form-row { grid-template-columns: 1fr; } .upload-grid { grid-template-columns: 1fr; } .upload-grid-4 { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-logo">AIRPORTS TRANSFER TURKEY</div>
+    <div class="header-sub">Driver Application Portal</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="progress" id="progressBar">
+    <div class="step active" id="step1">1. Personal</div>
+    <div class="step" id="step2">2. Documents</div>
+    <div class="step" id="step3">3. Authority</div>
+    <div class="step" id="step4">4. Bank</div>
+    <div class="step" id="step5">5. Vehicle</div>
+    <div class="step" id="step6">6. Interior</div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- STEP 1: Personal Info -->
+  <div class="section-page active" id="page1">
+    <div class="card">
+      <div class="card-title">👤 Personal Information</div>
+      <div class="card-sub">Please enter your personal details accurately.</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name <span class="req">*</span></label>
+          <input class="form-input" id="full_name" placeholder="John Smith" /></div>
+        <div class="form-group"><label class="form-label">Phone <span class="req">*</span></label>
+          <input class="form-input" id="phone" placeholder="+90 555 000 0000" /></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email <span class="req">*</span></label>
+        <input class="form-input" id="email" type="email" placeholder="john@example.com" /></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🤳 Profile Photo</div>
+      <div class="card-sub">Upload a recent passport-style photo.</div>
+      <div class="upload-area" id="ua-photo">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">Click to upload your photo (JPEG/PNG)</div>
+        <div class="upload-name" id="un-photo"></div>
+        <input type="file" class="upload-input" accept="image/*" onchange="handleFile('photo', this)" />
+      </div>
+    </div>
+    <div class="nav-btns">
+      <span></span>
+      <button class="btn-next" onclick="goNext(1)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Personal Documents -->
+  <div class="section-page" id="page2">
+    <div class="card">
+      <div class="card-title">🪪 ID Card</div>
+      <div class="card-sub">Upload both sides of your national identity card.</div>
+      <div class="upload-grid">
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Front Side <span class="req">*</span></div>
+          <div class="upload-area" id="ua-id_front">
+            <div class="upload-icon">⬆️</div>
+            <div class="upload-text">ID Front</div>
+            <div class="upload-name" id="un-id_front"></div>
+            <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('id_front', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Back Side <span class="req">*</span></div>
+          <div class="upload-area" id="ua-id_back">
+            <div class="upload-icon">⬆️</div>
+            <div class="upload-text">ID Back</div>
+            <div class="upload-name" id="un-id_back"></div>
+            <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('id_back', this)" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🚗 Driver's License</div>
+      <div class="card-sub">Upload both sides of your valid driver's license.</div>
+      <div class="upload-grid">
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Front Side <span class="req">*</span></div>
+          <div class="upload-area" id="ua-license_front">
+            <div class="upload-icon">⬆️</div>
+            <div class="upload-text">License Front</div>
+            <div class="upload-name" id="un-license_front"></div>
+            <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('license_front', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Back Side <span class="req">*</span></div>
+          <div class="upload-area" id="ua-license_back">
+            <div class="upload-icon">⬆️</div>
+            <div class="upload-text">License Back</div>
+            <div class="upload-name" id="un-license_back"></div>
+            <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('license_back', this)" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Criminal Record & Residence</div>
+      <div class="card-sub">Upload your criminal record and residence document.</div>
+      <div class="upload-grid">
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Criminal Record <span class="req">*</span></div>
+          <div class="upload-area" id="ua-criminal_record">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">Sabıka Kaydı</div>
+            <div class="upload-name" id="un-criminal_record"></div>
+            <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('criminal_record', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Residence Document <span class="req">*</span></div>
+          <div class="upload-area" id="ua-residence_doc">
+            <div class="upload-icon">🏠</div>
+            <div class="upload-text">İkametgah Belgesi</div>
+            <div class="upload-name" id="un-residence_doc"></div>
+            <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('residence_doc', this)" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goBack(2)">← Back</button>
+      <button class="btn-next" onclick="goNext(2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Authority Docs -->
+  <div class="section-page" id="page3">
+    <div class="card">
+      <div class="card-title">📜 Authority Documents</div>
+      <div class="card-sub">Upload your TÜRSAB certificate and D2 authority document.</div>
+      <div class="upload-grid">
+        <div>
+          <div class="form-label" style="margin-bottom:6px">TÜRSAB Certificate <span class="req">*</span></div>
+          <div class="upload-area" id="ua-tursab_doc">
+            <div class="upload-icon">🏆</div>
+            <div class="upload-text">TÜRSAB Belgesi</div>
+            <div class="upload-name" id="un-tursab_doc"></div>
+            <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('tursab_doc', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px">D2 Authority Document <span class="req">*</span></div>
+          <div class="upload-area" id="ua-d2_doc">
+            <div class="upload-icon">📃</div>
+            <div class="upload-text">D2 Yetki Belgesi</div>
+            <div class="upload-name" id="un-d2_doc"></div>
+            <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('d2_doc', this)" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goBack(3)">← Back</button>
+      <button class="btn-next" onclick="goNext(3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Bank Info -->
+  <div class="section-page" id="page4">
+    <div class="card">
+      <div class="card-title">🏦 Bank Information</div>
+      <div class="card-sub">This information will be used for payment transfers. Account holder can be the driver or a first-degree relative.</div>
+      <div class="form-group"><label class="form-label">Bank Name <span class="req">*</span></label>
+        <input class="form-input" id="bank_name" placeholder="e.g. Ziraat Bank, Garanti BBVA" /></div>
+      <div class="form-group"><label class="form-label">Account Holder Name <span class="req">*</span></label>
+        <input class="form-input" id="bank_holder" placeholder="Full name of account holder" /></div>
+      <div class="form-group"><label class="form-label">IBAN <span class="req">*</span></label>
+        <input class="form-input" id="bank_iban" placeholder="TR00 0000 0000 0000 0000 0000 00" /></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goBack(4)">← Back</button>
+      <button class="btn-next" onclick="goNext(4)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Vehicle Exterior -->
+  <div class="section-page" id="page5">
+    <div class="card">
+      <div class="card-title">🚐 Vehicle Exterior Photos</div>
+      <div class="card-sub">Upload 4 exterior photos of your vehicle. License plate must be visible in the front photo.</div>
+      <div class="upload-grid-4">
+        <div>
+          <div class="form-label" style="margin-bottom:6px;text-align:center">Front <span class="req">*</span></div>
+          <div style="text-align:center;font-size:24px;margin-bottom:6px">⬆️🚐</div>
+          <div class="upload-area" id="ua-car_front">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" style="font-size:11px">Front (plate visible)</div>
+            <div class="upload-name" id="un-car_front"></div>
+            <input type="file" class="upload-input" accept="image/*" onchange="handleFile('car_front', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px;text-align:center">Right Side <span class="req">*</span></div>
+          <div style="text-align:center;font-size:24px;margin-bottom:6px">➡️🚐</div>
+          <div class="upload-area" id="ua-car_right">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" style="font-size:11px">Right Side</div>
+            <div class="upload-name" id="un-car_right"></div>
+            <input type="file" class="upload-input" accept="image/*" onchange="handleFile('car_right', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px;text-align:center">Left Side <span class="req">*</span></div>
+          <div style="text-align:center;font-size:24px;margin-bottom:6px">⬅️🚐</div>
+          <div class="upload-area" id="ua-car_left">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" style="font-size:11px">Left Side</div>
+            <div class="upload-name" id="un-car_left"></div>
+            <input type="file" class="upload-input" accept="image/*" onchange="handleFile('car_left', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px;text-align:center">Rear <span class="req">*</span></div>
+          <div style="text-align:center;font-size:24px;margin-bottom:6px">⬇️🚐</div>
+          <div class="upload-area" id="ua-car_back">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" style="font-size:11px">Rear</div>
+            <div class="upload-name" id="un-car_back"></div>
+            <input type="file" class="upload-input" accept="image/*" onchange="handleFile('car_back', this)" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goBack(5)">← Back</button>
+      <button class="btn-next" onclick="goNext(5)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Vehicle Interior -->
+  <div class="section-page" id="page6">
+    <div class="card">
+      <div class="card-title">🪑 Vehicle Interior Photos</div>
+      <div class="card-sub">Upload 4 interior photos. Show the full passenger area clearly.</div>
+      <div class="upload-grid">
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Interior Photo 1</div>
+          <div class="upload-area" id="ua-car_interior_1">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" style="font-size:11px">Front seats area</div>
+            <div class="upload-name" id="un-car_interior_1"></div>
+            <input type="file" class="upload-input" accept="image/*" onchange="handleFile('car_interior_1', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Interior Photo 2</div>
+          <div class="upload-area" id="ua-car_interior_2">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" style="font-size:11px">Rear seats area</div>
+            <div class="upload-name" id="un-car_interior_2"></div>
+            <input type="file" class="upload-input" accept="image/*" onchange="handleFile('car_interior_2', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Interior Photo 3</div>
+          <div class="upload-area" id="ua-car_interior_3">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" style="font-size:11px">Dashboard</div>
+            <div class="upload-name" id="un-car_interior_3"></div>
+            <input type="file" class="upload-input" accept="image/*" onchange="handleFile('car_interior_3', this)" />
+          </div>
+        </div>
+        <div>
+          <div class="form-label" style="margin-bottom:6px">Interior Photo 4</div>
+          <div class="upload-area" id="ua-car_interior_4">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text" style="font-size:11px">Luggage area</div>
+            <div class="upload-name" id="un-car_interior_4"></div>
+            <input type="file" class="upload-input" accept="image/*" onchange="handleFile('car_interior_4', this)" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="border-color:#2ea8f0">
+      <div class="card-title" style="color:#2ea8f0">📋 Review & Submit</div>
+      <div class="card-sub">Please make sure all required documents are uploaded before submitting.</div>
+      <div id="reviewList" style="font-size:13px;line-height:2;color:#8b949e"></div>
+    </div>
+
+    <button class="btn btn-primary" id="submitBtn" onclick="submitApplication()">Submit Application ✓</button>
+
+    <div class="nav-btns" style="margin-top:1rem">
+      <button class="btn-back" onclick="goBack(6)">← Back</button>
+      <span></span>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Application Submitted!</div>
+    <div class="success-sub">Thank you for applying to join Airports Transfer Turkey.<br>We will review your documents and contact you within 2–3 business days.<br><br>📧 A confirmation will be sent to your email.</div>
+  </div>
+
+</div>
+
+<script>
+const API = 'https://home-production-6910.up.railway.app';
+var currentPage = 1;
+var files = {};
+
+function handleFile(key, input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    files[key] = e.target.result; // base64
+    var ua = document.getElementById('ua-' + key);
+    var un = document.getElementById('un-' + key);
+    if (ua) { ua.classList.add('has-file'); ua.classList.remove('error'); }
+    if (un) un.textContent = '✓ ' + file.name.slice(0, 25);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showError(msg) {
+  var el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function hideError() {
+  document.getElementById('errorMsg').style.display = 'none';
+}
+
+function validatePage(page) {
+  hideError();
+  if (page === 1) {
+    var name = document.getElementById('full_name').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var email = document.getElementById('email').value.trim();
+    if (!name) { document.getElementById('full_name').classList.add('error'); showError('Please enter your full name.'); return false; }
+    if (!phone) { document.getElementById('phone').classList.add('error'); showError('Please enter your phone number.'); return false; }
+    if (!email || !email.includes('@')) { document.getElementById('email').classList.add('error'); showError('Please enter a valid email address.'); return false; }
+    if (!files.photo) { document.getElementById('ua-photo').classList.add('error'); showError('Please upload your profile photo.'); return false; }
+  }
+  if (page === 2) {
+    var required = ['id_front','id_back','license_front','license_back','criminal_record','residence_doc'];
+    for (var r of required) {
+      if (!files[r]) { document.getElementById('ua-' + r).classList.add('error'); showError('Please upload all required documents.'); return false; }
+    }
+  }
+  if (page === 3) {
+    if (!files.tursab_doc) { document.getElementById('ua-tursab_doc').classList.add('error'); showError('Please upload your TÜRSAB certificate.'); return false; }
+    if (!files.d2_doc) { document.getElementById('ua-d2_doc').classList.add('error'); showError('Please upload your D2 authority document.'); return false; }
+  }
+  if (page === 4) {
+    var iban = document.getElementById('bank_iban').value.trim();
+    var holder = document.getElementById('bank_holder').value.trim();
+    var bname = document.getElementById('bank_name').value.trim();
+    if (!bname) { document.getElementById('bank_name').classList.add('error'); showError('Please enter bank name.'); return false; }
+    if (!holder) { document.getElementById('bank_holder').classList.add('error'); showError('Please enter account holder name.'); return false; }
+    if (!iban) { document.getElementById('bank_iban').classList.add('error'); showError('Please enter IBAN.'); return false; }
+  }
+  if (page === 5) {
+    var extRequired = ['car_front','car_right','car_left','car_back'];
+    for (var r of extRequired) {
+      if (!files[r]) { document.getElementById('ua-' + r).classList.add('error'); showError('Please upload all 4 exterior vehicle photos.'); return false; }
+    }
+  }
+  return true;
+}
+
+function goNext(page) {
+  if (!validatePage(page)) return;
+  showPage(page + 1);
+  if (page + 1 === 6) buildReview();
+}
+
+function goBack(page) {
+  showPage(page - 1);
+}
+
+function showPage(n) {
+  for (var i = 1; i <= 6; i++) {
+    var pg = document.getElementById('page' + i);
+    var st = document.getElementById('step' + i);
+    if (pg) pg.className = 'section-page' + (i === n ? ' active' : '');
+    if (st) {
+      st.className = 'step';
+      if (i === n) st.className += ' active';
+      else if (i < n) st.className += ' done';
+    }
+  }
+  currentPage = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function buildReview() {
+  var items = [
+    ['Photo', files.photo], ['ID Front', files.id_front], ['ID Back', files.id_back],
+    ['License Front', files.license_front], ['License Back', files.license_back],
+    ['Criminal Record', files.criminal_record], ['Residence Doc', files.residence_doc],
+    ['TÜRSAB', files.tursab_doc], ['D2 Doc', files.d2_doc],
+    ['Car Front', files.car_front], ['Car Right', files.car_right],
+    ['Car Left', files.car_left], ['Car Back', files.car_back],
+    ['Interior 1', files.car_interior_1], ['Interior 2', files.car_interior_2],
+    ['Interior 3', files.car_interior_3], ['Interior 4', files.car_interior_4],
+  ];
+  var html = items.map(function(i) {
+    return '<div>' + (i[1] ? '✅' : '⬜') + ' ' + i[0] + '</div>';
+  }).join('');
+  document.getElementById('reviewList').innerHTML = html;
+}
+
+async function submitApplication() {
+  if (!validatePage(6)) return;
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  hideError();
+
+  var payload = {
+    full_name: document.getElementById('full_name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    bank_name: document.getElementById('bank_name').value.trim(),
+    bank_holder: document.getElementById('bank_holder').value.trim(),
+    bank_iban: document.getElementById('bank_iban').value.trim(),
+    ...files,
+  };
+
+  try {
+    var res = await fetch(API + '/api/driver-applications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+    // Show success
+    document.getElementById('progressBar').style.display = 'none';
+    for (var i = 1; i <= 6; i++) { var p = document.getElementById('page' + i); if (p) p.style.display = 'none'; }
+    document.getElementById('successScreen').style.display = 'block';
+  } catch (err) {
+    showError('Error: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Submit Application ✓';
+  }
+}
+</script>
+</body>
+</html>

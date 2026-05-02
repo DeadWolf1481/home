@@ -343,6 +343,7 @@ const ROLE_ACCESS = {
   admin:      ['reservations', 'content', 'vehicles', 'accounting', 'settings', 'messages'],
   accounting: ['reservations', 'accounting', 'messages'],
   editor:     ['content', 'vehicles'],
+  driver:     ['reservations'],
 };
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
@@ -465,7 +466,7 @@ function applyRoleNav(role) {
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 const SECTIONS = {
   reservations: {
-    subs: ['Transfer Reservations', 'Customers'],
+    subs: currentUser?.role === 'driver' ? ['Transfer Reservations'] : ['Transfer Reservations', 'Customers'],
     render: (sub) => sub === 'Customers' ? renderCustomers() : renderReservations(),
   },
   content: {
@@ -481,7 +482,7 @@ const SECTIONS = {
     render: (sub) => sub === 'Payment Links' ? renderPaymentLinks() : renderAccounting(),
   },
   settings: {
-    subs: ['General', 'Users', 'Extra Price Settings'],
+    subs: ['General', 'Users', 'Extra Price Settings', 'Driver Applications'],
     render: (sub) => renderSettings(sub),
   },
   messages: {
@@ -573,7 +574,7 @@ function renderResRows(rows) {
       <td style="font-family:monospace;font-size:11px;color:var(--blue)">${r.reference?.slice(0,10) || '—'}</td>
       <td>
         <div style="font-weight:600">${r.customer_name}</div>
-        <div style="font-size:11px;color:var(--text2)">${r.email}</div>
+        <div style="font-size:11px;color:var(--text2)">${r.phone || '—'}</div>
       </td>
       <td style="font-size:12px">
         <div>${r.pickup_location}</div>
@@ -586,9 +587,11 @@ function renderResRows(rows) {
       <td>
         <div style="display:flex;gap:6px;align-items:center;">
           <button class="btn btn-ghost btn-sm" onclick="viewReservation(${r.id})">👁</button>
+          ${currentUser?.role !== 'driver' ? `
           <button class="btn btn-success btn-sm" onclick="setResStatus(${r.id},'approved')">✅</button>
           <button class="btn btn-danger btn-sm" onclick="setResStatus(${r.id},'cancelled')">❌</button>
           <button class="btn btn-danger btn-sm" onclick="deleteReservation(${r.id})" title="Delete">🗑</button>
+          ` : ''}
         </div>
       </td>
     </tr>`).join('');
@@ -1613,15 +1616,17 @@ function renderSettings(sub) {
           <div><span class="badge badge-blue">admin</span> — Full access to all sections</div>
           <div><span class="badge badge-green">accounting</span> — Reservations + Accounting + Other only</div>
           <div><span class="badge badge-yellow">editor</span> — Content + Vehicles + Other only</div>
+          <div><span class="badge badge-purple">driver</span> — Transfer Reservations only (no customer details)</div>
         </div>
       </div>`;
 
     api('/api/auth/users').then(users => {
-      const roleColors = { admin: 'badge-blue', accounting: 'badge-green', editor: 'badge-yellow' };
+      const roleColors = { admin: 'badge-blue', accounting: 'badge-green', editor: 'badge-yellow', driver: 'badge-purple' };
       const roleAccess = {
         admin: 'All sections',
         accounting: 'Reservations, Accounting, Other',
         editor: 'Content, Vehicles, Other',
+        driver: 'Transfer Reservations only',
       };
       document.getElementById('usersTbody').innerHTML = users.map(u => `<tr>
         <td>${u.id}</td>
@@ -1759,10 +1764,51 @@ function renderSettings(sub) {
           </tbody>
         </table>
       </div>`;
+  } else if (sub === 'Driver Applications') {
+    mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
+    api('/api/driver-applications').then(apps => {
+      mc.innerHTML = `
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2>Driver Applications</h2>
+            <p>Review and approve driver applications. Accepted drivers receive an email notification.</p>
+          </div>
+          <a href="driver-apply.html" target="_blank" class="btn btn-ghost">Application Form ↗</a>
+        </div>
+        <div class="table-card">
+          <div style="overflow-x:auto">
+          <table>
+            <thead><tr>
+              <th>ID</th><th>Name</th><th>Email</th><th>Phone</th>
+              <th>Bank</th><th>IBAN</th><th>Status</th><th>Applied</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              ${apps.length ? apps.map(a => `<tr>
+                <td>${a.id}</td>
+                <td style="font-weight:600">${a.full_name}</td>
+                <td style="font-size:12px;color:var(--blue)">${a.email}</td>
+                <td style="font-size:12px">${a.phone}</td>
+                <td style="font-size:12px">${a.bank_name || '—'}</td>
+                <td style="font-size:11px;font-family:monospace;color:var(--text2)">${a.bank_iban || '—'}</td>
+                <td>${a.status === 'approved' ? '<span class="badge badge-green">Approved</span>' : a.status === 'rejected' ? '<span class="badge badge-red">Rejected</span>' : '<span class="badge badge-yellow">Pending</span>'}</td>
+                <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(a.created_at)}</td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-ghost btn-sm" onclick="viewDriverApp(${a.id})">👁 View</button>
+                    <button class="btn btn-success btn-sm" onclick="setDriverStatus(${a.id},'approved')">✅</button>
+                    <button class="btn btn-danger btn-sm" onclick="setDriverStatus(${a.id},'rejected')">❌</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteDriverApp(${a.id})">🗑</button>
+                  </div>
+                </td>
+              </tr>`).join('') : '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text2)">No applications yet.</td></tr>'}
+            </tbody>
+          </table>
+          </div>
+        </div>`;
+    }).catch(err => {
+      mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+    });
   }
-}
-
-function openEditUserModal(u) {
   openModal('Edit User', `
     <div class="form-group"><label class="form-label">Full Name</label>
       <input class="form-input" id="eu-name" value="${u.name || ''}" /></div>
@@ -1868,6 +1914,79 @@ async function savePassword(id) {
     toast('Password changed successfully ✅');
     closeModalDirect();
   } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+
+// ─── DRIVER APPLICATIONS ──────────────────────────────────────────────────────
+async function viewDriverApp(id) {
+  try {
+    const a = await api('/api/driver-applications/' + id);
+    const docImg = (label, key) => a[key] ? `<div style="margin-bottom:0.75rem"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">${label}</div><img src="${a[key]}" style="max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--border)" onerror="this.style.display='none'" /></div>` : '';
+    openModal('Driver Application — ' + a.full_name, `
+      <div style="font-size:13px;display:grid;gap:0.5rem;margin-bottom:1rem">
+        <div><b>Email:</b> ${a.email}</div>
+        <div><b>Phone:</b> ${a.phone}</div>
+        <div><b>Bank:</b> ${a.bank_name || '—'} · ${a.bank_holder || '—'}</div>
+        <div><b>IBAN:</b> ${a.bank_iban || '—'}</div>
+        <div><b>Status:</b> ${a.status}</div>
+        ${a.admin_notes ? `<div><b>Notes:</b> ${a.admin_notes}</div>` : ''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        ${docImg('Profile Photo', 'photo')}
+        ${docImg('ID Front', 'id_front')}
+        ${docImg('ID Back', 'id_back')}
+        ${docImg('License Front', 'license_front')}
+        ${docImg('License Back', 'license_back')}
+        ${docImg('Criminal Record', 'criminal_record')}
+        ${docImg('Residence Doc', 'residence_doc')}
+        ${docImg('TÜRSAB', 'tursab_doc')}
+        ${docImg('D2 Doc', 'd2_doc')}
+        ${docImg('Car Front', 'car_front')}
+        ${docImg('Car Right', 'car_right')}
+        ${docImg('Car Left', 'car_left')}
+        ${docImg('Car Back', 'car_back')}
+        ${docImg('Interior 1', 'car_interior_1')}
+        ${docImg('Interior 2', 'car_interior_2')}
+        ${docImg('Interior 3', 'car_interior_3')}
+        ${docImg('Interior 4', 'car_interior_4')}
+      </div>`,
+      `<button class="btn btn-success" onclick="setDriverStatus(${a.id},'approved');closeModalDirect()">✅ Approve</button>
+       <button class="btn btn-danger" onclick="setDriverStatus(${a.id},'rejected');closeModalDirect()">❌ Reject</button>
+       <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>`,
+      true
+    );
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+function setDriverStatus(id, status) {
+  const label = status === 'approved' ? 'Approve' : 'Reject';
+  openModal(label + ' Application', `
+    <p style="font-size:14px;color:var(--text2);margin-bottom:1rem">The applicant will receive an email notification.</p>
+    <div class="form-group"><label class="form-label">Note to applicant (optional)</label>
+      <textarea class="form-textarea" id="driver-note" placeholder="Add a personal note..." style="min-height:80px"></textarea></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="confirmDriverStatus(${id},'${status}')">${label}</button>`
+  );
+}
+
+async function confirmDriverStatus(id, status) {
+  const notes = document.getElementById('driver-note')?.value.trim() || '';
+  try {
+    await api('/api/driver-applications/' + id + '/status', { method: 'PUT', body: JSON.stringify({ status, admin_notes: notes }) });
+    toast(status === 'approved' ? '✅ Approved — email sent' : '❌ Rejected — email sent');
+    closeModalDirect();
+    renderSettings('Driver Applications');
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
+}
+
+async function deleteDriverApp(id) {
+  openConfirm('Delete Application', 'This application will be permanently deleted.', async () => {
+    try {
+      await api('/api/driver-applications/' + id, { method: 'DELETE' });
+      toast('Deleted');
+      renderSettings('Driver Applications');
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
 }
 
 async function saveGeneralSettings() {

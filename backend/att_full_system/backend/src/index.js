@@ -54,6 +54,8 @@ app.use('/api/booking',            require('./routes/booking'));
 app.use('/api/stats',              require('./routes/stats'));
 app.use('/api/payment-links',      require('./routes/paymentLinks'));
 app.use('/api/settings',           require('./routes/settings'));
+app.use('/api/driver-applications',require('./routes/driverApplications'));
+app.use('/api/drivers',            require('./routes/drivers'));
 
 // ── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {

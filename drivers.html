@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Driver Panel | Airports Transfer Turkey</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+#loginPage { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse at 50% 0%, #1a2a3a 0%, #0d1117 70%); }
+.login-box { background: #161b22; border: 1px solid #21262d; border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 420px; text-align: center; }
+.login-logo { font-size: 13px; font-weight: 700; color: #f0c040; letter-spacing: 1px; margin-bottom: 1.5rem; }
+.login-title { font-size: 24px; font-weight: 700; margin-bottom: 0.25rem; }
+.login-sub { font-size: 13px; color: #8b949e; margin-bottom: 2rem; }
+.lf-input { display: block; width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 12px 14px; color: #e6edf3; font-size: 14px; outline: none; margin-bottom: 1rem; transition: border-color 0.2s; }
+.lf-input:focus { border-color: #2ea8f0; }
+.btn-login { width: 100%; background: #2ea8f0; color: white; border: none; border-radius: 8px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.btn-login:hover { background: #1a7fc1; }
+.login-error { background: rgba(248,81,73,0.12); border: 1px solid rgba(248,81,73,0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #f85149; margin-bottom: 1rem; display: none; }
+.login-link { margin-top: 1.25rem; font-size: 13px; color: #8b949e; }
+.login-link a { color: #2ea8f0; text-decoration: none; }
+#app { display: none; flex-direction: column; min-height: 100vh; }
+.top-bar { background: #161b22; border-bottom: 1px solid #21262d; padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+.top-logo { font-size: 14px; font-weight: 700; color: #f0c040; }
+.top-user { font-size: 13px; color: #8b949e; }
+.top-logout { background: none; border: 1px solid #30363d; color: #8b949e; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+.top-logout:hover { border-color: #f85149; color: #f85149; }
+.main { padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+.page-title { font-size: 20px; font-weight: 700; margin-bottom: 0.25rem; }
+.page-sub { font-size: 13px; color: #8b949e; margin-bottom: 1.5rem; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 1.25rem 1.5rem; }
+.stat-label { font-size: 12px; color: #8b949e; margin-bottom: 0.5rem; }
+.stat-value { font-size: 28px; font-weight: 700; }
+.table-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; overflow: hidden; }
+.table-toolbar { padding: 1rem 1.25rem; border-bottom: 1px solid #21262d; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #8b949e; border-bottom: 1px solid #21262d; }
+td { padding: 14px 16px; border-bottom: 1px solid rgba(33,38,45,0.5); font-size: 13px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+.badge { display: inline-block; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 600; }
+.badge-green { background: rgba(63,185,80,0.15); color: #3fb950; }
+.badge-yellow { background: rgba(210,153,34,0.15); color: #d29922; }
+.badge-red { background: rgba(248,81,73,0.15); color: #f85149; }
+.empty { text-align: center; padding: 3rem; color: #8b949e; }
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">AIRPORTS TRANSFER TURKEY</div>
+    <div class="login-title">Driver Panel</div>
+    <div class="login-sub">Sign in to view your transfers</div>
+    <div class="login-error" id="loginError"></div>
+    <input class="lf-input" id="drEmail" type="email" placeholder="Email" />
+    <input class="lf-input" id="drPass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="btn-login" onclick="doLogin()">Sign In</button>
+    <div class="login-link">Want to join? <a href="driver-apply.html">Apply here →</a></div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top-bar">
+    <div class="top-logo">AIRPORTS TRANSFER TURKEY — Driver Panel</div>
+    <div style="display:flex;align-items:center;gap:1rem">
+      <span class="top-user" id="topUser"></span>
+      <button class="top-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="page-title">My Transfers</div>
+    <div class="page-sub">Approved reservations assigned to your fleet</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label" style="color:#2ea8f0">Total Transfers</div><div class="stat-value" id="statTotal">—</div></div>
+      <div class="stat-card"><div class="stat-label" style="color:#3fb950">This Month</div><div class="stat-value" id="statMonth">—</div></div>
+      <div class="stat-card"><div class="stat-label" style="color:#d29922">Upcoming</div><div class="stat-value" id="statUpcoming">—</div></div>
+    </div>
+    <div class="table-card">
+      <div class="table-toolbar" style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-weight:600;font-size:14px">Approved Reservations</span>
+        <button onclick="loadReservations()" style="background:none;border:1px solid #30363d;color:#8b949e;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer">↻ Refresh</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr>
+            <th>Reference</th>
+            <th>Customer</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Date</th>
+            <th>Vehicle</th>
+            <th>Pax</th>
+            <th>Price</th>
+          </tr></thead>
+          <tbody id="resTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://home-production-6910.up.railway.app';
+var driverToken = localStorage.getItem('att_driver_token');
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+async function doLogin() {
+  var email = document.getElementById('drEmail').value.trim();
+  var pass  = document.getElementById('drPass').value;
+  var errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if (!email || !pass) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
+  var btn = document.querySelector('.btn-login');
+  btn.textContent = 'Signing in…'; btn.disabled = true;
+  try {
+    var res = await fetch(API + '/api/drivers/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass }),
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    driverToken = data.token;
+    localStorage.setItem('att_driver_token', driverToken);
+    document.getElementById('topUser').textContent = data.driver.name || data.driver.email;
+    showApp();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally { btn.textContent = 'Sign In'; btn.disabled = false; }
+}
+
+function doLogout() {
+  localStorage.removeItem('att_driver_token');
+  driverToken = null;
+  location.reload();
+}
+
+function showApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('app').style.flexDirection = 'column';
+  loadReservations();
+}
+
+async function loadReservations() {
+  var tbody = document.getElementById('resTbody');
+  tbody.innerHTML = '<tr><td colspan="8" class="empty">Loading…</td></tr>';
+  try {
+    var res = await fetch(API + '/api/drivers/reservations', {
+      headers: { 'Authorization': 'Bearer ' + driverToken },
+    });
+    if (!res.ok) throw new Error('Unauthorized');
+    var rows = await res.json();
+    document.getElementById('statTotal').textContent = rows.length;
+    var now = new Date();
+    var thisMonth = rows.filter(function(r){ return new Date(r.created_at).getMonth() === now.getMonth(); }).length;
+    document.getElementById('statMonth').textContent = thisMonth;
+    document.getElementById('statUpcoming').textContent = rows.filter(function(r){
+      return new Date(r.date) >= now;
+    }).length;
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">No approved reservations yet.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(r){
+      return '<tr>' +
+        '<td style="font-family:monospace;font-size:11px;color:#2ea8f0">' + r.reference + '</td>' +
+        '<td><div style="font-weight:600">' + r.customer_name + '</div><div style="font-size:11px;color:#8b949e">' + r.phone + '</div></td>' +
+        '<td style="font-size:12px;max-width:160px">' + r.pickup_location + '</td>' +
+        '<td style="font-size:12px;max-width:160px">' + r.dropoff_location + '</td>' +
+        '<td style="font-size:12px;white-space:nowrap">' + r.date + '</td>' +
+        '<td style="font-size:12px">' + (r.vehicle ? r.vehicle.name : '—') + '</td>' +
+        '<td>' + r.passengers + ' pax</td>' +
+        '<td style="font-weight:700;color:#f0c040">' + (r.price ? '€' + r.price : '—') + '</td>' +
+      '</tr>';
+    }).join('');
+  } catch (err) {
+    if (err.message === 'Unauthorized') { doLogout(); return; }
+    tbody.innerHTML = '<tr><td colspan="8" class="empty" style="color:#f85149">' + err.message + '</td></tr>';
+  }
+}
+
+// Auto login
+if (driverToken) {
+  fetch(API + '/api/drivers/me', { headers: { 'Authorization': 'Bearer ' + driverToken } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.id) {
+        document.getElementById('topUser').textContent = d.name || d.email;
+        showApp();
+      }
+    }).catch(function(){ localStorage.removeItem('att_driver_token'); });
+}
+</script>
+</body>
+</html>

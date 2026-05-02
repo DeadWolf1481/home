@@ -133,3 +133,58 @@ model ContactMessage {
 
   @@map("contact_messages")
 }
+
+model DriverApplication {
+  id         Int      @id @default(autoincrement())
+  // Personal Info
+  full_name  String
+  email      String
+  phone      String
+  status     String   @default("pending") // pending / approved / rejected
+
+  // Documents (base64 or URL stored as text)
+  photo           String?  // vesikalık
+  id_front        String?  // kimlik ön
+  id_back         String?  // kimlik arka
+  license_front   String?  // ehliyet ön
+  license_back    String?  // ehliyet arka
+  criminal_record String?  // sabıka kaydı
+  residence_doc   String?  // ikametgah
+  tursab_doc      String?  // TÜRSAB belgesi
+  d2_doc          String?  // D2 yetki belgesi
+
+  // Bank Info
+  bank_name       String?
+  bank_holder     String?
+  bank_iban       String?
+
+  // Vehicle Photos
+  car_front       String?
+  car_right       String?
+  car_left        String?
+  car_back        String?
+  car_interior_1  String?
+  car_interior_2  String?
+  car_interior_3  String?
+  car_interior_4  String?
+
+  // Admin notes
+  admin_notes     String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@map("driver_applications")
+}
+
+model Driver {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  name       String
+  phone      String?
+  status     String   @default("active")
+  application_id Int?
+  created_at DateTime @default(now())
+
+  @@map("drivers")
+}
