@@ -363,18 +363,42 @@ const API = 'https://home-production-6910.up.railway.app';
 var currentPage = 1;
 var files = {};
 
+function compressImage(file, callback) {
+  // PDF dosyaları sıkıştırma
+  if (file.type === 'application/pdf') {
+    var reader = new FileReader();
+    reader.onload = function(e) { callback(e.target.result); };
+    reader.readAsDataURL(file);
+    return;
+  }
+  var img = new Image();
+  var url = URL.createObjectURL(file);
+  img.onload = function() {
+    var canvas = document.createElement('canvas');
+    var MAX = 800; // max width/height
+    var w = img.width, h = img.height;
+    if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+    else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    var compressed = canvas.toDataURL('image/jpeg', 0.6); // 60% quality
+    URL.revokeObjectURL(url);
+    callback(compressed);
+  };
+  img.src = url;
+}
+
 function handleFile(key, input) {
   var file = input.files[0];
   if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    files[key] = e.target.result; // base64
-    var ua = document.getElementById('ua-' + key);
-    var un = document.getElementById('un-' + key);
-    if (ua) { ua.classList.add('has-file'); ua.classList.remove('error'); }
+  var ua = document.getElementById('ua-' + key);
+  var un = document.getElementById('un-' + key);
+  if (ua) { ua.style.opacity = '0.5'; }
+  compressImage(file, function(data) {
+    files[key] = data;
+    if (ua) { ua.classList.add('has-file'); ua.classList.remove('error'); ua.style.opacity = '1'; }
     if (un) un.textContent = '✓ ' + file.name.slice(0, 25);
-  };
-  reader.readAsDataURL(file);
+  });
 }
 
 function showError(msg) {

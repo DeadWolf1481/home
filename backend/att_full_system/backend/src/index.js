@@ -26,8 +26,8 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Make prisma available to routes
 app.locals.prisma = prisma;
