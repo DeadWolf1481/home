@@ -1809,6 +1809,9 @@ function renderSettings(sub) {
       mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
     });
   }
+}
+
+function openEditUserModal(u) {
   openModal('Edit User', `
     <div class="form-group"><label class="form-label">Full Name</label>
       <input class="form-input" id="eu-name" value="${u.name || ''}" /></div>
