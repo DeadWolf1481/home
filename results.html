@@ -465,10 +465,8 @@ fetch(API_BASE + '/api/vehicles?status=active')
       } catch(e) {}
 
       finalPrice = Math.max(0, Math.round(finalPrice));
-      var displayPrice = finalPrice !== basePrice
-        ? '<span style="text-decoration:line-through;color:#9ab4cc;font-size:14px;margin-right:4px">€' + basePrice + '</span>€' + finalPrice
-        : '€' + basePrice;
-      if (surcharges.length) priceNote = surcharges.join(' · ');
+      var displayPrice = '€' + finalPrice;
+      var priceNote = 'fixed price · all-inclusive';
 
       // Store adjusted price on vehicle object
       v._finalPrice = finalPrice;
