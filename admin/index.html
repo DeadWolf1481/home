@@ -1754,7 +1754,7 @@ function renderSettings(sub) {
                 ${r.type === 'discount' ? '−' : '+'}${r.value}${r.unit === 'percent' ? '%' : '€'}
               </td>
               <td style="padding:10px 12px;font-size:12px;color:var(--text2)">${r.example || '—'}</td>
-              <td style="padding:10px 12px"><button class="btn btn-danger btn-sm" onclick="deleteLocationRule(${i})">🗑</button></td>
+              <td style="padding:10px 12px"><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="openEditLocationRule(${i})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteLocationRule(${i})">🗑</button></div></td>
             </tr>`).join('') : '<tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text2)">No location rules yet. Add one above.</td></tr>'}
           </tbody>
         </table>
@@ -1900,6 +1900,60 @@ function saveExtraPrices() {
   };
   localStorage.setItem('att_extra_prices_v2', JSON.stringify(data));
   toast('Saved ✅');
+}
+
+function openEditLocationRule(index) {
+  const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
+  const r = (saved.location || [])[index];
+  if (!r) return;
+  openModal('Edit Location Rule', `
+    <div class="form-group"><label class="form-label">Applies When *</label>
+      <select class="form-select" id="lr-field">
+        <option value="from" ${r.field==='from'?'selected':''}>From location contains...</option>
+        <option value="to" ${r.field==='to'?'selected':''}>To location contains...</option>
+        <option value="both" ${r.field==='both'?'selected':''}>From OR To location contains...</option>
+      </select></div>
+    <div class="form-group"><label class="form-label">Location Keyword *</label>
+      <input class="form-input" id="lr-keyword" value="${r.keyword}" /></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Type *</label>
+        <select class="form-select" id="lr-type">
+          <option value="surcharge" ${r.type==='surcharge'?'selected':''}>Surcharge</option>
+          <option value="discount" ${r.type==='discount'?'selected':''}>Discount</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">Unit *</label>
+        <select class="form-select" id="lr-unit">
+          <option value="percent" ${r.unit==='percent'?'selected':''}>Percentage (%)</option>
+          <option value="fixed" ${r.unit==='fixed'?'selected':''}>Fixed amount (€)</option>
+        </select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Value *</label>
+      <input class="form-input" id="lr-value" type="number" min="0" value="${r.value}" /></div>
+    <div class="form-group"><label class="form-label">Example</label>
+      <input class="form-input" id="lr-example" value="${r.example||''}" /></div>`,
+    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
+     <button class="btn btn-primary" onclick="updateLocationRule(${index})">Save Changes</button>`
+  );
+}
+
+function updateLocationRule(index) {
+  const keyword = document.getElementById('lr-keyword').value.trim();
+  const value   = document.getElementById('lr-value').value;
+  if (!keyword || !value) return toast('Keyword and value required', 'error');
+  const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
+  if (!saved.location) saved.location = [];
+  saved.location[index] = {
+    field:   document.getElementById('lr-field').value,
+    keyword,
+    type:    document.getElementById('lr-type').value,
+    unit:    document.getElementById('lr-unit').value,
+    value:   parseFloat(value),
+    example: document.getElementById('lr-example').value.trim(),
+  };
+  localStorage.setItem('att_extra_prices_v2', JSON.stringify(saved));
+  toast('Rule updated ✅');
+  closeModalDirect();
+  renderSettings('Extra Price Settings');
 }
 
 function openAddLocationRule() {
