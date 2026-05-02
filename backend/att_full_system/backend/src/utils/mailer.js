@@ -16,70 +16,35 @@ async function sendBookingConfirmation(reservation) {
 </td></tr>
 
 <tr><td style="padding:30px 40px">
-<div style="font-size:24px;font-weight:bold;color:#0a1628;margin-bottom:12px">Booking Received! 🎉</div>
-<div style="font-size:16px;color:#444;line-height:1.6">Dear <b>${reservation.customer_name}</b>, thank you for choosing Airports Transfer Turkey. We have received your booking.</div>
+<div style="font-size:16px;color:#444;line-height:1.6;margin-bottom:20px">Dear <b>${reservation.customer_name}</b>,</div>
+<div style="font-size:16px;color:#333;line-height:1.8">Thank you for choosing Airports Transfer Turkey. We have received your booking and will be in touch shortly to confirm the details.</div>
 </td></tr>
 
 <tr><td style="padding:0 40px 30px">
-<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-radius:10px;border:1px solid #e0e8f0">
-<tr><td style="padding:20px 24px;font-size:16px;font-weight:bold;color:#0a1628;border-bottom:1px solid #e0e8f0">📋 Booking Details</td></tr>
-<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
-  <table width="100%"><tr>
-    <td style="color:#888;font-size:15px;width:150px">Reference</td>
-    <td style="font-weight:bold;color:#b8860b;font-size:16px;font-family:monospace">${reservation.reference}</td>
-  </tr></table>
-</td></tr>
-<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
-  <table width="100%"><tr>
-    <td style="color:#888;font-size:15px;width:150px">From</td>
-    <td style="font-weight:600;font-size:16px;color:#222">${reservation.pickup_location}</td>
-  </tr></table>
-</td></tr>
-<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
-  <table width="100%"><tr>
-    <td style="color:#888;font-size:15px;width:150px">To</td>
-    <td style="font-weight:600;font-size:16px;color:#222">${reservation.dropoff_location}</td>
-  </tr></table>
-</td></tr>
-<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
-  <table width="100%"><tr>
-    <td style="color:#888;font-size:15px;width:150px;vertical-align:top">Date</td>
-    <td style="font-weight:600;font-size:16px;color:#222;white-space:nowrap">${reservation.date}</td>
-  </tr></table>
-</td></tr>
-<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
-  <table width="100%"><tr>
-    <td style="color:#888;font-size:15px;width:150px">Passengers</td>
-    <td style="font-size:16px;color:#222">${reservation.passengers}</td>
-  </tr></table>
-</td></tr>
-${reservation.vehicle_name ? `<tr><td style="padding:14px 24px;border-bottom:1px solid #f0f4f8">
-  <table width="100%"><tr>
-    <td style="color:#888;font-size:15px;width:150px">Vehicle</td>
-    <td style="font-weight:600;font-size:16px;color:#222">${reservation.vehicle_name}</td>
-  </tr></table>
-</td></tr>` : ''}
-${reservation.price ? `<tr><td style="padding:14px 24px">
-  <table width="100%"><tr>
-    <td style="color:#888;font-size:15px;width:150px">Price</td>
-    <td style="font-weight:bold;font-size:22px;color:#0a1628">€${reservation.price}</td>
-  </tr></table>
-</td></tr>` : ''}
-</table>
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #f0c040;border-radius:0 10px 10px 0"><tr>
+<td style="padding:20px 24px;font-size:15px;color:#333;line-height:2">
+<b>Reference:</b> ${reservation.reference}<br>
+<b>From:</b> ${reservation.pickup_location}<br>
+<b>To:</b> ${reservation.dropoff_location}<br>
+<b>Date:</b> ${reservation.date}<br>
+<b>Passengers:</b> ${reservation.passengers}<br>
+${reservation.vehicle_name ? `<b>Vehicle:</b> ${reservation.vehicle_name}<br>` : ''}
+${reservation.price ? `<b>Price:</b> €${reservation.price}<br>` : ''}
+${reservation.flight_number ? `<b>Flight:</b> ${reservation.flight_number}<br>` : ''}
+${reservation.notes ? `<b>Notes:</b> ${reservation.notes}<br>` : ''}
+</td>
+</tr></table>
 </td></tr>
 
 <tr><td style="padding:0 40px 30px">
-<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#e3f2fd" style="border-left:4px solid #2196f3;border-radius:0 8px 8px 0"><tr><td style="padding:16px 20px">
-<div style="font-size:16px;font-weight:bold;color:#1565c0">✈️ Flight Tracking</div>
-<div style="font-size:15px;color:#444;margin-top:4px">We monitor your flight in real time. Delays? Your driver adjusts automatically.</div>
-</td></tr></table>
-</td></tr>
-
-<tr><td style="padding:0 40px 30px">
-<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#fff8e1" style="border-left:4px solid #ffc107;border-radius:0 8px 8px 0"><tr><td style="padding:16px 20px">
-<div style="font-size:16px;font-weight:bold;color:#e65100">💳 Pay on Arrival</div>
-<div style="font-size:15px;color:#444;margin-top:4px">No upfront payment. Pay your driver on the day of travel.</div>
-</td></tr></table>
+<table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #f0c040;border-radius:0 10px 10px 0"><tr>
+<td style="padding:16px 20px;font-size:14px;color:#555;line-height:1.7">
+<b style="color:#0a1628">Airports Transfer Turkey Team</b><br>
+📞 +90 544 102 1414<br>
+✉️ airportstransferturkey@gmail.com<br>
+🌐 airportstransferturkey.com
+</td>
+</tr></table>
 </td></tr>
 
 <tr><td bgcolor="#0a1628" style="padding:28px 40px;text-align:center">
