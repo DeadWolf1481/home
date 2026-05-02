@@ -10,8 +10,9 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
   try {
-    const driver = await prisma.driver.findUnique({ where: { email } });
-    if (!driver) return res.status(401).json({ error: 'Invalid credentials' });
+    const rows = await prisma.$queryRaw`SELECT * FROM drivers WHERE email = ${email} LIMIT 1`;
+    if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
+    const driver = rows[0];
     if (driver.status !== 'active') return res.status(403).json({ error: 'Account is not active' });
     const valid = await bcrypt.compare(password, driver.password);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
@@ -20,20 +21,20 @@ router.post('/login', async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Server error' }); }
 });
 
-// GET /api/drivers/me — driver auth
+// GET /api/drivers/me
 router.get('/me', async (req, res) => {
   const prisma = req.app.locals.prisma;
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) return res.status(401).json({ error: 'No token' });
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const driver = await prisma.driver.findUnique({ where: { id: decoded.id }, select: { id: true, name: true, email: true, phone: true, status: true } });
-    if (!driver) return res.status(401).json({ error: 'Not found' });
-    res.json(driver);
+    const rows = await prisma.$queryRaw`SELECT id, name, email, phone, status FROM drivers WHERE id = ${decoded.id} LIMIT 1`;
+    if (!rows.length) return res.status(401).json({ error: 'Not found' });
+    res.json(rows[0]);
   } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
 });
 
-// GET /api/drivers/reservations — driver sees assigned reservations
+// GET /api/drivers/reservations
 router.get('/reservations', async (req, res) => {
   const prisma = req.app.locals.prisma;
   const token = req.headers.authorization?.replace('Bearer ', '');
