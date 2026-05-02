@@ -1632,9 +1632,9 @@ function renderSettings(sub) {
         <td style="font-size:11px;color:var(--text2)">${fmtDate(u.created_at)}</td>
         <td>
           <div style="display:flex;gap:6px">
-            <button class="btn btn-ghost btn-sm" onclick="openEditUserModal(${JSON.stringify(u).replace(/"/g,'&quot;')})">✏️</button>
+            ${u.email !== 'bekpenturizm@gmail.com' ? `<button class="btn btn-ghost btn-sm" onclick="openEditUserModal(${JSON.stringify(u).replace(/"/g,'&quot;')})">✏️</button>` : ''}
             <button class="btn btn-ghost btn-sm" onclick="openChangePasswordModal(${u.id})">🔑</button>
-            ${currentUser?.role === 'admin' && currentUser?.id !== u.id ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">🗑</button>` : ''}
+            ${currentUser?.role === 'admin' && currentUser?.id !== u.id && u.email !== 'bekpenturizm@gmail.com' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">🗑</button>` : ''}
           </div>
         </td>
       </tr>`).join('');
@@ -1845,6 +1845,8 @@ async function deleteUser(id) {
 function openChangePasswordModal(userId) {
   const id = userId || currentUser?.id;
   openModal('Change Password', `
+    <div class="form-group"><label class="form-label">Current Password *</label>
+      <input class="form-input" id="cp-current" type="password" placeholder="Enter current password" /></div>
     <div class="form-group"><label class="form-label">New Password *</label>
       <input class="form-input" id="cp-new" type="password" placeholder="Min 6 characters" /></div>
     <div class="form-group"><label class="form-label">Confirm New Password *</label>
@@ -1855,13 +1857,15 @@ function openChangePasswordModal(userId) {
 }
 
 async function savePassword(id) {
+  const current = document.getElementById('cp-current').value;
   const np = document.getElementById('cp-new').value;
   const cp = document.getElementById('cp-confirm').value;
+  if (!current) return toast('Please enter your current password', 'error');
   if (!np || np.length < 6) return toast('Password must be at least 6 characters', 'error');
   if (np !== cp) return toast('Passwords do not match', 'error');
   try {
-    await api(`/api/auth/users/${id}/password`, { method: 'PUT', body: JSON.stringify({ password: np }) });
-    toast('Password changed successfully');
+    await api(`/api/auth/users/${id}/password`, { method: 'PUT', body: JSON.stringify({ password: np, currentPassword: current }) });
+    toast('Password changed successfully ✅');
     closeModalDirect();
   } catch (err) { toast('Error: ' + err.message, 'error'); }
 }

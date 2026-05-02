@@ -131,9 +131,15 @@ router.put('/users/:id/password', auth, async (req, res) => {
   if (req.user.role !== 'admin' && req.user.id !== parseInt(req.params.id))
     return res.status(403).json({ error: 'Forbidden' });
   const prisma = req.app.locals.prisma;
-  const { password } = req.body;
+  const { password, currentPassword } = req.body;
   if (!password) return res.status(400).json({ error: 'Password required' });
   try {
+    // Verify current password
+    if (currentPassword) {
+      const user = await prisma.user.findUnique({ where: { id: parseInt(req.params.id) } });
+      const valid = await bcrypt.compare(currentPassword, user.password);
+      if (!valid) return res.status(400).json({ error: 'Current password is incorrect' });
+    }
     const hashed = await bcrypt.hash(password, 12);
     await prisma.user.update({ where: { id: parseInt(req.params.id) }, data: { password: hashed } });
     res.json({ success: true });
