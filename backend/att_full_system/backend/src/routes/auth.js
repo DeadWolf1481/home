@@ -71,7 +71,7 @@ router.post('/users', auth, async (req, res) => {
   const prisma = req.app.locals.prisma;
   const { email, password, name, role } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
-  const validRoles = ['admin', 'accounting', 'editor'];
+  const validRoles = ['admin', 'accounting', 'editor', 'driver'];
   if (role && !validRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' });
   try {
     const hashed = await bcrypt.hash(password, 12);
@@ -92,7 +92,7 @@ router.put('/users/:id', auth, async (req, res) => {
     return res.status(403).json({ error: 'Admin access required' });
   const prisma = req.app.locals.prisma;
   const { name, email, role } = req.body;
-  const validRoles = ['admin', 'accounting', 'editor'];
+  const validRoles = ['admin', 'accounting', 'editor', 'driver'];
   if (role && !validRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' });
   try {
     const user = await prisma.user.update({
