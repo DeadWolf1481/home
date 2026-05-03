@@ -40,7 +40,7 @@ router.get('/me', auth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, role: true, created_at: true },
+      select: { id: true, email: true, name: true, role: true, created_at: true, plain_password: true },
     });
     res.json(user);
   } catch (err) {
@@ -55,7 +55,7 @@ router.get('/users', auth, async (req, res) => {
   const prisma = req.app.locals.prisma;
   try {
     const users = await prisma.user.findMany({
-      select: { id: true, email: true, name: true, role: true, created_at: true },
+      select: { id: true, email: true, name: true, role: true, created_at: true, plain_password: true },
       orderBy: { id: 'asc' },
     });
     res.json(users);
@@ -77,7 +77,7 @@ router.post('/users', auth, async (req, res) => {
     const hashed = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
       data: { email, password: hashed, name: name || null, role: role || 'editor' },
-      select: { id: true, email: true, name: true, role: true, created_at: true },
+      select: { id: true, email: true, name: true, role: true, created_at: true, plain_password: true },
     });
     res.status(201).json(user);
   } catch (err) {
@@ -102,7 +102,7 @@ router.put('/users/:id', auth, async (req, res) => {
         ...(email && { email }),
         ...(role && { role }),
       },
-      select: { id: true, email: true, name: true, role: true, created_at: true },
+      select: { id: true, email: true, name: true, role: true, created_at: true, plain_password: true },
     });
     res.json(user);
   } catch (err) {

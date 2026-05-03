@@ -102,10 +102,10 @@ router.put('/:id/status', auth, async (req, res) => {
         const existingUser = await prisma.$queryRaw`SELECT id FROM users WHERE email = ${app.email} LIMIT 1`;
         if (existingUser.length === 0) {
           await prisma.$queryRaw`
-            INSERT INTO users (name, email, password, role, created_at)
-            VALUES (${app.full_name}, ${app.email}, ${hashedPassword}, 'driver', NOW())`;
+            INSERT INTO users (name, email, password, plain_password, role, created_at)
+            VALUES (${app.full_name}, ${app.email}, ${hashedPassword}, ${plainPassword}, 'driver', NOW())`;
         } else {
-          await prisma.$queryRaw`UPDATE users SET password=${hashedPassword}, role='driver' WHERE email=${app.email}`;
+          await prisma.$queryRaw`UPDATE users SET password=${hashedPassword}, plain_password=${plainPassword}, role='driver' WHERE email=${app.email}`;
         }
         // Save plain password to driver_applications for admin reference
         await prisma.$queryRaw`UPDATE driver_applications SET admin_notes=${('Password: ' + plainPassword + (admin_notes ? ' | Note: ' + admin_notes : ''))} WHERE id=${parseInt(req.params.id)}`;

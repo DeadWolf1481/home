@@ -1766,10 +1766,7 @@ function renderSettings(sub) {
       </div>`;
   } else if (sub === 'Drivers') {
     mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
-    Promise.all([
-      api('/api/auth/users'),
-      api('/api/driver-applications'),
-    ]).then(([users, apps]) => {
+    api('/api/auth/users').then(users => {
       const drivers = users.filter(u => u.role === 'driver');
       mc.innerHTML = `
         <div class="section-header">
@@ -1786,10 +1783,7 @@ function renderSettings(sub) {
             </tr></thead>
             <tbody>
               ${drivers.length ? drivers.map(u => {
-                const app = apps.find(a => a.email === u.email);
-                const note = app?.admin_notes || '';
-                const passMatch = note.match(/Password: ([^\s|]+)/);
-                const plain = passMatch ? passMatch[1] : '••••••••';
+                const plain = u.plain_password || '••••••••';
                 return `<tr>
                   <td style="font-weight:600">${u.name || '—'}</td>
                   <td style="color:var(--blue);font-size:12px">${u.email}</td>
