@@ -1789,8 +1789,9 @@ function renderSettings(sub) {
                   <td style="color:var(--blue);font-size:12px">${u.email}</td>
                   <td>
                     <div style="display:flex;align-items:center;gap:6px">
-                      <span style="font-family:monospace;font-size:13px;color:var(--yellow)">${plain}</span>
-                      <button onclick="navigator.clipboard.writeText('${plain}');toast('Copied!')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:12px">📋</button>
+                      <span id="pw-${u.id}" style="font-family:monospace;font-size:13px;color:var(--yellow)">••••••••</span>
+                      <button onclick="toggleDriverPw('${u.id}','${plain}')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:14px" title="Show/Hide">👁</button>
+                      <button onclick="navigator.clipboard.writeText('${plain}');toast('Copied!')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:14px" title="Copy">📋</button>
                     </div>
                   </td>
                   <td>${statusBadge(u.status || 'active')}</td>
@@ -1966,7 +1967,19 @@ async function savePassword(id) {
 }
 
 
-// ─── DRIVER APPLICATIONS ──────────────────────────────────────────────────────
+function toggleDriverPw(id, plain) {
+  const el = document.getElementById('pw-' + id);
+  if (!el) return;
+  if (el.textContent === '••••••••') {
+    el.textContent = plain;
+    el.style.color = 'var(--green)';
+  } else {
+    el.textContent = '••••••••';
+    el.style.color = 'var(--yellow)';
+  }
+}
+
+
 async function viewDriverApp(id) {
   try {
     const a = await api('/api/driver-applications/' + id);
