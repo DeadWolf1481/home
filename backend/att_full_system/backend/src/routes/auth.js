@@ -40,7 +40,7 @@ router.get('/me', auth, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, role: true, created_at: true, plain_password: true },
+      select: { id: true, email: true, name: true, role: true, created_at: true },
     });
     res.json(user);
   } catch (err) {
@@ -54,13 +54,22 @@ router.get('/users', auth, async (req, res) => {
     return res.status(403).json({ error: 'Admin access required' });
   const prisma = req.app.locals.prisma;
   try {
-    const users = await prisma.user.findMany({
-      select: { id: true, email: true, name: true, role: true, created_at: true, plain_password: true },
-      orderBy: { id: 'asc' },
-    });
+    const users = await prisma.$queryRaw`
+      SELECT id, email, name, role, created_at,
+        CASE WHEN plain_password IS NOT NULL THEN plain_password ELSE NULL END as plain_password
+      FROM users ORDER BY id ASC`;
     res.json(users);
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    // Fallback if plain_password column doesn't exist yet
+    try {
+      const users = await prisma.user.findMany({
+        select: { id: true, email: true, name: true, role: true, created_at: true },
+        orderBy: { id: 'asc' },
+      });
+      res.json(users);
+    } catch(e2) {
+      res.status(500).json({ error: 'Server error' });
+    }
   }
 });
 
@@ -77,7 +86,7 @@ router.post('/users', auth, async (req, res) => {
     const hashed = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
       data: { email, password: hashed, name: name || null, role: role || 'editor' },
-      select: { id: true, email: true, name: true, role: true, created_at: true, plain_password: true },
+      select: { id: true, email: true, name: true, role: true, created_at: true },
     });
     res.status(201).json(user);
   } catch (err) {
@@ -102,7 +111,7 @@ router.put('/users/:id', auth, async (req, res) => {
         ...(email && { email }),
         ...(role && { role }),
       },
-      select: { id: true, email: true, name: true, role: true, created_at: true, plain_password: true },
+      select: { id: true, email: true, name: true, role: true, created_at: true },
     });
     res.json(user);
   } catch (err) {
