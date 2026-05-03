@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const auth = require('../middleware/auth');
+const bcrypt = require('bcryptjs');
 const { Resend } = require('resend');
 
 const resend = new Resend('re_QtVzdob1_CurncEBEbQPnAvEiNxZ9BNVX');
@@ -90,11 +91,50 @@ router.put('/:id/status', auth, async (req, res) => {
     const app = rows[0];
 
     if (status === 'approved') {
+      // Generate 8-char random password
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+      let plainPassword = '';
+      for (let i = 0; i < 8; i++) plainPassword += chars[Math.floor(Math.random() * chars.length)];
+      const hashedPassword = await bcrypt.hash(plainPassword, 12);
+
+      // Add to users table as driver role
+      try {
+        const existingUser = await prisma.$queryRaw`SELECT id FROM users WHERE email = ${app.email} LIMIT 1`;
+        if (existingUser.length === 0) {
+          await prisma.$queryRaw`
+            INSERT INTO users (name, email, password, role, created_at)
+            VALUES (${app.full_name}, ${app.email}, ${hashedPassword}, 'driver', NOW())`;
+        } else {
+          await prisma.$queryRaw`UPDATE users SET password=${hashedPassword}, role='driver' WHERE email=${app.email}`;
+        }
+        // Save plain password to driver_applications for admin reference
+        await prisma.$queryRaw`UPDATE driver_applications SET admin_notes=${('Password: ' + plainPassword + (admin_notes ? ' | Note: ' + admin_notes : ''))} WHERE id=${parseInt(req.params.id)}`;
+      } catch(e) { console.error('User creation error:', e); }
+
+      // Send approval email with password
       const mailResult = await resend.emails.send({
         from: FROM,
         to: app.email,
         subject: '✅ Your Driver Application Has Been Approved — Airports Transfer Turkey',
-        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,sans-serif"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f4f8"><tr><td style="padding:30px 0" align="center"><table width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="border-radius:12px;overflow:hidden"><tr><td bgcolor="#0a1628" style="padding:30px 40px;text-align:center"><div style="font-size:22px;font-weight:bold;color:#f0c040;letter-spacing:2px">AIRPORTS TRANSFER TURKEY</div><div style="font-size:14px;color:#aaa;margin-top:6px">Driver Panel</div></td></tr><tr><td style="padding:30px 40px"><div style="font-size:16px;color:#444;margin-bottom:16px">Dear <b>${app.full_name}</b>,</div><div style="font-size:16px;color:#333;line-height:1.8;margin-bottom:20px">We are pleased to inform you that your driver application has been <b style="color:#2e7d32">approved</b>. Welcome to the Airports Transfer Turkey team!</div><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #f0c040;border-radius:0 10px 10px 0"><tr><td style="padding:16px 20px;font-size:15px;color:#333;line-height:1.8">You can now log in to the driver panel to view your assigned transfers.<br><br>For any questions, contact us via WhatsApp.</td></tr></table>${admin_notes ? `<div style="margin-top:16px;padding:14px;background:#fff8e1;border-left:4px solid #ffc107;font-size:14px;color:#555">${admin_notes}</div>` : ''}</td></tr><tr><td style="padding:0 40px 30px"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #f0c040;border-radius:0 10px 10px 0"><tr><td style="padding:16px 20px;font-size:14px;color:#555;line-height:1.7"><b style="color:#0a1628">Airports Transfer Turkey Team</b><br>📞 +90 544 102 1414<br>✉️ airportstransferturkey@gmail.com</td></tr></table></td></tr><tr><td bgcolor="#0a1628" style="padding:28px 40px;text-align:center"><a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;display:inline-block">WhatsApp: +90 544 102 1414</a></td></tr></table></td></tr></table></body></html>`,
+        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f0f4f8;font-family:Arial,sans-serif"><table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f0f4f8"><tr><td style="padding:30px 0" align="center"><table width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="border-radius:12px;overflow:hidden">
+        <tr><td bgcolor="#0a1628" style="padding:30px 40px;text-align:center"><div style="font-size:22px;font-weight:bold;color:#f0c040;letter-spacing:2px">AIRPORTS TRANSFER TURKEY</div><div style="font-size:14px;color:#aaa;margin-top:6px">Driver Panel</div></td></tr>
+        <tr><td style="padding:30px 40px">
+          <div style="font-size:16px;color:#444;margin-bottom:16px">Dear <b>${app.full_name}</b>,</div>
+          <div style="font-size:16px;color:#333;line-height:1.8;margin-bottom:20px">We are pleased to welcome you to the <b>Airports Transfer Turkey</b> driver team! Your application has been reviewed and approved. Thank you for choosing to work with us.</div>
+          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #f0c040;border-radius:0 10px 10px 0;margin-bottom:20px"><tr><td style="padding:20px 24px;font-size:15px;color:#333;line-height:2">
+            <b>Your Login Credentials:</b><br>
+            📧 Email: <b>${app.email}</b><br>
+            🔑 Password: <b style="font-size:18px;color:#0a1628;letter-spacing:2px">${plainPassword}</b>
+          </td></tr></table>
+          ${admin_notes ? `<div style="margin-bottom:16px;padding:14px;background:#fff8e1;border-left:4px solid #ffc107;font-size:14px;color:#555">${admin_notes}</div>` : ''}
+          <div style="font-size:14px;color:#888;margin-bottom:20px">Please keep your password safe. You can change it after logging in.</div>
+          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f8fafc" style="border-left:4px solid #f0c040;border-radius:0 10px 10px 0"><tr><td style="padding:16px 20px;font-size:14px;color:#555;line-height:1.7">
+            <b style="color:#0a1628">Airports Transfer Turkey Team</b><br>
+            📞 +90 544 102 1414<br>✉️ airportstransferturkey@gmail.com
+          </td></tr></table>
+        </td></tr>
+        <tr><td bgcolor="#0a1628" style="padding:28px 40px;text-align:center"><a href="https://wa.me/905441021414" style="background:#25D366;color:white;text-decoration:none;padding:12px 30px;border-radius:25px;font-size:16px;font-weight:bold;display:inline-block">WhatsApp: +90 544 102 1414</a></td></tr>
+        </table></td></tr></table></body></html>`,
       });
       console.log('Approval mail result:', JSON.stringify(mailResult));
     } else if (status === 'rejected') {

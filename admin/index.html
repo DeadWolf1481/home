@@ -482,7 +482,7 @@ const SECTIONS = {
     render: (sub) => sub === 'Payment Links' ? renderPaymentLinks() : renderAccounting(),
   },
   settings: {
-    subs: ['General', 'Users', 'Extra Price Settings', 'Driver Applications'],
+    subs: ['General', 'Users', 'Drivers', 'Extra Price Settings', 'Driver Applications'],
     render: (sub) => renderSettings(sub),
   },
   messages: {
@@ -1764,6 +1764,58 @@ function renderSettings(sub) {
           </tbody>
         </table>
       </div>`;
+  } else if (sub === 'Drivers') {
+    mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
+    Promise.all([
+      api('/api/auth/users'),
+      api('/api/driver-applications'),
+    ]).then(([users, apps]) => {
+      const drivers = users.filter(u => u.role === 'driver');
+      mc.innerHTML = `
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2>Drivers</h2>
+            <p>Approved drivers with their login credentials.</p>
+          </div>
+        </div>
+        <div class="table-card">
+          <div style="overflow-x:auto">
+          <table>
+            <thead><tr>
+              <th>Name</th><th>Email</th><th>Password</th><th>Status</th><th>Created</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+              ${drivers.length ? drivers.map(u => {
+                const app = apps.find(a => a.email === u.email);
+                const note = app?.admin_notes || '';
+                const passMatch = note.match(/Password: ([^\s|]+)/);
+                const plain = passMatch ? passMatch[1] : '••••••••';
+                return `<tr>
+                  <td style="font-weight:600">${u.name || '—'}</td>
+                  <td style="color:var(--blue);font-size:12px">${u.email}</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <span style="font-family:monospace;font-size:13px;color:var(--yellow)">${plain}</span>
+                      <button onclick="navigator.clipboard.writeText('${plain}');toast('Copied!')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:12px">📋</button>
+                    </div>
+                  </td>
+                  <td>${statusBadge(u.status || 'active')}</td>
+                  <td style="font-size:11px;color:var(--text2)">${fmtDate(u.created_at)}</td>
+                  <td>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-ghost btn-sm" onclick="openChangePasswordModal(${u.id})">🔑</button>
+                      <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">🗑</button>
+                    </div>
+                  </td>
+                </tr>`;
+              }).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">No approved drivers yet.</td></tr>'}
+            </tbody>
+          </table>
+          </div>
+        </div>`;
+    }).catch(err => {
+      mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+    });
   } else if (sub === 'Driver Applications') {
     mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
     api('/api/driver-applications').then(apps => {
