@@ -228,7 +228,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; c
       <div class="form-group"><label class="form-label">Account Holder Name <span class="req">*</span></label>
         <input class="form-input" id="bank_holder" placeholder="Full name of account holder" /></div>
       <div class="form-group"><label class="form-label">IBAN <span class="req">*</span></label>
-        <input class="form-input" id="bank_iban" placeholder="TR00 0000 0000 0000 0000 0000 00" /></div>
+        <input class="form-input" id="bank_iban" placeholder="TR00 0000 0000 0000 0000 0000 00" oninput="formatIBAN(this)" /></div>
     </div>
     <div class="nav-btns">
       <button class="btn-back" onclick="goBack(4)">← Back</button>
@@ -335,6 +335,17 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; c
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-title">🔧 Vehicle Inspection (Muayene)</div>
+      <div class="card-sub">Upload a photo of your vehicle's current inspection certificate (muayene belgesi).</div>
+      <div class="upload-area" id="ua-car_inspection">
+        <div class="upload-icon">📋</div>
+        <div class="upload-text">Muayene Belgesi (JPEG/PNG/PDF) <span style="color:#f85149">*</span></div>
+        <div class="upload-name" id="un-car_inspection"></div>
+        <input type="file" class="upload-input" accept="image/*,application/pdf" onchange="handleFile('car_inspection', this)" />
+      </div>
+    </div>
+
     <div class="card" style="border-color:#2ea8f0">
       <div class="card-title" style="color:#2ea8f0">📋 Review & Submit</div>
       <div class="card-sub">Please make sure all required documents are uploaded before submitting.</div>
@@ -362,6 +373,12 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; c
 const API = 'https://home-production-6910.up.railway.app';
 var currentPage = 1;
 var files = {};
+
+function formatIBAN(input) {
+  var val = input.value.replace(/\s/g, '').toUpperCase();
+  var formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+  input.value = formatted;
+}
 
 function compressImage(file, callback) {
   // PDF dosyaları sıkıştırma
@@ -447,6 +464,9 @@ function validatePage(page) {
       if (!files[r]) { document.getElementById('ua-' + r).classList.add('error'); showError('Please upload all 4 exterior vehicle photos.'); return false; }
     }
   }
+  if (page === 6) {
+    if (!files.car_inspection) { document.getElementById('ua-car_inspection').classList.add('error'); showError('Please upload your vehicle inspection certificate.'); return false; }
+  }
   return true;
 }
 
@@ -485,6 +505,7 @@ function buildReview() {
     ['Car Left', files.car_left], ['Car Back', files.car_back],
     ['Interior 1', files.car_interior_1], ['Interior 2', files.car_interior_2],
     ['Interior 3', files.car_interior_3], ['Interior 4', files.car_interior_4],
+    ['Muayene', files.car_inspection],
   ];
   var html = items.map(function(i) {
     return '<div>' + (i[1] ? '✅' : '⬜') + ' ' + i[0] + '</div>';
@@ -505,7 +526,7 @@ async function submitApplication() {
     phone: document.getElementById('phone').value.trim(),
     bank_name: document.getElementById('bank_name').value.trim(),
     bank_holder: document.getElementById('bank_holder').value.trim(),
-    bank_iban: document.getElementById('bank_iban').value.trim(),
+    bank_iban: document.getElementById('bank_iban').value.replace(/\s/g, ''),
     ...files,
   };
 

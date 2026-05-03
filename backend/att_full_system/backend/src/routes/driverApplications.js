@@ -25,13 +25,14 @@ router.post('/', async (req, res) => {
     const existing = await prisma.$queryRaw`SELECT id FROM driver_applications WHERE email = ${email} LIMIT 1`;
     if (existing.length > 0) return res.status(400).json({ error: 'An application with this email already exists' });
 
+    const { car_inspection } = req.body;
     const result = await prisma.$queryRaw`
       INSERT INTO driver_applications 
         (full_name, email, phone, photo, id_front, id_back, license_front, license_back,
          criminal_record, residence_doc, tursab_doc, d2_doc,
          bank_name, bank_holder, bank_iban,
          car_front, car_right, car_left, car_back,
-         car_interior_1, car_interior_2, car_interior_3, car_interior_4,
+         car_interior_1, car_interior_2, car_interior_3, car_interior_4, car_inspection,
          status, created_at, updated_at)
       VALUES
         (${full_name}, ${email}, ${phone},
@@ -39,7 +40,7 @@ router.post('/', async (req, res) => {
          ${criminal_record||null}, ${residence_doc||null}, ${tursab_doc||null}, ${d2_doc||null},
          ${bank_name||null}, ${bank_holder||null}, ${bank_iban||null},
          ${car_front||null}, ${car_right||null}, ${car_left||null}, ${car_back||null},
-         ${car_interior_1||null}, ${car_interior_2||null}, ${car_interior_3||null}, ${car_interior_4||null},
+         ${car_interior_1||null}, ${car_interior_2||null}, ${car_interior_3||null}, ${car_interior_4||null}, ${car_inspection||null},
          'pending', NOW(), NOW())
       RETURNING id`;
 
