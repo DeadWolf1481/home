@@ -10,14 +10,13 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
   try {
-    const rows = await prisma.$queryRaw`SELECT * FROM drivers WHERE email = ${email} LIMIT 1`;
-    if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
-    const driver = rows[0];
-    if (driver.status !== 'active') return res.status(403).json({ error: 'Account is not active' });
-    const valid = await bcrypt.compare(password, driver.password);
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    if (user.role !== 'driver') return res.status(403).json({ error: 'Access denied' });
+    const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
-    const token = jwt.sign({ id: driver.id, role: 'driver', email: driver.email }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, driver: { id: driver.id, name: driver.name, email: driver.email } });
+    const token = jwt.sign({ id: user.id, role: 'driver', email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, driver: { id: user.id, name: user.name, email: user.email } });
   } catch (err) { res.status(500).json({ error: 'Server error' }); }
 });
 
@@ -28,9 +27,9 @@ router.get('/me', async (req, res) => {
   if (!token) return res.status(401).json({ error: 'No token' });
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const rows = await prisma.$queryRaw`SELECT id, name, email, phone, status FROM drivers WHERE id = ${decoded.id} LIMIT 1`;
-    if (!rows.length) return res.status(401).json({ error: 'Not found' });
-    res.json(rows[0]);
+    const user = await prisma.user.findUnique({ where: { id: decoded.id }, select: { id: true, name: true, email: true, role: true } });
+    if (!user || user.role !== 'driver') return res.status(401).json({ error: 'Not found' });
+    res.json(user);
   } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
 });
 
