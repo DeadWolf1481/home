@@ -370,10 +370,15 @@ function renderTrips() {
     return;
   }
   list.innerHTML = allRes.map(function(r) {
+    var statusColor = r.status === 'approved' ? '#22c55e' : r.status === 'cancelled' ? '#ef4444' : '#f59e0b';
+    var statusBg = r.status === 'approved' ? '#f0fdf4' : r.status === 'cancelled' ? '#fef2f2' : '#fffbeb';
     return '<div class="trip-card">' +
       '<div class="trip-header">' +
         '<span class="trip-ref">' + r.reference + '</span>' +
-        '<span class="trip-price">' + (r.price ? '€'+r.price : '—') + '</span>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span style="font-size:11px;font-weight:700;color:' + statusColor + ';background:' + statusBg + ';padding:3px 8px;border-radius:6px;text-transform:uppercase">' + r.status + '</span>' +
+          '<span class="trip-price">' + (r.price ? '€'+r.price : '—') + '</span>' +
+        '</div>' +
       '</div>' +
       '<div class="trip-point"><div class="trip-dot from"></div><div class="trip-addr">' + r.pickup_location + '</div></div>' +
       '<div class="trip-line"></div>' +

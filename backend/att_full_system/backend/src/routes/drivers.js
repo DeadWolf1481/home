@@ -41,10 +41,9 @@ router.get('/reservations', async (req, res) => {
   try {
     jwt.verify(token, JWT_SECRET);
     const reservations = await prisma.reservation.findMany({
-      where: { status: 'approved' },
       include: { vehicle: true },
       orderBy: { created_at: 'desc' },
-      take: 50,
+      take: 100,
     });
     res.json(reservations);
   } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
