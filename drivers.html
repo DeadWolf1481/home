@@ -9,6 +9,94 @@
 :root { --bg:#f5f5f7; --card:#fff; --text:#1a1a2e; --text2:#6b7280; --accent:#0a1628; --gold:#f0c040; --green:#22c55e; --red:#ef4444; --blue:#3b82f6; --border:#e5e7eb; }
 body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:480px; margin:0 auto; }
 
+/* 500px+ */
+@media(min-width:500px) {
+  body { max-width:500px; }
+  .app-header { padding:4rem 2rem 6rem; }
+  .stats-row { padding:0 1.5rem; gap:1rem; }
+  .content { padding:0 1.5rem 6.5rem; }
+  .stat-val { font-size:28px; }
+  .driver-name { font-size:22px; }
+  .trip-card { padding:1.5rem; }
+  .trip-price { font-size:22px; }
+}
+
+/* 700px+ */
+@media(min-width:700px) {
+  body { max-width:700px; }
+  .app-header { padding:4.5rem 2.5rem 7rem; }
+  .stats-row { padding:0 2rem; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-top:-3.5rem; }
+  .content { padding:0 2rem 7rem; }
+  .stat-val { font-size:32px; }
+  .stat-lbl { font-size:11px; }
+  .stat-card { padding:1.25rem; border-radius:20px; }
+  .driver-name { font-size:24px; }
+  .driver-avatar { width:68px; height:68px; font-size:26px; }
+  .trip-card { padding:1.75rem; border-radius:20px; }
+  .trip-price { font-size:24px; }
+  .trip-addr { font-size:14px; }
+  .section-title { font-size:20px; }
+  .earn-amount { font-size:52px; }
+  .bottom-nav { padding:1rem 0 1.5rem; }
+  .nav-icon { font-size:26px; }
+  .nav-label { font-size:11px; }
+}
+
+/* 900px+ */
+@media(min-width:900px) {
+  body { max-width:900px; }
+  .app-header { padding:5rem 3rem 8rem; }
+  .stats-row { padding:0 2.5rem; gap:1.5rem; margin-top:-4rem; }
+  .content { padding:0 2.5rem 7.5rem; }
+  #tabTrips .section-title, #tabEarnings .section-title, #tabAccount .section-title { font-size:22px; margin-bottom:1.25rem; }
+  .stat-val { font-size:36px; }
+  .stat-card { padding:1.5rem; }
+  .driver-name { font-size:26px; }
+  .driver-avatar { width:76px; height:76px; font-size:30px; }
+  .driver-profile { gap:1.25rem; }
+  .trip-card { padding:2rem; margin-bottom:1rem; }
+  .trip-price { font-size:26px; }
+  .trip-addr { font-size:15px; }
+  .trip-footer { padding-top:1rem; margin-top:1rem; }
+  .trip-tag { font-size:13px; }
+  .trip-customer { font-size:14px; }
+  .account-item { padding:1.25rem 1.5rem; }
+  .account-label { font-size:15px; }
+  .earn-card { padding:2.5rem; border-radius:24px; }
+  .earn-amount { font-size:60px; }
+  .bottom-nav { padding:1.25rem 2rem 2rem; }
+  .nav-icon { font-size:28px; }
+  .nav-label { font-size:12px; }
+}
+
+/* 1100px+ */
+@media(min-width:1100px) {
+  body { max-width:1100px; }
+  .app-header { padding:5.5rem 4rem 9rem; }
+  .stats-row { padding:0 3rem; gap:2rem; margin-top:-4.5rem; }
+  .content { padding:0 3rem 8rem; }
+  .stat-val { font-size:40px; }
+  .stat-card { padding:1.75rem; border-radius:24px; }
+  .driver-name { font-size:30px; }
+  .driver-avatar { width:88px; height:88px; font-size:36px; }
+  .driver-profile { gap:1.5rem; }
+  .driver-email { font-size:15px; }
+  .trip-card { padding:2.25rem; border-radius:22px; }
+  .trip-price { font-size:30px; }
+  .trip-addr { font-size:16px; }
+  .trip-ref { font-size:12px; padding:5px 10px; }
+  .section-title { font-size:24px; margin-bottom:1.5rem; }
+  .account-item { padding:1.5rem 2rem; }
+  .account-label { font-size:16px; }
+  .account-section { border-radius:20px; }
+  .earn-card { padding:3rem; border-radius:28px; }
+  .earn-amount { font-size:72px; }
+  .earn-label { font-size:15px; }
+  .bottom-nav { padding:1.5rem 3rem 2.25rem; }
+  .nav-icon { font-size:30px; }
+  .nav-label { font-size:13px; }
+}
+
 #loginPage { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; background:var(--accent); }
 .login-logo { font-size:11px; font-weight:800; color:var(--gold); letter-spacing:2px; text-align:center; margin-bottom:0.5rem; }
 .login-title { font-size:28px; font-weight:700; color:white; text-align:center; margin-bottom:0.5rem; }
