@@ -343,7 +343,7 @@ const ROLE_ACCESS = {
   admin:      ['reservations', 'content', 'vehicles', 'accounting', 'settings', 'messages'],
   accounting: ['reservations', 'accounting', 'messages'],
   editor:     ['content', 'vehicles'],
-  driver:     ['reservations'],
+  driver:     [],
 };
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
@@ -432,6 +432,11 @@ async function doLogin() {
     const remember = document.getElementById('rememberMe').checked;
     if (remember) localStorage.setItem('att_token', token);
     else sessionStorage.setItem('att_token', token);
+
+    if (data.user.role === 'driver') {
+      window.location.href = 'drivers.html';
+      return;
+    }
 
     document.getElementById('topBarUser').textContent = `${data.user.name || data.user.email} (${data.user.role})`;
     document.getElementById('loginPage').style.display = 'none';
@@ -2508,6 +2513,7 @@ function filterTable(input, tableId) {
 // ─── AUTO LOGIN (if token exists) ─────────────────────────────────────────────
 if (token) {
   api('/api/auth/me').then(user => {
+    if (user.role === 'driver') { window.location.href = 'drivers.html'; return; }
     currentUser = user;
     document.getElementById('topBarUser').textContent = `${user.name || user.email} (${user.role})`;
     document.getElementById('loginPage').style.display = 'none';
