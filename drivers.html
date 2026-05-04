@@ -2,100 +2,183 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Driver Panel | Airports Transfer Turkey</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Driver Panel | ATT</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
-#loginPage { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse at 50% 0%, #1a2a3a 0%, #0d1117 70%); }
-.login-box { background: #161b22; border: 1px solid #21262d; border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 420px; text-align: center; }
-.login-logo { font-size: 13px; font-weight: 700; color: #f0c040; letter-spacing: 1px; margin-bottom: 1.5rem; }
-.login-title { font-size: 24px; font-weight: 700; margin-bottom: 0.25rem; }
-.login-sub { font-size: 13px; color: #8b949e; margin-bottom: 2rem; }
-.lf-input { display: block; width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 12px 14px; color: #e6edf3; font-size: 14px; outline: none; margin-bottom: 1rem; transition: border-color 0.2s; }
-.lf-input:focus { border-color: #2ea8f0; }
-.btn-login { width: 100%; background: #2ea8f0; color: white; border: none; border-radius: 8px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; }
-.btn-login:hover { background: #1a7fc1; }
-.login-error { background: rgba(248,81,73,0.12); border: 1px solid rgba(248,81,73,0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #f85149; margin-bottom: 1rem; display: none; }
-.login-link { margin-top: 1.25rem; font-size: 13px; color: #8b949e; }
-.login-link a { color: #2ea8f0; text-decoration: none; }
-#app { display: none; flex-direction: column; min-height: 100vh; }
-.top-bar { background: #161b22; border-bottom: 1px solid #21262d; padding: 0.75rem 2rem; display: flex; align-items: center; justify-content: space-between; }
-.top-logo { font-size: 14px; font-weight: 700; color: #f0c040; }
-.top-user { font-size: 13px; color: #8b949e; }
-.top-logout { background: none; border: 1px solid #30363d; color: #8b949e; border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
-.top-logout:hover { border-color: #f85149; color: #f85149; }
-.main { padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
-.page-title { font-size: 20px; font-weight: 700; margin-bottom: 0.25rem; }
-.page-sub { font-size: 13px; color: #8b949e; margin-bottom: 1.5rem; }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-.stat-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 1.25rem 1.5rem; }
-.stat-label { font-size: 12px; color: #8b949e; margin-bottom: 0.5rem; }
-.stat-value { font-size: 28px; font-weight: 700; }
-.table-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; overflow: hidden; }
-.table-toolbar { padding: 1rem 1.25rem; border-bottom: 1px solid #21262d; }
-table { width: 100%; border-collapse: collapse; }
-th { padding: 12px 16px; text-align: left; font-size: 12px; font-weight: 600; color: #8b949e; border-bottom: 1px solid #21262d; }
-td { padding: 14px 16px; border-bottom: 1px solid rgba(33,38,45,0.5); font-size: 13px; vertical-align: middle; }
-tr:last-child td { border-bottom: none; }
-.badge { display: inline-block; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 600; }
-.badge-green { background: rgba(63,185,80,0.15); color: #3fb950; }
-.badge-yellow { background: rgba(210,153,34,0.15); color: #d29922; }
-.badge-red { background: rgba(248,81,73,0.15); color: #f85149; }
-.empty { text-align: center; padding: 3rem; color: #8b949e; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root { --bg:#f5f5f7; --card:#fff; --text:#1a1a2e; --text2:#6b7280; --accent:#0a1628; --gold:#f0c040; --green:#22c55e; --red:#ef4444; --blue:#3b82f6; --border:#e5e7eb; }
+body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:480px; margin:0 auto; }
+
+#loginPage { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; background:var(--accent); }
+.login-logo { font-size:11px; font-weight:800; color:var(--gold); letter-spacing:2px; text-align:center; margin-bottom:0.5rem; }
+.login-title { font-size:28px; font-weight:700; color:white; text-align:center; margin-bottom:0.5rem; }
+.login-sub { font-size:14px; color:rgba(255,255,255,0.5); text-align:center; margin-bottom:2rem; }
+.login-card { background:white; border-radius:20px; padding:1.75rem; width:100%; }
+.login-error { background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:10px 14px; font-size:13px; color:var(--red); margin-bottom:1rem; display:none; }
+.lf-label { font-size:12px; font-weight:600; color:var(--text2); margin-bottom:6px; display:block; }
+.lf-input { width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:12px; padding:13px 16px; font-size:15px; color:var(--text); outline:none; margin-bottom:1rem; }
+.lf-input:focus { border-color:var(--accent); }
+.btn-login { width:100%; background:var(--accent); color:white; border:none; border-radius:12px; padding:15px; font-size:16px; font-weight:700; cursor:pointer; }
+.login-link { text-align:center; margin-top:1.25rem; font-size:13px; color:rgba(255,255,255,0.5); }
+.login-link a { color:var(--gold); text-decoration:none; font-weight:600; }
+
+#app { display:none; min-height:100vh; flex-direction:column; }
+.app-header { background:var(--accent); padding:3.5rem 1.5rem 5.5rem; }
+.header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+.header-logo { font-size:11px; font-weight:800; color:var(--gold); letter-spacing:2px; }
+.header-logout { background:rgba(255,255,255,0.1); border:none; color:rgba(255,255,255,0.7); border-radius:8px; padding:6px 14px; font-size:12px; cursor:pointer; }
+.driver-profile { display:flex; align-items:center; gap:1rem; }
+.driver-avatar { width:56px; height:56px; border-radius:50%; background:var(--gold); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:var(--accent); flex-shrink:0; }
+.driver-name { font-size:20px; font-weight:700; color:white; }
+.driver-email { font-size:13px; color:rgba(255,255,255,0.5); margin-top:2px; }
+.driver-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(240,192,64,0.15); border:1px solid rgba(240,192,64,0.3); border-radius:20px; padding:4px 10px; margin-top:8px; }
+.badge-dot { width:7px; height:7px; border-radius:50%; background:var(--gold); }
+.badge-text { font-size:11px; font-weight:700; color:var(--gold); letter-spacing:0.5px; }
+
+.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem; padding:0 1.25rem; margin-top:-3rem; margin-bottom:1.25rem; position:relative; z-index:10; }
+.stat-card { background:white; border-radius:16px; padding:1rem; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+.stat-val { font-size:24px; font-weight:800; color:var(--text); }
+.stat-lbl { font-size:10px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
+
+.content { padding:0 1.25rem 6rem; flex:1; }
+.section-title { font-size:18px; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; }
+.refresh-btn { background:white; border:1.5px solid var(--border); color:var(--text2); border-radius:8px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+
+.trip-card { background:white; border-radius:16px; padding:1.25rem; margin-bottom:0.75rem; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1.5px solid var(--border); }
+.trip-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+.trip-ref { font-size:11px; font-weight:700; color:var(--blue); font-family:monospace; background:#eff6ff; padding:4px 8px; border-radius:6px; }
+.trip-price { font-size:20px; font-weight:800; }
+.trip-point { display:flex; align-items:flex-start; gap:0.75rem; }
+.trip-point+.trip-point { margin-top:0.5rem; }
+.trip-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.trip-dot.from { background:var(--green); }
+.trip-dot.to { background:var(--red); }
+.trip-line { width:1.5px; height:10px; background:var(--border); margin-left:4.25px; }
+.trip-addr { font-size:13px; line-height:1.4; font-weight:500; }
+.trip-footer { display:flex; align-items:center; justify-content:space-between; padding-top:0.875rem; border-top:1.5px solid var(--bg); margin-top:0.875rem; }
+.trip-tag { font-size:12px; color:var(--text2); font-weight:500; }
+.trip-customer { font-size:13px; font-weight:700; }
+
+.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:white; border-top:1.5px solid var(--border); display:flex; padding:0.75rem 0 1.25rem; z-index:100; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; }
+.nav-icon { font-size:22px; }
+.nav-label { font-size:10px; font-weight:600; color:var(--text2); }
+.nav-item.active .nav-label { color:var(--accent); font-weight:700; }
+
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+.empty { text-align:center; padding:3rem 1rem; }
+.empty-icon { font-size:48px; margin-bottom:1rem; }
+.empty-text { font-size:15px; color:var(--text2); line-height:1.6; }
+
+.account-section { background:white; border-radius:16px; overflow:hidden; margin-bottom:1rem; border:1.5px solid var(--border); }
+.account-item { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem; border-bottom:1px solid var(--bg); cursor:pointer; }
+.account-item:last-child { border-bottom:none; }
+.account-left { display:flex; align-items:center; gap:0.75rem; }
+.account-label { font-size:14px; font-weight:600; }
+.account-value { font-size:13px; color:var(--text2); }
+
+.earn-card { background:var(--accent); border-radius:20px; padding:1.75rem; text-align:center; margin-bottom:1rem; }
+.earn-amount { font-size:44px; font-weight:800; color:var(--gold); }
+.earn-label { font-size:13px; color:rgba(255,255,255,0.5); margin-top:4px; }
 </style>
 </head>
 <body>
 
 <div id="loginPage">
-  <div class="login-box">
-    <div class="login-logo">AIRPORTS TRANSFER TURKEY</div>
-    <div class="login-title">Driver Panel</div>
-    <div class="login-sub">Sign in to view your transfers</div>
+  <div class="login-logo">AIRPORTS TRANSFER TURKEY</div>
+  <div class="login-title">Driver Panel</div>
+  <div class="login-sub">Sign in to manage your transfers</div>
+  <div class="login-card">
     <div class="login-error" id="loginError"></div>
-    <input class="lf-input" id="drEmail" type="email" placeholder="Email" />
-    <input class="lf-input" id="drPass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" />
-    <button class="btn-login" onclick="doLogin()">Sign In</button>
-    <div class="login-link">Want to join? <a href="driver-apply.html">Apply here →</a></div>
+    <label class="lf-label">Email Address</label>
+    <input class="lf-input" id="drEmail" type="email" placeholder="your@email.com" />
+    <label class="lf-label">Password</label>
+    <input class="lf-input" id="drPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="btn-login" onclick="doLogin()" id="loginBtn">Sign In</button>
   </div>
+  <div class="login-link">New driver? <a href="driver-apply.html">Apply here →</a></div>
 </div>
 
 <div id="app">
-  <div class="top-bar">
-    <div class="top-logo">AIRPORTS TRANSFER TURKEY — Driver Panel</div>
-    <div style="display:flex;align-items:center;gap:1rem">
-      <span class="top-user" id="topUser"></span>
-      <button class="top-logout" onclick="doLogout()">Sign Out</button>
+  <div class="app-header">
+    <div class="header-top">
+      <div class="header-logo">ATT DRIVER</div>
+      <button class="header-logout" onclick="doLogout()">Sign out</button>
+    </div>
+    <div class="driver-profile">
+      <div class="driver-avatar" id="driverAvatar">?</div>
+      <div>
+        <div class="driver-name" id="driverName">—</div>
+        <div class="driver-email" id="driverEmail">—</div>
+        <div class="driver-badge"><div class="badge-dot"></div><div class="badge-text">ACTIVE DRIVER</div></div>
+      </div>
     </div>
   </div>
-  <div class="main">
-    <div class="page-title">My Transfers</div>
-    <div class="page-sub">Approved reservations assigned to your fleet</div>
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label" style="color:#2ea8f0">Total Transfers</div><div class="stat-value" id="statTotal">—</div></div>
-      <div class="stat-card"><div class="stat-label" style="color:#3fb950">This Month</div><div class="stat-value" id="statMonth">—</div></div>
-      <div class="stat-card"><div class="stat-label" style="color:#d29922">Upcoming</div><div class="stat-value" id="statUpcoming">—</div></div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-card"><div class="stat-val" id="statMonth">0</div><div class="stat-lbl">Month</div></div>
+    <div class="stat-card"><div class="stat-val" id="statUpcoming">0</div><div class="stat-lbl">Upcoming</div></div>
+  </div>
+
+  <div class="content tab-content active" id="tabTrips">
+    <div class="section-title">Upcoming Trips <button class="refresh-btn" onclick="loadReservations()">↻</button></div>
+    <div id="tripsList"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading trips…</div></div></div>
+  </div>
+
+  <div class="content tab-content" id="tabEarnings">
+    <div class="section-title">Earnings</div>
+    <div class="earn-card">
+      <div class="earn-amount" id="earnTotal">€0</div>
+      <div class="earn-label">Total from all trips</div>
     </div>
-    <div class="table-card">
-      <div class="table-toolbar" style="display:flex;align-items:center;justify-content:space-between">
-        <span style="font-weight:600;font-size:14px">Approved Reservations</span>
-        <button onclick="loadReservations()" style="background:none;border:1px solid #30363d;color:#8b949e;border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer">↻ Refresh</button>
+    <div class="account-section">
+      <div class="account-item">
+        <div class="account-left"><span>📅</span><span class="account-label">This Month</span></div>
+        <span class="account-value" id="earnMonth">€0</span>
       </div>
-      <div style="overflow-x:auto">
-        <table>
-          <thead><tr>
-            <th>Reference</th>
-            <th>Customer</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Date</th>
-            <th>Vehicle</th>
-            <th>Pax</th>
-            <th>Price</th>
-          </tr></thead>
-          <tbody id="resTbody"></tbody>
-        </table>
+      <div class="account-item">
+        <div class="account-left"><span>🚐</span><span class="account-label">Total Trips</span></div>
+        <span class="account-value" id="earnTrips">0</span>
       </div>
+    </div>
+  </div>
+
+  <div class="content tab-content" id="tabAccount">
+    <div class="section-title">Account</div>
+    <div class="account-section">
+      <div class="account-item">
+        <div class="account-left"><span>👤</span><span class="account-label">Name</span></div>
+        <span class="account-value" id="accName">—</span>
+      </div>
+      <div class="account-item">
+        <div class="account-left"><span>✉️</span><span class="account-label">Email</span></div>
+        <span class="account-value" id="accEmail">—</span>
+      </div>
+    </div>
+    <div class="account-section">
+      <div class="account-item" onclick="window.open('https://wa.me/905441021414','_blank')">
+        <div class="account-left"><span>💬</span><span class="account-label">Support</span></div>
+        <span style="color:var(--text2)">›</span>
+      </div>
+      <div class="account-item" onclick="doLogout()">
+        <div class="account-left"><span>🚪</span><span class="account-label" style="color:var(--red)">Sign Out</span></div>
+        <span style="color:var(--text2)">›</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('Trips',this)">
+      <div class="nav-icon">🗺️</div><div class="nav-label">Trips</div>
+    </div>
+    <div class="nav-item" onclick="switchTab('Earnings',this)">
+      <div class="nav-icon">💰</div><div class="nav-label">Earnings</div>
+    </div>
+    <div class="nav-item" onclick="switchTab('Account',this)">
+      <div class="nav-icon">👤</div><div class="nav-label">Account</div>
     </div>
   </div>
 </div>
@@ -103,30 +186,34 @@ tr:last-child td { border-bottom: none; }
 <script>
 const API = 'https://home-production-6910.up.railway.app';
 var driverToken = localStorage.getItem('att_driver_token');
+var driverData = null;
+var allRes = [];
 
-function fmtDate(d) {
-  if (!d) return '—';
-  return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric' });
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('tab' + name).classList.add('active');
+  el.classList.add('active');
 }
 
 async function doLogin() {
   var email = document.getElementById('drEmail').value.trim();
   var pass  = document.getElementById('drPass').value;
   var errEl = document.getElementById('loginError');
+  var btn   = document.getElementById('loginBtn');
   errEl.style.display = 'none';
   if (!email || !pass) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
-  var btn = document.querySelector('.btn-login');
   btn.textContent = 'Signing in…'; btn.disabled = true;
   try {
     var res = await fetch(API + '/api/drivers/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pass }),
+      body: JSON.stringify({ email: email, password: pass }),
     });
     var data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
     driverToken = data.token;
     localStorage.setItem('att_driver_token', driverToken);
-    document.getElementById('topUser').textContent = data.driver.name || data.driver.email;
+    driverData = data.driver;
     showApp();
   } catch (err) {
     errEl.textContent = err.message;
@@ -136,62 +223,85 @@ async function doLogin() {
 
 function doLogout() {
   localStorage.removeItem('att_driver_token');
-  driverToken = null;
   location.reload();
 }
 
 function showApp() {
   document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  document.getElementById('app').style.flexDirection = 'column';
+  var appEl = document.getElementById('app');
+  appEl.style.display = 'flex';
+  appEl.style.flexDirection = 'column';
+  var name = (driverData && driverData.name) ? driverData.name : (driverData ? driverData.email : '?');
+  var email = (driverData && driverData.email) ? driverData.email : '';
+  document.getElementById('driverName').textContent = name;
+  document.getElementById('driverEmail').textContent = email;
+  document.getElementById('driverAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('accName').textContent = name;
+  document.getElementById('accEmail').textContent = email;
   loadReservations();
 }
 
 async function loadReservations() {
-  var tbody = document.getElementById('resTbody');
-  tbody.innerHTML = '<tr><td colspan="8" class="empty">Loading…</td></tr>';
+  document.getElementById('tripsList').innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading…</div></div>';
   try {
-    var res = await fetch(API + '/api/drivers/reservations', {
-      headers: { 'Authorization': 'Bearer ' + driverToken },
-    });
+    var res = await fetch(API + '/api/drivers/reservations', { headers: { 'Authorization': 'Bearer ' + driverToken } });
     if (!res.ok) throw new Error('Unauthorized');
-    var rows = await res.json();
-    document.getElementById('statTotal').textContent = rows.length;
-    var now = new Date();
-    var thisMonth = rows.filter(function(r){ return new Date(r.created_at).getMonth() === now.getMonth(); }).length;
-    document.getElementById('statMonth').textContent = thisMonth;
-    document.getElementById('statUpcoming').textContent = rows.filter(function(r){
-      return new Date(r.date) >= now;
-    }).length;
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty">No approved reservations yet.</td></tr>'; return; }
-    tbody.innerHTML = rows.map(function(r){
-      return '<tr>' +
-        '<td style="font-family:monospace;font-size:11px;color:#2ea8f0">' + r.reference + '</td>' +
-        '<td><div style="font-weight:600">' + r.customer_name + '</div><div style="font-size:11px;color:#8b949e">' + r.phone + '</div></td>' +
-        '<td style="font-size:12px;max-width:160px">' + r.pickup_location + '</td>' +
-        '<td style="font-size:12px;max-width:160px">' + r.dropoff_location + '</td>' +
-        '<td style="font-size:12px;white-space:nowrap">' + r.date + '</td>' +
-        '<td style="font-size:12px">' + (r.vehicle ? r.vehicle.name : '—') + '</td>' +
-        '<td>' + r.passengers + ' pax</td>' +
-        '<td style="font-weight:700;color:#f0c040">' + (r.price ? '€' + r.price : '—') + '</td>' +
-      '</tr>';
-    }).join('');
+    allRes = await res.json();
+    updateStats();
+    renderTrips();
   } catch (err) {
     if (err.message === 'Unauthorized') { doLogout(); return; }
-    tbody.innerHTML = '<tr><td colspan="8" class="empty" style="color:#f85149">' + err.message + '</td></tr>';
+    document.getElementById('tripsList').innerHTML = '<div class="empty"><div class="empty-icon">❌</div><div class="empty-text">' + err.message + '</div></div>';
   }
 }
 
-// Auto login
+function updateStats() {
+  var now = new Date();
+  var total = allRes.length;
+  var month = allRes.filter(function(r){ return new Date(r.created_at).getMonth() === now.getMonth(); }).length;
+  var upcoming = allRes.filter(function(r){ return new Date(r.date) >= now; }).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statMonth').textContent = month;
+  document.getElementById('statUpcoming').textContent = upcoming;
+  var totalE = allRes.reduce(function(s,r){ return s+(parseFloat(r.price)||0); }, 0);
+  var monthE = allRes.filter(function(r){ return new Date(r.created_at).getMonth()===now.getMonth(); })
+    .reduce(function(s,r){ return s+(parseFloat(r.price)||0); }, 0);
+  document.getElementById('earnTotal').textContent = '€' + totalE.toFixed(0);
+  document.getElementById('earnMonth').textContent = '€' + monthE.toFixed(0);
+  document.getElementById('earnTrips').textContent = total;
+}
+
+function renderTrips() {
+  var list = document.getElementById('tripsList');
+  if (!allRes.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">🗺️</div><div class="empty-text">No approved trips yet.<br>Check back soon.</div></div>';
+    return;
+  }
+  list.innerHTML = allRes.map(function(r) {
+    return '<div class="trip-card">' +
+      '<div class="trip-header">' +
+        '<span class="trip-ref">' + r.reference + '</span>' +
+        '<span class="trip-price">' + (r.price ? '€'+r.price : '—') + '</span>' +
+      '</div>' +
+      '<div class="trip-point"><div class="trip-dot from"></div><div class="trip-addr">' + r.pickup_location + '</div></div>' +
+      '<div class="trip-line"></div>' +
+      '<div class="trip-point"><div class="trip-dot to"></div><div class="trip-addr">' + r.dropoff_location + '</div></div>' +
+      '<div class="trip-footer">' +
+        '<div>' +
+          '<div class="trip-tag">📅 ' + r.date + '</div>' +
+          '<div class="trip-tag" style="margin-top:4px">👥 ' + r.passengers + ' pax' + (r.vehicle ? ' · 🚐 '+r.vehicle.name : '') + '</div>' +
+        '</div>' +
+        '<div class="trip-customer">' + r.customer_name + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
 if (driverToken) {
   fetch(API + '/api/drivers/me', { headers: { 'Authorization': 'Bearer ' + driverToken } })
     .then(function(r){ return r.json(); })
-    .then(function(d){
-      if (d.id) {
-        document.getElementById('topUser').textContent = d.name || d.email;
-        showApp();
-      }
-    }).catch(function(){ localStorage.removeItem('att_driver_token'); });
+    .then(function(d){ if (d.id) { driverData = d; showApp(); } })
+    .catch(function(){ localStorage.removeItem('att_driver_token'); });
 }
 </script>
 </body>
