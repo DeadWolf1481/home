@@ -215,8 +215,13 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
     <div class="stat-card"><div class="stat-val" id="statUpcoming">0</div><div class="stat-lbl">Upcoming</div></div>
   </div>
 
+  <div class="content tab-content" id="tabOffers">
+    <div class="section-title">Available Offers <button class="refresh-btn" onclick="loadOffers()">↻</button></div>
+    <div id="offersList"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading offers…</div></div></div>
+  </div>
+
   <div class="content tab-content active" id="tabTrips">
-    <div class="section-title">Upcoming Trips <button class="refresh-btn" onclick="loadReservations()">↻</button></div>
+    <div class="section-title">My Trips <button class="refresh-btn" onclick="loadReservations()">↻</button></div>
     <div id="tripsList"><div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading trips…</div></div></div>
   </div>
 
@@ -263,6 +268,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
   </div>
 
   <div class="bottom-nav">
+    <div class="nav-item" onclick="switchTab('Offers',this)">
+      <div class="nav-icon">📋</div><div class="nav-label">Offers</div>
+    </div>
     <div class="nav-item active" onclick="switchTab('Trips',this)">
       <div class="nav-icon">🗺️</div><div class="nav-label">Trips</div>
     </div>
@@ -330,7 +338,63 @@ function showApp() {
   document.getElementById('driverAvatar').textContent = name.charAt(0).toUpperCase();
   document.getElementById('accName').textContent = name;
   document.getElementById('accEmail').textContent = email;
+  loadOffers();
   loadReservations();
+}
+
+async function loadOffers() {
+  document.getElementById('offersList').innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading offers…</div></div>';
+  try {
+    var res = await fetch(API + '/api/drivers/offers', { headers: { 'Authorization': 'Bearer ' + driverToken } });
+    if (!res.ok) throw new Error('Unauthorized');
+    var offers = await res.json();
+    var list = document.getElementById('offersList');
+    if (!offers.length) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No available offers right now.<br>Check back soon.</div></div>';
+      return;
+    }
+    list.innerHTML = offers.map(function(r) {
+      return '<div class="trip-card">' +
+        '<div class="trip-header">' +
+          '<span class="trip-ref">' + r.reference + '</span>' +
+          '<span class="trip-price">' + (r.price ? '€'+r.price : '—') + '</span>' +
+        '</div>' +
+        '<div class="trip-point"><div class="trip-dot from"></div><div class="trip-addr">' + r.pickup_location + '</div></div>' +
+        '<div class="trip-line"></div>' +
+        '<div class="trip-point"><div class="trip-dot to"></div><div class="trip-addr">' + r.dropoff_location + '</div></div>' +
+        '<div class="trip-footer">' +
+          '<div>' +
+            '<div class="trip-tag">📅 ' + r.date + '</div>' +
+            '<div class="trip-tag" style="margin-top:4px">👥 ' + r.passengers + ' pax' + (r.vehicle_name ? ' · 🚐 '+r.vehicle_name : '') + '</div>' +
+          '</div>' +
+          '<button onclick="acceptOffer(' + r.id + ',this)" style="background:var(--green);color:white;border:none;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;">Accept</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch (err) {
+    if (err.message === 'Unauthorized') { doLogout(); return; }
+    document.getElementById('offersList').innerHTML = '<div class="empty"><div class="empty-icon">❌</div><div class="empty-text">' + err.message + '</div></div>';
+  }
+}
+
+async function acceptOffer(id, btn) {
+  btn.textContent = '…'; btn.disabled = true;
+  try {
+    var res = await fetch(API + '/api/drivers/offers/' + id + '/accept', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + driverToken, 'Content-Type': 'application/json' },
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    btn.textContent = '✓ Accepted';
+    btn.style.background = '#6b7280';
+    loadOffers();
+    loadReservations();
+  } catch (err) {
+    btn.textContent = err.message === 'This job has already been taken' ? '⚡ Taken!' : 'Error';
+    btn.style.background = '#ef4444';
+    setTimeout(function(){ loadOffers(); }, 1500);
+  }
 }
 
 async function loadReservations() {
