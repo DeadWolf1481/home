@@ -229,7 +229,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
     <div class="section-title">Earnings</div>
     <div class="earn-card">
       <div class="earn-amount" id="earnTotal">€0</div>
-      <div class="earn-label">Total from all trips</div>
+      <div class="earn-label">Total from completed trips</div>
     </div>
     <div class="account-section">
       <div class="account-item">
@@ -237,9 +237,13 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
         <span class="account-value" id="earnMonth">€0</span>
       </div>
       <div class="account-item">
-        <div class="account-left"><span>🚐</span><span class="account-label">Total Trips</span></div>
+        <div class="account-left"><span>🚐</span><span class="account-label">Completed Trips</span></div>
         <span class="account-value" id="earnTrips">0</span>
       </div>
+    </div>
+    <div class="section-title" style="margin-top:1rem">Trip History</div>
+    <div class="account-section" id="earnList">
+      <div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No completed trips yet.</div></div>
     </div>
   </div>
 
@@ -296,7 +300,6 @@ function switchTab(name, el) {
   el.classList.add('active');
 }
 
-
 async function doLogin() {
   var email = document.getElementById('drEmail').value.trim();
   var pass  = document.getElementById('drPass').value;
@@ -341,6 +344,46 @@ function showApp() {
   document.getElementById('accEmail').textContent = email;
   loadOffers();
   loadReservations();
+  loadEarnings();
+}
+
+async function loadEarnings() {
+  try {
+    var res = await fetch(API + '/api/drivers/earnings', { headers: { 'Authorization': 'Bearer ' + driverToken } });
+    if (!res.ok) return;
+    var earnings = await res.json();
+    var now = new Date();
+    var total = earnings.reduce(function(s, e){ return s + (parseFloat(e.amount)||0); }, 0);
+    var monthEarn = earnings.filter(function(e){ return new Date(e.earned_at).getMonth() === now.getMonth(); })
+      .reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+    document.getElementById('earnTotal').textContent = '€' + total.toFixed(0);
+    document.getElementById('earnMonth').textContent = '€' + monthEarn.toFixed(0);
+    document.getElementById('earnTrips').textContent = earnings.length;
+
+    // Render earnings list
+    var earnList = document.getElementById('earnList');
+    if (earnList) {
+      if (!earnings.length) {
+        earnList.innerHTML = '<div class="empty"><div class="empty-icon">💰</div><div class="empty-text">No completed trips yet.<br>Earnings appear 1 hour after trip completion.</div></div>';
+        return;
+      }
+      earnList.innerHTML = earnings.map(function(e) {
+        return '<div class="account-item">' +
+          '<div class="account-left">' +
+            '<span>🚐</span>' +
+            '<div>' +
+              '<div class="account-label">' + (e.reference || '—') + '</div>' +
+              '<div class="account-value" style="font-size:11px">' + (e.pickup_location ? e.pickup_location.slice(0,30) + '…' : '—') + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-weight:700;color:var(--green);font-size:16px">+€' + parseFloat(e.amount).toFixed(0) + '</div>' +
+            '<div style="font-size:11px;color:var(--text2)">' + (e.date || '') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+  } catch(e) {}
 }
 
 async function loadOffers() {

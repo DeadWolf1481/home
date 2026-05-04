@@ -88,4 +88,19 @@ router.get('/reservations', async (req, res) => {
   } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
 });
 
+// GET /api/drivers/earnings — driver's completed trip earnings
+router.get('/earnings', async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    const decoded = verifyDriver(req);
+    const rows = await prisma.$queryRaw`
+      SELECT de.*, r.pickup_location, r.dropoff_location, r.date, r.reference
+      FROM driver_earnings de
+      LEFT JOIN reservations r ON de.reservation_id = r.id
+      WHERE de.driver_id = ${decoded.id}
+      ORDER BY de.earned_at DESC`;
+    res.json(rows);
+  } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
+});
+
 module.exports = router;
