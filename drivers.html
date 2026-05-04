@@ -7,11 +7,10 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 :root { --bg:#f5f5f7; --card:#fff; --text:#1a1a2e; --text2:#6b7280; --accent:#0a1628; --gold:#f0c040; --green:#22c55e; --red:#ef4444; --blue:#3b82f6; --border:#e5e7eb; }
-body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:480px; margin:0 auto; }
+body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
 /* 500px+ */
 @media(min-width:500px) {
-  body { max-width:500px; }
   .app-header { padding:4rem 2rem 6rem; }
   .stats-row { padding:0 1.5rem; gap:1rem; }
   .content { padding:0 1.5rem 6.5rem; }
@@ -23,7 +22,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
 
 /* 700px+ */
 @media(min-width:700px) {
-  body { max-width:700px; }
+  .login-card { max-width:460px; }
   .app-header { padding:4.5rem 2.5rem 7rem; }
   .stats-row { padding:0 2rem; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-top:-3.5rem; }
   .content { padding:0 2rem 7rem; }
@@ -44,7 +43,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
 
 /* 900px+ */
 @media(min-width:900px) {
-  body { max-width:900px; }
+  .login-card { max-width:520px; }
+  #tabTrips, #tabEarnings, #tabAccount { max-width:860px; margin:0 auto; }
+  .stats-row { max-width:860px; margin-left:auto; margin-right:auto; }
   .app-header { padding:5rem 3rem 8rem; }
   .stats-row { padding:0 2.5rem; gap:1.5rem; margin-top:-4rem; }
   .content { padding:0 2.5rem 7.5rem; }
@@ -71,7 +72,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
 
 /* 1100px+ */
 @media(min-width:1100px) {
-  body { max-width:1100px; }
+  .login-card { max-width:580px; }
+  #tabTrips, #tabEarnings, #tabAccount { max-width:1000px; margin:0 auto; }
+  .stats-row { max-width:1000px; margin-left:auto; margin-right:auto; }
   .app-header { padding:5.5rem 4rem 9rem; }
   .stats-row { padding:0 3rem; gap:2rem; margin-top:-4.5rem; }
   .content { padding:0 3rem 8rem; }
@@ -97,7 +100,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
   .nav-label { font-size:13px; }
 }
 
-#loginPage { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; background:var(--accent); }
+#loginPage { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.25rem; background:var(--accent); }
 .login-logo { font-size:11px; font-weight:800; color:var(--gold); letter-spacing:2px; text-align:center; margin-bottom:0.5rem; }
 .login-title { font-size:28px; font-weight:700; color:white; text-align:center; margin-bottom:0.5rem; }
 .login-sub { font-size:14px; color:rgba(255,255,255,0.5); text-align:center; margin-bottom:2rem; }
@@ -147,7 +150,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
 .trip-tag { font-size:12px; color:var(--text2); font-weight:500; }
 .trip-customer { font-size:13px; font-weight:700; }
 
-.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:white; border-top:1.5px solid var(--border); display:flex; padding:0.75rem 0 1.25rem; z-index:100; }
+.bottom-nav { position:fixed; bottom:0; left:0; right:0; background:white; border-top:1.5px solid var(--border); display:flex; padding:0.75rem 0 1.25rem; z-index:100; }
 .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; }
 .nav-icon { font-size:22px; }
 .nav-label { font-size:10px; font-weight:600; color:var(--text2); }
