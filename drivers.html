@@ -441,6 +441,25 @@ async function acceptOffer(id, btn) {
   }
 }
 
+async function releaseJob(id, btn) {
+  if (!confirm('Release this job back to Offers?')) return;
+  btn.textContent = '…'; btn.disabled = true;
+  try {
+    var res = await fetch(API + '/api/drivers/reservations/' + id + '/release', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + driverToken, 'Content-Type': 'application/json' },
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    loadReservations();
+    loadOffers();
+  } catch (err) {
+    btn.textContent = '↩ Release';
+    btn.disabled = false;
+    alert(err.message);
+  }
+}
+
 async function loadReservations() {
   document.getElementById('tripsList').innerHTML = '<div class="empty"><div class="empty-icon">⏳</div><div class="empty-text">Loading…</div></div>';
   try {
@@ -478,8 +497,9 @@ function renderTrips() {
     return;
   }
   list.innerHTML = allRes.map(function(r) {
-    var statusColor = r.status === 'approved' ? '#22c55e' : r.status === 'cancelled' ? '#ef4444' : '#f59e0b';
-    var statusBg = r.status === 'approved' ? '#f0fdf4' : r.status === 'cancelled' ? '#fef2f2' : '#fffbeb';
+    var statusColor = r.status === 'approved' ? '#22c55e' : r.status === 'completed' ? '#3b82f6' : r.status === 'cancelled' ? '#ef4444' : '#f59e0b';
+    var statusBg = r.status === 'approved' ? '#f0fdf4' : r.status === 'completed' ? '#eff6ff' : r.status === 'cancelled' ? '#fef2f2' : '#fffbeb';
+    var canRelease = r.status === 'approved';
     return '<div class="trip-card">' +
       '<div class="trip-header">' +
         '<span class="trip-ref">' + r.reference + '</span>' +
@@ -494,9 +514,9 @@ function renderTrips() {
       '<div class="trip-footer">' +
         '<div>' +
           '<div class="trip-tag">📅 ' + r.date + '</div>' +
-          '<div class="trip-tag" style="margin-top:4px">👥 ' + r.passengers + ' pax' + (r.vehicle ? ' · 🚐 '+r.vehicle.name : '') + '</div>' +
+          '<div class="trip-tag" style="margin-top:4px">👥 ' + r.passengers + ' pax' + (r.vehicle_name ? ' · 🚐 '+r.vehicle_name : '') + '</div>' +
         '</div>' +
-        '<div class="trip-customer">' + r.customer_name + '</div>' +
+        (canRelease ? '<button onclick="releaseJob(' + r.id + ',this)" style="background:#f5f5f7;color:#ef4444;border:1.5px solid #fecaca;border-radius:10px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;">↩ Release</button>' : '') +
       '</div>' +
     '</div>';
   }).join('');

@@ -88,6 +88,24 @@ router.get('/reservations', async (req, res) => {
   } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
 });
 
+// POST /api/drivers/reservations/:id/release — driver releases a job back to offers
+router.post('/reservations/:id/release', async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    const decoded = verifyDriver(req);
+    const id = parseInt(req.params.id);
+    const rows = await prisma.$queryRaw`SELECT driver_id, status FROM reservations WHERE id = ${id} LIMIT 1`;
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    if (rows[0].driver_id !== decoded.id) return res.status(403).json({ error: 'Not your job' });
+    if (rows[0].status === 'completed') return res.status(400).json({ error: 'Completed jobs cannot be released' });
+    await prisma.$queryRaw`UPDATE reservations SET driver_id = NULL WHERE id = ${id}`;
+    res.json({ success: true });
+  } catch (err) {
+    if (err.message === 'Invalid token' || err.message === 'No token') return res.status(401).json({ error: 'Invalid token' });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /api/drivers/earnings — driver's completed trip earnings
 router.get('/earnings', async (req, res) => {
   const prisma = req.app.locals.prisma;
