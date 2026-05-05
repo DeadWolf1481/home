@@ -64,7 +64,7 @@ router.post('/offers/:id/accept', async (req, res) => {
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     if (rows[0].driver_id) return res.status(409).json({ error: 'This job has already been taken' });
     // Assign driver
-    await prisma.$queryRaw`UPDATE reservations SET driver_id = ${decoded.id} WHERE id = ${id}`;
+    await prisma.$queryRaw`UPDATE reservations SET driver_id = ${decoded.id}, driver_accepted_at = NOW() WHERE id = ${id}`;
     res.json({ success: true });
   } catch (err) {
     if (err.message === 'Invalid token' || err.message === 'No token') return res.status(401).json({ error: 'Invalid token' });

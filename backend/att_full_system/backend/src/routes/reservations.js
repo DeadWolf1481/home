@@ -106,4 +106,21 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
+// GET /api/reservations/drivers-jobs — admin only, reservations with assigned drivers
+router.get('/drivers-jobs', auth, async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    const rows = await prisma.$queryRaw`
+      SELECT r.id, r.reference, r.customer_name, r.pickup_location, r.dropoff_location,
+             r.date, r.status, r.price, r.driver_id, r.driver_accepted_at, r.created_at,
+             u.email as driver_email, u.name as driver_name
+      FROM reservations r
+      LEFT JOIN users u ON r.driver_id = u.id
+      WHERE r.driver_id IS NOT NULL
+      ORDER BY r.driver_accepted_at DESC NULLS LAST
+      LIMIT 100`;
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
 module.exports = router;
