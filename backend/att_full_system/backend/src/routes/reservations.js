@@ -120,7 +120,10 @@ router.get('/drivers-jobs', auth, async (req, res) => {
       ORDER BY r.driver_accepted_at DESC NULLS LAST
       LIMIT 100`;
     res.json(rows);
-  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+  } catch (err) { 
+    console.error('drivers-jobs error:', err.message);
+    res.status(500).json({ error: 'Server error: ' + err.message }); 
+  }
 });
 
 module.exports = router;
