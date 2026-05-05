@@ -35,6 +35,26 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// GET /api/reservations/drivers-jobs — admin only, reservations with assigned drivers
+router.get('/drivers-jobs', auth, async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    const rows = await prisma.$queryRaw`
+      SELECT r.id, r.reference, r.customer_name, r.pickup_location, r.dropoff_location,
+             r.date, r.status, r.price, r.driver_id, r.created_at,
+             u.email as driver_email
+      FROM reservations r
+      LEFT JOIN users u ON r.driver_id = u.id
+      WHERE r.driver_id IS NOT NULL
+      ORDER BY r.created_at DESC
+      LIMIT 100`;
+    res.json(rows);
+  } catch (err) { 
+    console.error('drivers-jobs error:', err.message);
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
 // GET /api/reservations/:id — admin only
 router.get('/:id', auth, async (req, res) => {
   const prisma = req.app.locals.prisma;
@@ -103,26 +123,6 @@ router.delete('/:id', auth, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// GET /api/reservations/drivers-jobs — admin only, reservations with assigned drivers
-router.get('/drivers-jobs', auth, async (req, res) => {
-  const prisma = req.app.locals.prisma;
-  try {
-    const rows = await prisma.$queryRaw`
-      SELECT r.id, r.reference, r.customer_name, r.pickup_location, r.dropoff_location,
-             r.date, r.status, r.price, r.driver_id, r.created_at,
-             u.email as driver_email
-      FROM reservations r
-      LEFT JOIN users u ON r.driver_id = u.id
-      WHERE r.driver_id IS NOT NULL
-      ORDER BY r.created_at DESC
-      LIMIT 100`;
-    res.json(rows);
-  } catch (err) { 
-    console.error('drivers-jobs error:', err.message);
-    res.status(500).json({ error: err.message }); 
   }
 });
 
