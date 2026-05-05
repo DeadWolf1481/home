@@ -42,9 +42,11 @@ router.get('/drivers-jobs', auth, async (req, res) => {
     const rows = await prisma.$queryRaw`
       SELECT r.id, r.reference, r.customer_name, r.pickup_location, r.dropoff_location,
              r.date, r.status, r.price, r.driver_id, r.created_at,
-             u.email as driver_email, u.name as driver_name
+             u.email as driver_email,
+             COALESCE(da.full_name, u.name, u.email) as driver_name
       FROM reservations r
       LEFT JOIN users u ON r.driver_id = u.id
+      LEFT JOIN driver_applications da ON da.email = u.email
       WHERE r.driver_id IS NOT NULL
       ORDER BY r.created_at DESC
       LIMIT 100`;
