@@ -465,7 +465,9 @@ async function loadReservations() {
   try {
     var res = await fetch(API + '/api/drivers/reservations', { headers: { 'Authorization': 'Bearer ' + driverToken } });
     if (!res.ok) throw new Error('Unauthorized');
-    allRes = await res.json();
+    var rows = await res.json();
+    // Filter out completed jobs — they are in Earnings
+    allRes = rows.filter(function(r){ return r.status !== 'completed'; });
     updateStats();
     renderTrips();
   } catch (err) {

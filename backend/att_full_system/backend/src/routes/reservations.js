@@ -42,7 +42,7 @@ router.get('/drivers-jobs', auth, async (req, res) => {
     const rows = await prisma.$queryRaw`
       SELECT r.id, r.reference, r.customer_name, r.pickup_location, r.dropoff_location,
              r.date, r.status, r.price, r.driver_id, r.created_at,
-             u.email as driver_email
+             u.email as driver_email, u.name as driver_name
       FROM reservations r
       LEFT JOIN users u ON r.driver_id = u.id
       WHERE r.driver_id IS NOT NULL
