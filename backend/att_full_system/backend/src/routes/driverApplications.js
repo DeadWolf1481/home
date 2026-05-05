@@ -105,7 +105,7 @@ router.put('/:id/status', auth, async (req, res) => {
             INSERT INTO users (name, email, password, plain_password, role, created_at)
             VALUES (${app.full_name}, ${app.email}, ${hashedPassword}, ${plainPassword}, 'driver', NOW())`;
         } else {
-          await prisma.$queryRaw`UPDATE users SET password=${hashedPassword}, plain_password=${plainPassword}, role='driver' WHERE email=${app.email}`;
+          await prisma.$queryRaw`UPDATE users SET name=${app.full_name}, password=${hashedPassword}, plain_password=${plainPassword}, role='driver' WHERE email=${app.email}`;
         }
         // Save plain password to driver_applications for admin reference
         await prisma.$queryRaw`UPDATE driver_applications SET admin_notes=${('Password: ' + plainPassword + (admin_notes ? ' | Note: ' + admin_notes : ''))} WHERE id=${parseInt(req.params.id)}`;
