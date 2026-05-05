@@ -471,7 +471,7 @@ function applyRoleNav(role) {
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 const SECTIONS = {
   reservations: {
-    subs: currentUser?.role === 'driver' ? ['Transfer Reservations'] : ['Transfer Reservations', "Drivers' Jobs", 'Customers'],
+    subs: ['Transfer Reservations', "Drivers' Jobs", 'Customers'],
     render: (sub) => sub === 'Customers' ? renderCustomers() : sub === "Drivers' Jobs" ? renderDriversJobs() : renderReservations(),
   },
   content: {
