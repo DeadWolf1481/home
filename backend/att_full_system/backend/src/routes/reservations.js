@@ -113,7 +113,7 @@ router.get('/drivers-jobs', auth, async (req, res) => {
     const rows = await prisma.$queryRaw`
       SELECT r.id, r.reference, r.customer_name, r.pickup_location, r.dropoff_location,
              r.date, r.status, r.price, r.driver_id, r.created_at,
-             u.email as driver_email, u.name as driver_name
+             u.email as driver_email
       FROM reservations r
       LEFT JOIN users u ON r.driver_id = u.id
       WHERE r.driver_id IS NOT NULL
@@ -121,7 +121,7 @@ router.get('/drivers-jobs', auth, async (req, res) => {
       LIMIT 100`;
     res.json(rows);
   } catch (err) { 
-    console.error('drivers-jobs error:', err.message, err.stack);
+    console.error('drivers-jobs error:', err.message);
     res.status(500).json({ error: err.message }); 
   }
 });
