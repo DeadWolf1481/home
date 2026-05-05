@@ -43,10 +43,14 @@ router.get('/drivers-jobs', auth, async (req, res) => {
       SELECT r.id, r.reference, r.customer_name, r.pickup_location, r.dropoff_location,
              r.date, r.status, r.price, r.driver_id, r.created_at,
              u.email as driver_email,
-             COALESCE(da.full_name, u.name, u.email) as driver_name
+             da.phone as driver_phone
       FROM reservations r
       LEFT JOIN users u ON r.driver_id = u.id
-      LEFT JOIN driver_applications da ON da.email = u.email
+      LEFT JOIN LATERAL (
+        SELECT phone FROM driver_applications 
+        WHERE email = u.email 
+        ORDER BY id ASC LIMIT 1
+      ) da ON true
       WHERE r.driver_id IS NOT NULL
       ORDER BY r.created_at DESC
       LIMIT 100`;
