@@ -540,7 +540,7 @@ async function renderDriversJobs() {
         <table>
           <thead><tr>
             <th>Reference</th>
-            <th>Driver</th>
+            <th>Phone</th>
             <th>Driver Email</th>
             <th>Route</th>
             <th>Date</th>
@@ -551,7 +551,7 @@ async function renderDriversJobs() {
           <tbody>
             ${rows.length ? rows.map(r => `<tr>
               <td style="font-family:monospace;font-size:11px;color:var(--blue)">${r.reference}</td>
-              <td style="font-weight:600">${r.driver_name || r.driver_email || '—'}</td>
+              <td style="font-weight:600">${r.driver_phone || '—'}</td>
               <td style="font-size:12px;color:var(--blue)">${r.driver_email || '—'}</td>
               <td style="font-size:12px">
                 <div>${r.pickup_location}</div>
