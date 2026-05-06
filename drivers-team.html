@@ -87,7 +87,27 @@ nav{background:var(--dark);padding:0 5%;display:flex;align-items:center;justify-
 .loading{text-align:center;padding:5rem;color:var(--text2);}
 
 /* FOOTER */
-footer{background:var(--dark);color:rgba(255,255,255,0.5);padding:3rem 5% 2rem;}
+.footer-rich { background: #07101e; padding: 0; margin-top: 0; }
+.footer-inner { max-width: 1300px; margin: 0 auto; padding: 3.5rem 2rem 2.5rem; display: grid; grid-template-columns: 1.2fr 1.4fr 1.2fr; gap: 2rem; }
+.footer-logo { font-size: 22px; font-weight: 800; color: #f0c040; letter-spacing: 1px; line-height: 1.25; margin-bottom: 1.5rem; }
+.footer-contact-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+.footer-contact-item { display: flex; align-items: flex-start; gap: 0.6rem; font-size: 13px; color: rgba(255,255,255,0.65); text-decoration: none; transition: color 0.2s; line-height: 1.5; }
+.footer-contact-item:hover { color: #f0c040; }
+.footer-socials { display: flex; gap: 0.6rem; }
+.social-btn { width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: background 0.2s; }
+.social-btn:hover { background: rgba(255,255,255,0.22); }
+.social-btn img { width: 20px; height: 20px; object-fit: contain; }
+.footer-col-title { font-size: 18px; font-weight: 700; color: white; margin-bottom: 1.25rem; }
+.footer-menu { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; padding: 0; }
+.footer-menu a { font-size: 14px; color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s; }
+.footer-menu a:hover { color: #f0c040; }
+.footer-menu-2col { display: flex; gap: 1.5rem; }
+.footer-bottom { border-top: 0.5px solid rgba(255,255,255,0.06); text-align: center; padding: 1.25rem 2rem; font-size: 12px; color: rgba(180,200,220,0.35); letter-spacing: 0.3px; }
+.tursab-badge { display: block; text-decoration: none; }
+.tursab-img { width: 220px; border-radius: 10px; transition: box-shadow 0.2s; }
+.tursab-badge:hover .tursab-img { box-shadow: 0 4px 20px rgba(240,192,64,0.35); }
+@media (max-width: 960px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 1.5rem; } .footer-col.footer-tursab { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; } .tursab-img { width: 200px; } }
+@media (max-width: 600px) { .footer-inner { grid-template-columns: 1fr; gap: 1.5rem; } }
 
 /* RESPONSIVE */
 @media(max-width:700px){
@@ -163,28 +183,53 @@ footer{background:var(--dark);color:rgba(255,255,255,0.5);padding:3rem 5% 2rem;}
   </div>
 </div>
 
-<footer>
-  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-bottom:2rem;">
-    <div>
-      <div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:16px;font-weight:700;letter-spacing:2px;margin-bottom:1rem;">AIRPORTS TRANSFER TURKEY</div>
-      <p style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.5);">Professional airport transfer services in Istanbul and across Turkey.</p>
-    </div>
-    <div>
-      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:1rem;">Quick Menu</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
-        <a href="index.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ Home</a>
-        <a href="about-us.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ About Us</a>
-        <a href="blog.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ Blog</a>
-        <a href="drivers-team.html" style="color:var(--gold);text-decoration:none;font-size:13px;">→ Our Team</a>
-        <a href="contact.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ Contact</a>
-        <a href="driver-apply.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ Join Our Team</a>
+<footer class="footer-rich">
+    <div class="footer-inner">
+      <div class="footer-col footer-brand">
+        <div class="footer-logo">AIRPORTS<br>TRANSFER TURKEY</div>
+        <div class="footer-contact-list">
+          <a href="tel:+905441021414" class="footer-contact-item"><span class="fci-icon">📞</span> +90 544 102 1414</a>
+          <a href="mailto:bekpenturizm@gmail.com" class="footer-contact-item"><span class="fci-icon">✉️</span> bekpenturizm@gmail.com</a>
+          <div class="footer-contact-item"><span class="fci-icon">📍</span><span>Esenyalı Mah. Mezkur Sk.<br>Nizamettin Otluoğlu Apt. NO:26 A<br>Pendik / Istanbul</span></div>
+        </div>
+        <div class="footer-socials">
+          <a href="https://www.instagram.com/bekpen.turizm/" target="_blank" rel="noopener" class="social-btn"><img src="pngler/instagram.png" alt="Instagram"></a>
+          <a href="https://www.facebook.com/profile.php?id=61573780439659" target="_blank" rel="noopener" class="social-btn"><img src="pngler/facebook.png" alt="Facebook"></a>
+          <a href="https://x.com/BekpenTurizm" target="_blank" rel="noopener" class="social-btn"><img src="pngler/twitter.png" alt="X/Twitter"></a>
+          <a href="https://www.youtube.com/@BekpenTurizm/featured" target="_blank" rel="noopener" class="social-btn"><img src="pngler/youtube.png" alt="YouTube"></a>
+          <a href="https://www.tiktok.com/@bekpen.turizm?lang=tr-TR" target="_blank" rel="noopener" class="social-btn"><img src="pngler/tiktok.png" alt="TikTok"></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Quick Menu</div>
+        <div class="footer-menu-2col">
+          <ul class="footer-menu">
+            <li><a href="index.html">→ Home Page</a></li>
+            <li><a href="about-us.html">→ About Us</a></li>
+            <li><a href="index.html#vehicles">→ Our Fleet</a></li>
+            <li><a href="index.html#how">→ How It Works</a></li>
+            <li><a href="blog.html">→ Blog</a></li>
+            <li><a href="drivers-team.html">→ Our Team</a></li>
+            <li><a href="contact.html">→ Contact</a></li>
+          </ul>
+          <ul class="footer-menu">
+            <li><a href="terms.html">→ Terms of Use</a></li>
+            <li><a href="privacy.html">→ Privacy Policy</a></li>
+            <li><a href="distance-sales.html">→ Distance Sales Agreement</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-col footer-tursab">
+        <div class="footer-col-title">TURSAB</div>
+        <a href="https://www.tursab.org.tr/tr/ddsv" target="_blank" rel="noopener" class="tursab-badge">
+          <img src="pngler/tursab.png" alt="TURSAB Verified" class="tursab-img" onerror="this.onerror=null;this.src='https://bekpentravel.com/upload/64ae5e1f2f5d7-1689148959.png';" />
+        </a>
       </div>
     </div>
-  </div>
-  <div style="max-width:1100px;margin:0 auto;border-top:1px solid rgba(255,255,255,0.1);padding-top:1.5rem;text-align:center;font-size:12px;">
-    © 2026 Airports Transfer Turkey. All rights reserved.
-  </div>
-</footer>
+    <div class="footer-bottom">
+      <span>© 2026 Airports Transfer Turkey. All rights reserved.</span>
+    </div>
+  </footer>
 
 <script>
 function toggleMenu() {
