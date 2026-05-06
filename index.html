@@ -45,7 +45,7 @@ body { padding-top: 0; }
 .hero-title { font-size: 42px; font-weight: 600; line-height: 1.2; margin-bottom: 0.75rem; }
 .hero-title span { color: #f0c040; }
 .hero-sub { font-size: 16px; color: rgba(255,255,255,0.65); margin-bottom: 2.5rem; }
-.search-card { background: rgba(255,255,255,0.55); border-radius: 16px; padding: 1.75rem 2rem; max-width: 900px; margin: 0 auto 2rem; color: #1a1a1a; text-align: left; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.search-card { background: rgba(255,255,255,0.55); border-radius: 16px; padding: 1.75rem 2rem; max-width: 900px; width: 92%; margin: 0 auto 2rem; color: #1a1a1a; text-align: left; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .search-fields { display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr 0.7fr; gap: 12px; align-items: flex-end; }
 .field-group { display: flex; flex-direction: column; gap: 4px; }
 .field-group label { font-size: 12px; color: #444; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; text-align: left; }
@@ -171,7 +171,7 @@ body { padding-top: 0; }
 
 /* ── 1600px ve üzeri ── */
 @media (min-width: 1600px) {
-  .search-card { max-width: 1200px; padding: 2rem 2.5rem; width: 90%; }
+  .search-card { width: 92%; max-width: 1400px; padding: 2rem 2.5rem; }
   .section { max-width: 1300px; padding: 5rem 3rem; }
   .hero-title { font-size: 54px; }
   .hero-content { padding: 14rem 3rem 2.5rem; }
@@ -183,7 +183,7 @@ body { padding-top: 0; }
 
 /* ── 1400px–1599px ── */
 @media (min-width: 1400px) and (max-width: 1599.98px) {
-  .search-card { max-width: 1100px; padding: 2rem 2.5rem; }
+  .search-card { width: 92%; max-width: 1200px; padding: 2rem 2.5rem; }
   .section { max-width: 1200px; padding: 5rem 2.5rem; }
   .hero-title { font-size: 50px; }
   .search-fields { grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr 0.7fr; gap: 12px; }
@@ -194,7 +194,7 @@ body { padding-top: 0; }
 
 /* ── 1200px–1399px ── */
 @media (min-width: 1200px) and (max-width: 1399.98px) {
-  .search-card { max-width: 1000px; padding: 1.75rem 2rem; }
+  .search-card { width: 92%; max-width: 1050px; padding: 1.75rem 2rem; }
   .section { max-width: 1100px; padding: 4rem 2.5rem; }
   .hero-title { font-size: 46px; }
   .search-fields { grid-template-columns: 1.5fr 1.5fr 1fr 1fr 1fr 0.7fr; gap: 10px; }
