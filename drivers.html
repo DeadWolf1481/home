@@ -466,8 +466,15 @@ async function loadReservations() {
     var res = await fetch(API + '/api/drivers/reservations', { headers: { 'Authorization': 'Bearer ' + driverToken } });
     if (!res.ok) throw new Error('Unauthorized');
     var rows = await res.json();
-    // Filter out completed jobs — they are in Earnings
+    // Keep all for stats, filter completed for display
+    var allResRaw = rows;
     allRes = rows.filter(function(r){ return r.status !== 'completed'; });
+    
+    // Stats from all jobs
+    var now = new Date();
+    document.getElementById('statTotal').textContent = allResRaw.length;
+    document.getElementById('statMonth').textContent = allResRaw.filter(function(r){ return new Date(r.created_at).getMonth() === now.getMonth(); }).length;
+    document.getElementById('statUpcoming').textContent = allRes.filter(function(r){ return new Date(r.date) >= now; }).length;
     updateStats();
     renderTrips();
   } catch (err) {
@@ -477,19 +484,8 @@ async function loadReservations() {
 }
 
 function updateStats() {
-  var now = new Date();
-  var total = allRes.length;
-  var month = allRes.filter(function(r){ return new Date(r.created_at).getMonth() === now.getMonth(); }).length;
-  var upcoming = allRes.filter(function(r){ return new Date(r.date) >= now; }).length;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statMonth').textContent = month;
-  document.getElementById('statUpcoming').textContent = upcoming;
-  var totalE = allRes.reduce(function(s,r){ return s+(parseFloat(r.price)||0); }, 0);
-  var monthE = allRes.filter(function(r){ return new Date(r.created_at).getMonth()===now.getMonth(); })
-    .reduce(function(s,r){ return s+(parseFloat(r.price)||0); }, 0);
-  document.getElementById('earnTotal').textContent = '€' + totalE.toFixed(0);
-  document.getElementById('earnMonth').textContent = '€' + monthE.toFixed(0);
-  document.getElementById('earnTrips').textContent = total;
+  // Stats are calculated in loadReservations directly
+  // This function now only handles earnings display
 }
 
 function renderTrips() {
