@@ -570,6 +570,25 @@ function submitBooking() {
   var errEl = document.getElementById('modalError');
   errEl.style.display = 'none';
 
+  // 2-hour advance check
+  if (tripDate) {
+    var match = tripDate.match(/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+)/);
+    if (match) {
+      var months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+      var month = months[match[2]];
+      if (month !== undefined) {
+        var tripTime = new Date(parseInt(match[3]), month, parseInt(match[1]), parseInt(match[4]), parseInt(match[5]));
+        var now = new Date();
+        var hoursUntil = (tripTime - now) / (1000 * 60 * 60);
+        if (hoursUntil < 0.5) {
+          errEl.textContent = '⚠️ Bookings must be made at least 30 minutes in advance. Please select a later time.';
+          errEl.style.display = 'block';
+          return;
+        }
+      }
+    }
+  }
+
   var name   = document.getElementById('bf-name').value.trim();
   var email  = document.getElementById('bf-email').value.trim();
   var phone  = document.getElementById('bf-phone').value.trim();

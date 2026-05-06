@@ -71,7 +71,7 @@ router.get('/offers', async (req, res) => {
       const tripDate = parseDriverDate(r.date);
       if (!tripDate) return true;
       const hoursUntil = (tripDate - now) / (1000 * 60 * 60);
-      return hoursUntil > 2;
+      return hoursUntil > 0.5;
     });
 
     res.json(filtered);
