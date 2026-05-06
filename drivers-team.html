@@ -22,12 +22,13 @@ body{font-family:'Inter',sans-serif;background:var(--light);color:var(--text);}
 
 /* NAV */
 nav{background:var(--dark);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:70px;position:sticky;top:0;z-index:100;}
-.nav-logo{font-family:'Playfair Display',serif;color:var(--gold);font-size:15px;font-weight:700;letter-spacing:2px;text-decoration:none;}
+.nav-logo{color:#f0c040;font-size:20px;font-weight:600;letter-spacing:1px;text-decoration:none;white-space:nowrap;}
 .nav-right{display:flex;align-items:center;gap:1.5rem;}
 .nav-link{color:rgba(255,255,255,0.7);text-decoration:none;font-size:13px;font-weight:500;transition:color 0.2s;}
 .nav-link:hover{color:var(--gold);}
 .nav-btn{background:var(--gold);color:var(--dark);border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:background 0.2s;}
 .nav-btn:hover{background:var(--gold2);}
+@media(max-width:900px){.nav-right{display:none;}.hamburger-btn{display:flex!important;}}
 
 /* HERO */
 .hero{background:var(--dark);padding:6rem 5% 4rem;text-align:center;position:relative;overflow:hidden;}
@@ -80,7 +81,7 @@ nav{background:var(--dark);padding:0 5%;display:flex;align-items:center;justify-
 .loading{text-align:center;padding:5rem;color:var(--text2);}
 
 /* FOOTER */
-footer{background:var(--dark);color:rgba(255,255,255,0.5);text-align:center;padding:2rem;font-size:13px;}
+footer{background:var(--dark);color:rgba(255,255,255,0.5);padding:3rem 5% 2rem;}
 
 /* RESPONSIVE */
 @media(max-width:700px){
@@ -101,10 +102,29 @@ footer{background:var(--dark);color:rgba(255,255,255,0.5);text-align:center;padd
   <a href="index.html" class="nav-logo">AIRPORTS TRANSFER TURKEY</a>
   <div class="nav-right">
     <a href="index.html" class="nav-link">Home</a>
+    <a href="about-us.html" class="nav-link">About Us</a>
+    <a href="index.html#vehicles" class="nav-link">Our Fleet</a>
+    <a href="blog.html" class="nav-link">Blog</a>
+    <a href="drivers-team.html" class="nav-link" style="color:var(--gold)">Our Team</a>
     <a href="contact.html" class="nav-link">Contact</a>
     <a href="drivers.html" class="nav-btn">Driver Login</a>
   </div>
+  <button class="hamburger-btn" id="hamburger" onclick="toggleMenu()" style="display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:5px;padding:4px;">
+    <span style="display:block;width:24px;height:2px;background:white;border-radius:2px;"></span>
+    <span style="display:block;width:24px;height:2px;background:white;border-radius:2px;"></span>
+    <span style="display:block;width:24px;height:2px;background:white;border-radius:2px;"></span>
+  </button>
 </nav>
+
+<div id="mobileMenu" style="display:none;position:fixed;top:70px;left:0;right:0;background:#0a1628;z-index:9999;border-top:0.5px solid rgba(255,255,255,0.1);">
+  <a href="index.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Home</a>
+  <a href="about-us.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">About Us</a>
+  <a href="index.html#vehicles" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Our Fleet</a>
+  <a href="blog.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Blog</a>
+  <a href="drivers-team.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Our Team</a>
+  <a href="contact.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Contact</a>
+  <a href="drivers.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;font-weight:700;">Driver Login</a>
+</div>
 
 <div class="hero">
   <div class="hero-tag">OUR TEAM</div>
@@ -141,8 +161,34 @@ footer{background:var(--dark);color:rgba(255,255,255,0.5);text-align:center;padd
 </div>
 
 <footer>
-  <p>© 2026 Airports Transfer Turkey. All rights reserved.</p>
+  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-bottom:2rem;">
+    <div>
+      <div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:16px;font-weight:700;letter-spacing:2px;margin-bottom:1rem;">AIRPORTS TRANSFER TURKEY</div>
+      <p style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.5);">Professional airport transfer services in Istanbul and across Turkey.</p>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:1rem;">Quick Menu</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+        <a href="index.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ Home</a>
+        <a href="about-us.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ About Us</a>
+        <a href="blog.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ Blog</a>
+        <a href="drivers-team.html" style="color:var(--gold);text-decoration:none;font-size:13px;">→ Our Team</a>
+        <a href="contact.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ Contact</a>
+        <a href="driver-apply.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:13px;">→ Join Our Team</a>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:1100px;margin:0 auto;border-top:1px solid rgba(255,255,255,0.1);padding-top:1.5rem;text-align:center;font-size:12px;">
+    © 2026 Airports Transfer Turkey. All rights reserved.
+  </div>
 </footer>
+
+<script>
+function toggleMenu() {
+  var m = document.getElementById('mobileMenu');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+</script>
 
 <script>
 const API = 'https://home-production-6910.up.railway.app';
