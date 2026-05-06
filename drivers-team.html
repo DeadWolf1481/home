@@ -22,13 +22,19 @@ body{font-family:'Inter',sans-serif;background:var(--light);color:var(--text);}
 
 /* NAV */
 nav{background:var(--dark);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:70px;position:sticky;top:0;z-index:100;}
-.nav-logo{color:#f0c040;font-size:20px;font-weight:600;letter-spacing:1px;text-decoration:none;white-space:nowrap;}
-.nav-right{display:flex;align-items:center;gap:1.5rem;}
-.nav-link{color:rgba(255,255,255,0.7);text-decoration:none;font-size:13px;font-weight:500;transition:color 0.2s;}
-.nav-link:hover{color:var(--gold);}
-.nav-btn{background:var(--gold);color:var(--dark);border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:background 0.2s;}
-.nav-btn:hover{background:var(--gold2);}
-@media(max-width:900px){.nav-right{display:none;}.hamburger-btn{display:flex!important;}}
+.nav { display:flex; align-items:center; justify-content:space-between; padding:1rem 2rem; background:#0a1628; position:sticky; top:0; z-index:1000; }
+.nav-logo { font-size:20px; font-weight:600; letter-spacing:1px; color:#f0c040; white-space:nowrap; flex:0 0 auto; cursor:pointer; text-decoration:none; }
+.nav-links { display:flex; gap:2rem; list-style:none; margin:0; padding:0; position:absolute; left:50%; transform:translateX(-50%); pointer-events:none; }
+.nav-links li { pointer-events:all; list-style:none; }
+.nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:15px; font-weight:500; }
+.nav-links a:hover, .nav-links a.active { color:#f0c040; }
+.hamburger { display:none; flex-direction:column; gap:6px; cursor:pointer; background:none; border:none; padding:4px; margin-left:auto; flex-shrink:0; }
+.hamburger span { display:block; width:22px; height:2px; background:white; border-radius:2px; transition:all 0.3s; }
+.mobile-menu { background:#0a1628; overflow:hidden; max-height:0; transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1); display:none; }
+.mobile-menu a { display:block; padding:14px 2rem; color:rgba(255,255,255,0.85); text-decoration:none; font-size:15px; border-bottom:0.5px solid rgba(255,255,255,0.07); }
+.mobile-menu a:hover, .mobile-menu a.active { color:#f0c040; }
+@media(max-width:1150px) { .hamburger { display:flex !important; } .nav-links { display:none !important; } }
+@media(max-width:600px) { .nav { padding:0.85rem 1rem; } .nav-logo { font-size:17px; letter-spacing:0.4px; } }
 
 /* HERO */
 .hero{background:var(--dark);padding:6rem 5% 4rem;text-align:center;position:relative;overflow:hidden;}
@@ -98,32 +104,29 @@ footer{background:var(--dark);color:rgba(255,255,255,0.5);padding:3rem 5% 2rem;}
 </head>
 <body>
 
-<nav>
+<nav class="nav">
   <a href="index.html" class="nav-logo">AIRPORTS TRANSFER TURKEY</a>
-  <div class="nav-right">
-    <a href="index.html" class="nav-link">Home</a>
-    <a href="about-us.html" class="nav-link">About Us</a>
-    <a href="index.html#vehicles" class="nav-link">Our Fleet</a>
-    <a href="blog.html" class="nav-link">Blog</a>
-    <a href="drivers-team.html" class="nav-link" style="color:var(--gold)">Our Team</a>
-    <a href="contact.html" class="nav-link">Contact</a>
-    <a href="drivers.html" class="nav-btn">Driver Login</a>
-  </div>
-  <button class="hamburger-btn" id="hamburger" onclick="toggleMenu()" style="display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:5px;padding:4px;">
-    <span style="display:block;width:24px;height:2px;background:white;border-radius:2px;"></span>
-    <span style="display:block;width:24px;height:2px;background:white;border-radius:2px;"></span>
-    <span style="display:block;width:24px;height:2px;background:white;border-radius:2px;"></span>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about-us.html">About Us</a></li>
+    <li><a href="index.html#vehicles">Our Fleet</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="drivers-team.html" class="active">Our Team</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
   </button>
 </nav>
 
-<div id="mobileMenu" style="display:none;position:fixed;top:70px;left:0;right:0;background:#0a1628;z-index:9999;border-top:0.5px solid rgba(255,255,255,0.1);">
-  <a href="index.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Home</a>
-  <a href="about-us.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">About Us</a>
-  <a href="index.html#vehicles" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Our Fleet</a>
-  <a href="blog.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Blog</a>
-  <a href="drivers-team.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Our Team</a>
-  <a href="contact.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Contact</a>
-  <a href="drivers.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;font-weight:700;">Driver Login</a>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="about-us.html">About Us</a>
+  <a href="index.html#vehicles">Our Fleet</a>
+  <a href="blog.html">Blog</a>
+  <a href="drivers-team.html" class="active">Our Team</a>
+  <a href="contact.html">Contact</a>
+  <a href="drivers.html" style="color:#f0c040;font-weight:700;">Driver Login</a>
 </div>
 
 <div class="hero">
@@ -186,11 +189,18 @@ footer{background:var(--dark);color:rgba(255,255,255,0.5);padding:3rem 5% 2rem;}
 <script>
 function toggleMenu() {
   var m = document.getElementById('mobileMenu');
-  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+  var h = document.getElementById('hamburger');
+  if (m.style.display === 'none' || m.style.display === '') {
+    m.style.display = 'block';
+    m.style.maxHeight = '400px';
+    h.classList.add('open');
+  } else {
+    m.style.display = 'none';
+    m.style.maxHeight = '0';
+    h.classList.remove('open');
+  }
 }
-</script>
 
-<script>
 const API = 'https://home-production-6910.up.railway.app';
 
 async function loadTeam() {
