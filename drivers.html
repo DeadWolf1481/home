@@ -226,7 +226,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',
   </div>
 
   <div class="content tab-content" id="tabEarnings">
-    <div class="section-title">Earnings</div>
+    <div class="section-title">Earnings <button class="refresh-btn" onclick="resetEarnings()" style="color:var(--red);border-color:#fecaca">🗑 Reset</button></div>
     <div class="earn-card">
       <div class="earn-amount" id="earnTotal">€0</div>
       <div class="earn-label">Total from completed trips</div>
@@ -345,6 +345,19 @@ function showApp() {
   loadOffers();
   loadReservations();
   loadEarnings();
+}
+
+async function resetEarnings() {
+  if (!confirm('Are you sure you want to reset all your earnings? This cannot be undone.')) return;
+  try {
+    var res = await fetch(API + '/api/drivers/earnings/reset', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + driverToken },
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    loadEarnings();
+  } catch (err) { alert(err.message); }
 }
 
 async function loadEarnings() {

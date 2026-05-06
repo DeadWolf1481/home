@@ -106,6 +106,16 @@ router.post('/reservations/:id/release', async (req, res) => {
   }
 });
 
+// DELETE /api/drivers/earnings/reset — driver resets own earnings
+router.delete('/earnings/reset', async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    const decoded = verifyDriver(req);
+    await prisma.$queryRaw`DELETE FROM driver_earnings WHERE driver_id = ${decoded.id}`;
+    res.json({ success: true });
+  } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
+});
+
 // GET /api/drivers/earnings — driver's completed trip earnings
 router.get('/earnings', async (req, res) => {
   const prisma = req.app.locals.prisma;

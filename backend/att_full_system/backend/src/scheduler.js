@@ -1,62 +1,60 @@
 const cron = require('node-cron');
 
-// Run every 30 minutes — check if accepted jobs have passed their time + 1 hour
-// If so, mark as "completed" and add to driver earnings
+function parseDate(dateStr) {
+  if (!dateStr) return null;
+  let d = new Date(dateStr);
+  if (!isNaN(d.getTime())) return d;
+  // Format: "6 May 2026 21:10"
+  const match = dateStr.match(/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+)/);
+  if (match) {
+    const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+    const month = months[match[2]];
+    if (month !== undefined) {
+      d = new Date(parseInt(match[3]), month, parseInt(match[1]), parseInt(match[4]), parseInt(match[5]));
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  return null;
+}
+
 function startScheduler(prisma) {
   cron.schedule('*/30 * * * *', async () => {
     try {
       console.log('[Scheduler] Checking completed trips...');
-
-      // Find reservations that:
-      // 1. Have a driver assigned (driver_id is not null)
-      // 2. Status is 'approved' (not yet completed)
-      // 3. Trip date+time + 1 hour has passed
       const rows = await prisma.$queryRaw`
-        SELECT r.*, v.price as vehicle_price
+        SELECT r.id, r.date, r.price, r.driver_id, v.price as vehicle_price
         FROM reservations r
         LEFT JOIN vehicles v ON r.vehicle_id = v.id
-        WHERE r.driver_id IS NOT NULL
-          AND r.status = 'approved'
-      `;
+        WHERE r.driver_id IS NOT NULL AND r.status = 'approved'`;
 
+      console.log('[Scheduler] Active jobs:', rows.length);
       const now = new Date();
       let completed = 0;
 
       for (const r of rows) {
         try {
-          // Parse date string like "15 Jan 2026 23:00"
-          const tripDate = new Date(r.date.replace(/(\d+) (\w+) (\d+) (\d+:\d+)/, '$2 $1 $3 $4'));
-          if (isNaN(tripDate.getTime())) continue;
-
-          // Add 1 hour
+          const tripDate = parseDate(r.date);
+          if (!tripDate) { console.log('[Scheduler] Cannot parse date:', r.date); continue; }
           const completionTime = new Date(tripDate.getTime() + 60 * 60 * 1000);
-
+          console.log('[Scheduler] Job', r.id, '- date:', r.date, '- parsed:', tripDate, '- completes at:', completionTime);
           if (now >= completionTime) {
-            // Mark as completed
             await prisma.$queryRaw`UPDATE reservations SET status = 'completed' WHERE id = ${r.id}`;
-
-            // Add to driver earnings
             const price = parseFloat(r.price || r.vehicle_price || 0);
             if (price > 0 && r.driver_id) {
               await prisma.$queryRaw`
                 INSERT INTO driver_earnings (driver_id, reservation_id, amount, earned_at)
                 VALUES (${r.driver_id}, ${r.id}, ${price}, NOW())
                 ON CONFLICT (reservation_id) DO NOTHING`;
+              console.log('[Scheduler] Earnings added: €' + price + ' for driver', r.driver_id);
             }
             completed++;
           }
-        } catch (e) {
-          console.error('[Scheduler] Error processing reservation', r.id, e.message);
-        }
+        } catch (e) { console.error('[Scheduler] Error:', r.id, e.message); }
       }
-
-      if (completed > 0) console.log('[Scheduler]', completed, 'trips marked as completed');
-    } catch (e) {
-      console.error('[Scheduler] Error:', e.message);
-    }
+      console.log('[Scheduler] Completed this run:', completed);
+    } catch (e) { console.error('[Scheduler] Fatal:', e.message); }
   });
-
-  console.log('[Scheduler] Trip completion scheduler started');
+  console.log('[Scheduler] Started (every 30 min)');
 }
 
 module.exports = { startScheduler };
