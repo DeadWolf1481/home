@@ -57,6 +57,17 @@ app.use('/api/settings',           require('./routes/settings'));
 app.use('/api/driver-applications',require('./routes/driverApplications'));
 app.use('/api/drivers',            require('./routes/drivers'));
 
+// GET /api/driver-payments — admin only
+app.get('/api/driver-payments', require('./middleware/auth'), async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    const rows = await prisma.$queryRaw`
+      SELECT * FROM driver_payment_summaries 
+      ORDER BY created_at DESC LIMIT 200`;
+    res.json(rows);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -83,6 +94,10 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`✅ ATT Backend running on port ${PORT}`);
   console.log(`   Health: http://localhost:${PORT}/health`);
+  // Start trip completion scheduler
+  const { startScheduler, startMonthlyScheduler } = require('./scheduler');
+  startScheduler(prisma);
+  startMonthlyScheduler(prisma);
 });
 
 module.exports = app;
