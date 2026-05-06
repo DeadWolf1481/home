@@ -83,9 +83,6 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`✅ ATT Backend running on port ${PORT}`);
   console.log(`   Health: http://localhost:${PORT}/health`);
-  // Start trip completion scheduler
-  const { startScheduler } = require('./scheduler');
-  startScheduler(prisma);
 });
 
 module.exports = app;

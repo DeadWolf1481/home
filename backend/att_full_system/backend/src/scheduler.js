@@ -56,3 +56,51 @@ function startScheduler(prisma) {
 }
 
 module.exports = { startScheduler };
+
+// Monthly payment summary — runs on 1st of every month at 00:00
+function startMonthlyScheduler(prisma) {
+  cron.schedule('0 0 1 * *', async () => {
+    try {
+      console.log('[Monthly] Creating driver payment summaries...');
+      const now = new Date();
+      const periodEnd = new Date(now);
+      const periodStart = new Date(now);
+      periodStart.setDate(periodStart.getDate() - 30);
+
+      // Get all drivers with earnings in the last 30 days
+      const summaries = await prisma.$queryRaw`
+        SELECT 
+          de.driver_id,
+          u.email as driver_email,
+          da.phone as driver_phone,
+          da.bank_iban as driver_iban,
+          SUM(de.amount) as total_amount
+        FROM driver_earnings de
+        LEFT JOIN users u ON de.driver_id = u.id
+        LEFT JOIN LATERAL (
+          SELECT phone, bank_iban FROM driver_applications 
+          WHERE email = u.email ORDER BY id ASC LIMIT 1
+        ) da ON true
+        WHERE de.earned_at >= ${periodStart} AND de.earned_at <= ${periodEnd}
+        GROUP BY de.driver_id, u.email, da.phone, da.bank_iban
+      `;
+
+      for (const s of summaries) {
+        await prisma.$queryRaw`
+          INSERT INTO driver_payment_summaries 
+            (driver_id, driver_email, driver_phone, driver_iban, amount, period_start, period_end, created_at)
+          VALUES 
+            (${s.driver_id}, ${s.driver_email}, ${s.driver_phone}, ${s.driver_iban}, ${parseFloat(s.total_amount)}, ${periodStart}, ${periodEnd}, NOW())
+        `;
+        console.log('[Monthly] Added summary for', s.driver_email, '€' + s.total_amount);
+      }
+
+      // Reset driver_earnings after summary
+      await prisma.$queryRaw`DELETE FROM driver_earnings WHERE earned_at <= ${periodEnd}`;
+      console.log('[Monthly] Done. Summaries created:', summaries.length);
+    } catch (e) { console.error('[Monthly] Error:', e.message); }
+  });
+  console.log('[Monthly] Payment summary scheduler started (1st of every month)');
+}
+
+module.exports = { startScheduler, startMonthlyScheduler };
