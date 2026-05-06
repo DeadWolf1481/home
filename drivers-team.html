@@ -30,7 +30,7 @@ nav{background:var(--dark);padding:0 5%;display:flex;align-items:center;justify-
 .nav-links a:hover, .nav-links a.active { color:#f0c040; }
 .hamburger { display:none; flex-direction:column; gap:6px; cursor:pointer; background:none; border:none; padding:4px; margin-left:auto; flex-shrink:0; }
 .hamburger span { display:block; width:22px; height:2px; background:white; border-radius:2px; transition:all 0.3s; }
-.mobile-menu { background:#0a1628; overflow:hidden; max-height:0; transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1); display:none; }
+.mobile-menu { background:#0a1628; overflow:hidden; max-height:0; transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1); display:none; position:fixed; top:70px; left:0; right:0; z-index:999; }
 .mobile-menu a { display:block; padding:14px 2rem; color:rgba(255,255,255,0.85); text-decoration:none; font-size:15px; border-bottom:0.5px solid rgba(255,255,255,0.07); }
 .mobile-menu a:hover, .mobile-menu a.active { color:#f0c040; }
 @media(max-width:1150px) { .hamburger { display:flex !important; } .nav-links { display:none !important; } }
@@ -188,18 +188,32 @@ footer{background:var(--dark);color:rgba(255,255,255,0.5);padding:3rem 5% 2rem;}
 
 <script>
 function toggleMenu() {
-  var m = document.getElementById('mobileMenu');
-  var h = document.getElementById('hamburger');
-  if (m.style.display === 'none' || m.style.display === '') {
-    m.style.display = 'block';
-    m.style.maxHeight = '400px';
-    h.classList.add('open');
+  var btn = document.getElementById('hamburger');
+  var menu = document.getElementById('mobileMenu');
+  btn.classList.toggle('open');
+  if (menu.dataset.open === 'true') {
+    menu.style.maxHeight = '0';
+    menu.dataset.open = 'false';
+    setTimeout(function(){ menu.style.display = 'none'; }, 300);
   } else {
-    m.style.display = 'none';
-    m.style.maxHeight = '0';
-    h.classList.remove('open');
+    menu.style.display = 'block';
+    requestAnimationFrame(function() {
+      menu.style.maxHeight = '400px';
+      menu.dataset.open = 'true';
+    });
   }
 }
+
+window.addEventListener('scroll', function() {
+  var menu = document.getElementById('mobileMenu');
+  var btn = document.getElementById('hamburger');
+  if (menu && menu.dataset.open === 'true') {
+    menu.style.maxHeight = '0';
+    menu.dataset.open = 'false';
+    setTimeout(function(){ menu.style.display = 'none'; }, 300);
+    if (btn) btn.classList.remove('open');
+  }
+}, { passive: true });
 
 const API = 'https://home-production-6910.up.railway.app';
 
