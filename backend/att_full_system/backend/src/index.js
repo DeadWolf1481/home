@@ -57,7 +57,18 @@ app.use('/api/settings',           require('./routes/settings'));
 app.use('/api/driver-applications',require('./routes/driverApplications'));
 app.use('/api/drivers',            require('./routes/drivers'));
 
-// GET /api/driver-payments — admin only
+// GET /api/team — public, approved drivers with photo and bio
+app.get('/api/team', async (req, res) => {
+  const prisma = req.app.locals.prisma;
+  try {
+    const rows = await prisma.$queryRaw`
+      SELECT full_name, bio, photo, phone
+      FROM driver_applications
+      WHERE status = 'approved' AND photo IS NOT NULL AND bio IS NOT NULL
+      ORDER BY created_at ASC`;
+    res.json(rows);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
 app.get('/api/driver-payments', require('./middleware/auth'), async (req, res) => {
   const prisma = req.app.locals.prisma;
   try {

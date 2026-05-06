@@ -89,6 +89,8 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #0d1117; c
       </div>
       <div class="form-group"><label class="form-label">Email <span class="req">*</span></label>
         <input class="form-input" id="email" type="email" placeholder="john@example.com" /></div>
+      <div class="form-group"><label class="form-label">About Yourself <span class="req">*</span></label>
+        <textarea class="form-input" id="bio" rows="4" placeholder="Tell customers a bit about yourself — your experience, languages you speak, why you love this job..." style="resize:vertical;min-height:100px"></textarea></div>
     </div>
     <div class="card">
       <div class="card-title">🤳 Profile Photo</div>
@@ -527,6 +529,7 @@ async function submitApplication() {
     bank_name: document.getElementById('bank_name').value.trim(),
     bank_holder: document.getElementById('bank_holder').value.trim(),
     bank_iban: document.getElementById('bank_iban').value.replace(/\s/g, ''),
+      bio: document.getElementById('bio').value.trim(),
     ...files,
   };
 

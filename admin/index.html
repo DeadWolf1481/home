@@ -2086,6 +2086,7 @@ async function viewDriverApp(id) {
         <div><b>Bank:</b> ${a.bank_name || '—'} · ${a.bank_holder || '—'}</div>
         <div><b>IBAN:</b> ${a.bank_iban || '—'}</div>
         <div><b>Status:</b> ${a.status}</div>
+        ${a.bio ? `<div><b>Bio:</b> ${a.bio}</div>` : `<div><b>Bio:</b> <span style="color:var(--text2)">Not provided</span></div>`}
         ${a.admin_notes ? `<div><b>Notes:</b> ${a.admin_notes}</div>` : ''}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
