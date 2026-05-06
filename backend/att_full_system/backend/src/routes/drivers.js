@@ -4,6 +4,21 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'att-secret-2024';
 
+function parseDriverDate(dateStr) {
+  if (!dateStr) return null;
+  const match = dateStr.match(/(\d+)\s+(\w+)\s+(\d+)\s+(\d+):(\d+)/);
+  if (match) {
+    const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+    const month = months[match[2]];
+    if (month !== undefined) {
+      const d = new Date(parseInt(match[3]), month, parseInt(match[1]), parseInt(match[4]), parseInt(match[5]));
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d;
+}
+
 function verifyDriver(req) {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) throw new Error('No token');
@@ -37,7 +52,7 @@ router.get('/me', async (req, res) => {
   } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
 });
 
-// GET /api/drivers/offers — unassigned approved reservations
+// GET /api/drivers/offers — unassigned approved reservations (more than 2 hours away)
 router.get('/offers', async (req, res) => {
   const prisma = req.app.locals.prisma;
   try {
@@ -46,10 +61,20 @@ router.get('/offers', async (req, res) => {
       SELECT r.*, v.name as vehicle_name, v.price as vehicle_price
       FROM reservations r
       LEFT JOIN vehicles v ON r.vehicle_id = v.id
-      WHERE r.status = 'approved' AND (r.driver_id IS NULL)
+      WHERE r.status = 'approved' AND r.driver_id IS NULL
       ORDER BY r.created_at DESC
       LIMIT 50`;
-    res.json(rows);
+
+    // Filter out jobs that are less than 2 hours away
+    const now = new Date();
+    const filtered = rows.filter(r => {
+      const tripDate = parseDriverDate(r.date);
+      if (!tripDate) return true;
+      const hoursUntil = (tripDate - now) / (1000 * 60 * 60);
+      return hoursUntil > 2;
+    });
+
+    res.json(filtered);
   } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
 });
 
@@ -106,14 +131,17 @@ router.post('/reservations/:id/release', async (req, res) => {
   }
 });
 
-// DELETE /api/drivers/earnings/reset — driver resets own earnings
-router.delete('/earnings/reset', async (req, res) => {
+// POST /api/drivers/earnings/reset — driver resets own earnings
+router.post('/earnings/reset', async (req, res) => {
   const prisma = req.app.locals.prisma;
   try {
     const decoded = verifyDriver(req);
     await prisma.$queryRaw`DELETE FROM driver_earnings WHERE driver_id = ${decoded.id}`;
     res.json({ success: true });
-  } catch (err) { res.status(401).json({ error: 'Invalid token' }); }
+  } catch (err) { 
+    console.error('Reset earnings error:', err.message);
+    res.status(401).json({ error: err.message }); 
+  }
 });
 
 // GET /api/drivers/earnings — driver's completed trip earnings

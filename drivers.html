@@ -351,8 +351,8 @@ async function resetEarnings() {
   if (!confirm('Are you sure you want to reset all your earnings? This cannot be undone.')) return;
   try {
     var res = await fetch(API + '/api/drivers/earnings/reset', {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + driverToken },
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + driverToken, 'Content-Type': 'application/json' },
     });
     var data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed');
