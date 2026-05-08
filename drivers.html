@@ -348,16 +348,10 @@ function showApp() {
 }
 
 async function resetEarnings() {
-  if (!confirm('Are you sure you want to reset all your earnings? This cannot be undone.')) return;
-  try {
-    var res = await fetch(API + '/api/drivers/earnings/reset', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + driverToken, 'Content-Type': 'application/json' },
-    });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed');
-    loadEarnings();
-  } catch (err) { alert(err.message); }
+  if (!confirm('Reset your trip counters (Total & Month)? Your earnings history will not be deleted.')) return;
+  localStorage.setItem('att_driver_reset_' + (driverData ? driverData.id : 'x'), new Date().toISOString());
+  document.getElementById('statTotal').textContent = '0';
+  document.getElementById('statMonth').textContent = '0';
 }
 
 async function loadEarnings() {
