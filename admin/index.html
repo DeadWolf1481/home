@@ -692,11 +692,15 @@ async function renderCustomers() {
 }
 
 // ─── VEHICLES ─────────────────────────────────────────────────────────────────
+const _vehicleCache = {};
+
 async function renderVehicles() {
   const mc = document.getElementById('mainContent');
   mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
   try {
     const vehicles = await api('/api/vehicles');
+    // Store in cache so we can retrieve by id without putting JSON in onclick
+    vehicles.forEach(v => { _vehicleCache[v.id] = v; });
     mc.innerHTML = `
       <div class="section-header">
         <div class="section-header-left">
@@ -728,7 +732,7 @@ async function renderVehicles() {
                 <div class="actions-wrap">
                   <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
                   <div class="actions-menu">
-                    <button class="actions-menu-item" onclick="openVehicleModal(${JSON.stringify(v).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item" onclick="openVehicleModal(_vehicleCache[${v.id}]);closeAllActions()">✏️ Edit</button>
                     <button class="actions-menu-item" onclick="toggleVehicleStatus(${v.id},'${v.status === 'active' ? 'passive' : 'active'}');closeAllActions()">${v.status === 'active' ? '⏸ Deactivate' : '▶ Activate'}</button>
                     <button class="actions-menu-item danger" onclick="deleteVehicle(${v.id});closeAllActions()">🗑 Delete</button>
                   </div>
