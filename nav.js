@@ -167,4 +167,53 @@
       }
     }
   });
+
+  // ── Scroll davranışı ──────────────────────────────────────────────────────
+  // 300px'e kadar: nav görünür
+  // 300px sonra aşağı kaydırınca: nav gizlenir
+  // Herhangi bir noktada yukarı kaydırınca: nav tekrar çıkar
+  var nav = document.getElementById('mainNav');
+  var lastScrollY = window.scrollY || window.pageYOffset;
+  var navHidden = false;
+
+  window.addEventListener('scroll', function () {
+    var currentY = window.scrollY || window.pageYOffset;
+    var scrollingDown = currentY > lastScrollY;
+
+    if (currentY < 300) {
+      // 300px'in altındayken her zaman göster
+      if (navHidden) {
+        navHidden = false;
+        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+        nav.style.transform = 'translateY(0)';
+      }
+    } else if (scrollingDown) {
+      // 300px geçtikten sonra aşağı gidince gizle
+      if (!navHidden) {
+        navHidden = true;
+        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+        nav.style.transform = 'translateY(-100%)';
+      }
+    } else {
+      // Yukarı kaydırınca tekrar göster
+      if (navHidden) {
+        navHidden = false;
+        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+        nav.style.transform = 'translateY(0)';
+      }
+    }
+
+    lastScrollY = currentY;
+
+    // Mobile menu açıksa scroll'da kapat
+    var menu = document.getElementById('mobileMenu');
+    var btn  = document.getElementById('hamburger');
+    if (menu && menu.dataset.open === 'true') {
+      btn.classList.remove('open');
+      menu.style.maxHeight = '0';
+      menu.dataset.open = 'false';
+      setTimeout(function () { menu.style.display = 'none'; }, 300);
+    }
+  }, { passive: true });
+
 })();

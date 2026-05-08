@@ -1063,62 +1063,8 @@ window.addEventListener('DOMContentLoaded', function() {
   for (var s = 0; s <= 20; s++) suitcases.push(s + ' Suitcase' + (s !== 1 ? 's' : ''));
   buildDrop('luggageDrop', 'luggageList', suitcases, 0);
 
-  // Nav scroll behaviour
-  var nav = document.querySelector('.nav');
-  var hero = document.getElementById('hero');
-  var navH = 0;
-
-  var lastScrollY = 0;
-  var navVisible = true;
-
-  function updateNav() {
-    navH = nav.offsetHeight;
-    var scrollY = window.scrollY || window.pageYOffset;
-    var scrollingDown = scrollY > lastScrollY;
-    var searchCard = document.querySelector('.search-card');
-    var cardBottom = searchCard ? searchCard.getBoundingClientRect().bottom : 0;
-
-    if (cardBottom <= 0) {
-      if (!navVisible) {
-        navVisible = true;
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(0)';
-      }
-    } else if (scrollingDown && scrollY > 10) {
-      navVisible = false;
-      var ty = Math.min(scrollY, navH);
-      nav.style.transition = 'none';
-      nav.style.transform = 'translateY(-' + ty + 'px)';
-    } else if (!scrollingDown && scrollY <= 10) {
-      navVisible = true;
-      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      nav.style.transform = 'translateY(0)';
-    } else if (!scrollingDown && !navVisible) {
-      var ty2 = Math.min(scrollY, navH);
-      nav.style.transition = 'none';
-      nav.style.transform = 'translateY(-' + ty2 + 'px)';
-    }
-
-    lastScrollY = scrollY;
-  }
-
-  // Start with nav visible
-  nav.style.transform = 'translateY(0)';
-
-  window.addEventListener('scroll', updateNav, { passive: true });
-  updateNav();
-
   window.addEventListener('scroll', function() {
-    // Close mobile menu on scroll
-    var menu = document.getElementById('mobileMenu');
-    var btn = document.getElementById('hamburger');
-    if (menu && menu.dataset.open === 'true') {
-      menu.style.maxHeight = '0';
-      menu.dataset.open = 'false';
-      setTimeout(function(){ menu.style.display="none"; }, 300);
-      if (btn) btn.classList.remove('open');
-    }
-
+    // Close date picker and dropdowns on scroll
     var p = document.getElementById('dtPicker');
     if (p && p.classList.contains('open')) {
       p.classList.remove('open');
