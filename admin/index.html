@@ -568,7 +568,7 @@ function renderResRows(rows) {
       <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.created_at)}</td>
       <td>
         <div class="actions-wrap">
-          <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+          <button class="actions-btn" onclick="toggleActions(this, event)">Actions ▾</button>
           <div class="actions-menu">
             <button class="actions-menu-item" onclick="viewReservation(${r.id});closeAllActions()">View Detail</button>
             <button class="actions-menu-item" onclick="setResStatus(${r.id},'approved');closeAllActions()">✅ Approve</button>
@@ -730,7 +730,7 @@ async function renderVehicles() {
               <td>${statusBadge(v.status)}</td>
               <td>
                 <div class="actions-wrap">
-                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <button class="actions-btn" onclick="toggleActions(this, event)">Actions ▾</button>
                   <div class="actions-menu">
                     <button class="actions-menu-item" onclick="openVehicleModal(_vehicleCache[${v.id}]);closeAllActions()">✏️ Edit</button>
                     <button class="actions-menu-item" onclick="toggleVehicleStatus(${v.id},'${v.status === 'active' ? 'passive' : 'active'}');closeAllActions()">${v.status === 'active' ? '⏸ Deactivate' : '▶ Activate'}</button>
@@ -865,7 +865,7 @@ async function renderTours() {
               <td style="font-size:11px;color:var(--text2)">${fmtDate(t.created_at)}</td>
               <td>
                 <div class="actions-wrap">
-                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <button class="actions-btn" onclick="toggleActions(this, event)">Actions ▾</button>
                   <div class="actions-menu">
                     <button class="actions-menu-item" onclick="openTourModal(${JSON.stringify(t).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
                     <button class="actions-menu-item danger" onclick="deleteTour(${t.id});closeAllActions()">🗑 Delete</button>
@@ -973,7 +973,7 @@ async function renderBlog() {
               <td style="font-size:11px;color:var(--text2)">${fmtDate(p.created_at)}</td>
               <td>
                 <div class="actions-wrap">
-                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <button class="actions-btn" onclick="toggleActions(this, event)">Actions ▾</button>
                   <div class="actions-menu">
                     <button class="actions-menu-item" onclick="openBlogModal(${JSON.stringify(p).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
                     <button class="actions-menu-item danger" onclick="deleteBlog(${p.id});closeAllActions()">🗑 Delete</button>
@@ -1065,7 +1065,7 @@ async function renderFaq() {
               <td>${f.order_num}</td>
               <td>
                 <div class="actions-wrap">
-                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <button class="actions-btn" onclick="toggleActions(this, event)">Actions ▾</button>
                   <div class="actions-menu">
                     <button class="actions-menu-item" onclick="openFaqModal(${JSON.stringify(f).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
                     <button class="actions-menu-item danger" onclick="deleteFaq(${f.id});closeAllActions()">🗑 Delete</button>
@@ -1246,7 +1246,7 @@ async function renderMessages() {
               <td style="font-size:11px;color:var(--text2)">${fmtDate(m.created_at)}</td>
               <td>
                 <div class="actions-wrap">
-                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <button class="actions-btn" onclick="toggleActions(this, event)">Actions ▾</button>
                   <div class="actions-menu">
                     <button class="actions-menu-item" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')});closeAllActions()">👁 View</button>
                     <button class="actions-menu-item" onclick="markRead(${m.id});closeAllActions()">✅ Mark Read</button>
@@ -1292,10 +1292,17 @@ async function markRead(id) {
 }
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-function toggleActions(btn) {
+function toggleActions(btn, event) {
+  if (event) event.stopPropagation();
+  const menu = btn.nextElementSibling;
+  const isOpen = menu.classList.contains('open');
   closeAllActions();
-  btn.nextElementSibling.classList.toggle('open');
-  document.addEventListener('click', closeAllActionsOnce, { once: true });
+  if (!isOpen) {
+    menu.classList.add('open');
+    setTimeout(function() {
+      document.addEventListener('click', closeAllActionsOnce, { once: true });
+    }, 0);
+  }
 }
 
 function closeAllActions() {
