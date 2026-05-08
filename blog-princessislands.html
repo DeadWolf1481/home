@@ -7,14 +7,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 66px; }
-.nav { display: flex; align-items: center; padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.nav-logo { font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #f0c040; cursor: pointer; }
-.nav-links { display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); }
-.nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; }
-.nav-links a:hover { color: #f0c040; }
-.hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: none; border: none; padding: 4px; margin-left: auto; }
-.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }
-@media(max-width:1150px) { .hamburger { display: flex !important; } .nav-links { display: none !important; } }
+@media(max-width:1150px) { }
 .article-wrap { max-width: 760px; margin: 0 auto; padding: 3rem 2rem 5rem; }
 .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 13px; color: #9ab4cc; text-decoration: none; margin-bottom: 2rem; }
 .back-link:hover { color: #f0c040; }
@@ -35,17 +28,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 </style>
 </head>
 <body>
-<nav class="nav">
-  <div class="nav-logo" onclick="location.href='index.html'">AIRPORTS TRANSFER TURKEY</div>
-  <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="about-us.html">About Us</a></li>
-    <li><a href="blog.html">Blog</a></li>
-    <li><a href="contact.html">Contact</a></li>
-  </ul>
-  <button class="hamburger"><span></span><span></span><span></span></button>
-</nav>
-
+<script src="nav.js"></script>
 <div class="article-wrap">
   <a href="blog.html" class="back-link">← Back to Blog</a>
   <div class="art-label" id="artLabel">Day Trips</div>

@@ -10,20 +10,9 @@
 <meta property="og:type" content="website" />
 <link rel="canonical" href="https://airportstransferturkey.com/contact.html" />
 <style>
-.nav { display: flex; align-items: center; padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 1px 0 rgba(10,22,40,0.96); }
-.nav-logo { font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #f0c040; white-space: nowrap; flex: 0 0 auto; cursor: pointer; }
-.nav-links { display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
-.nav-links li { pointer-events: all; list-style: none; }
-.nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; pointer-events: all; }
-.nav-links a:hover, .nav-links a.active { color: #f0c040; }
-.hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: none; border: none; padding: 4px; margin-left: auto; flex-shrink: 0; }
-.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; transition: all 0.3s; }
-.hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-.hamburger.open span:nth-child(2) { opacity: 0; }
-.hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-@media(max-width:1150px) { .hamburger { display: flex !important; } .nav-links { display: none !important; } }
-@media(max-width:600px) { .nav { padding: 0.85rem 1rem; } .nav-logo { font-size: 17px; letter-spacing: 0.4px; } }
-@media(max-width:419.98px) { .nav { padding: 0.75rem 0.75rem; } .nav-logo { font-size: 15px; letter-spacing: 0.3px; } }
+@media(max-width:1150px) { }
+@media(max-width:600px) { }
+@media(max-width:419.98px) { }
 
 @media(max-width:800px) {   }
 @media(max-width:600px) {   }
@@ -113,42 +102,13 @@ body { font-family: system-ui, -apple-system, sans-serif; padding-top: 66px; bac
 </style>
 </head>
 <body>
+<script src="nav.js"></script>
 
-<nav class="nav">
-  <div class="nav-logo" onclick="window.location.href='index.html'">AIRPORTS TRANSFER TURKEY</div>
-  <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="about-us.html">About Us</a></li>
-    <li><a href="index.html#vehicles">Our Fleet</a></li>
-    <li><a href="blog.html">Blog</a></li>
-    <li><a href="contact.html" class="active">Contact</a></li>
-  </ul>
-  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
-
-<div id="mobileMenu" style="display:none;position:fixed;left:0;right:0;background:#0a1628;z-index:9999;border-top:0.5px solid rgba(255,255,255,0.1);overflow:hidden;max-height:0;transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1);">
-  <a href="index.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Home</a>
-  <a href="about-us.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">About Us</a>
-  <a href="index.html#vehicles" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Our Fleet</a>
-  <a href="index.html#reviews" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Blog</a>
-  <a href="contact.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;">Contact</a>
-</div>
 <style>
 
 </style>
 <script>
-function toggleMenu(){
-  var h=document.getElementById('hamburger');
-  var m=document.getElementById('mobileMenu');
-  var nav=document.querySelector('.nav');
-  m.style.top=nav.offsetHeight+'px';
-  h.classList.toggle('open');
-  if(m.dataset.open==='true'){
-    m.style.maxHeight='0';
-    m.dataset.open='false';
-    setTimeout(function(){m.style.display='none';},300);
+,300);
   } else {
     m.style.display='block';
     requestAnimationFrame(function(){m.style.maxHeight='400px';m.dataset.open='true';});

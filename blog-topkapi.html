@@ -11,19 +11,8 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 66px; }
-.nav { display: flex; align-items: center; padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.96); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.nav-logo { font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #f0c040; white-space: nowrap; flex: 0 0 auto; cursor: pointer; }
-.nav-links { display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; }
-.nav-links li { pointer-events: all; list-style: none; }
-.nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; }
-.nav-links a:hover { color: #f0c040; }
-.hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: none; border: none; padding: 4px; margin-left: auto; flex-shrink: 0; }
-.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; transition: all 0.3s; }
-.hamburger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-.hamburger.open span:nth-child(2) { opacity: 0; }
-.hamburger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
-@media(max-width:1150px) { .hamburger { display: flex !important; } .nav-links { display: none !important; } }
-@media(max-width:600px) { .nav { padding: 0.85rem 1rem; } .nav-logo { font-size: 17px; } }
+@media(max-width:1150px) { }
+@media(max-width:600px) { }
 .article-wrap { max-width: 760px; margin: 0 auto; padding: 3rem 2rem 5rem; }
 .back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 13px; color: #9ab4cc; text-decoration: none; margin-bottom: 2rem; transition: color 0.2s; }
 .back-link:hover { color: #f0c040; }
@@ -66,28 +55,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 </style>
 </head>
 <body>
-
-<nav class="nav">
-  <div class="nav-logo" onclick="window.location.href='index.html'">AIRPORTS TRANSFER TURKEY</div>
-  <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="about-us.html">About Us</a></li>
-    <li><a href="index.html#vehicles">Our Fleet</a></li>
-    <li><a href="blog.html" class="active">Blog</a></li>
-    <li><a href="contact.html">Contact</a></li>
-  </ul>
-  <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
-
-<div id="mobileMenu" style="display:none;position:fixed;left:0;right:0;background:#0a1628;z-index:9999;border-top:0.5px solid rgba(255,255,255,0.1);overflow:hidden;max-height:0;transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1);">
-  <a href="index.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Home</a>
-  <a href="about-us.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">About Us</a>
-  <a href="index.html#vehicles" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Our Fleet</a>
-  <a href="blog.html" style="display:block;padding:14px 2rem;color:#f0c040;text-decoration:none;font-size:15px;border-bottom:0.5px solid rgba(255,255,255,0.07);">Blog</a>
-  <a href="contact.html" style="display:block;padding:14px 2rem;color:rgba(255,255,255,0.85);text-decoration:none;font-size:15px;">Contact</a>
-</div>
+<script src="nav.js"></script>
 
 <div class="article-wrap">
   <a href="blog.html" class="back-link">← Back to Blog</a>
@@ -157,15 +125,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #243649; c
 <div class="footer-legal-note">BEKPEN ULUSLARARASI TURİZM TİCARET LİMİTED ŞİRKETİ – MERSİS No: 0161095459600001</div>
 
 <script>
-function toggleMenu(){
-  var h=document.getElementById('hamburger');
-  var m=document.getElementById('mobileMenu');
-  var nav=document.querySelector('.nav');
-  m.style.top=nav.offsetHeight+'px';
-  h.classList.toggle('open');
-  if(m.dataset.open==='true'){
-    m.style.maxHeight='0';m.dataset.open='false';
-    setTimeout(function(){m.style.display='none';},300);
+,300);
   } else {
     m.style.display='block';
     requestAnimationFrame(function(){m.style.maxHeight='400px';m.dataset.open='true';});
