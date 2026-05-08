@@ -169,37 +169,41 @@
   });
 
   // ── Scroll davranışı ──────────────────────────────────────────────────────
-  // 300px'e kadar: nav görünür
-  // 300px sonra aşağı kaydırınca: nav gizlenir
-  // Herhangi bir noktada yukarı kaydırınca: nav tekrar çıkar
+  // 0-300px: nav gizli
+  // 300px geçince yukarı kaydırınca: nav çıkar
+  // Aşağı kaydırınca: nav tekrar gizlenir
   var nav = document.getElementById('mainNav');
   var lastScrollY = window.scrollY || window.pageYOffset;
-  var navHidden = false;
+  var navHidden = true;
+
+  // Başlangıçta gizle
+  nav.style.transition = 'none';
+  nav.style.transform = 'translateY(-100%)';
 
   window.addEventListener('scroll', function () {
     var currentY = window.scrollY || window.pageYOffset;
     var scrollingDown = currentY > lastScrollY;
 
     if (currentY < 300) {
-      // 300px'in altındayken her zaman göster
-      if (navHidden) {
-        navHidden = false;
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(0)';
-      }
-    } else if (scrollingDown) {
-      // 300px geçtikten sonra aşağı gidince gizle
+      // 300px'in altında her zaman gizle
       if (!navHidden) {
         navHidden = true;
         nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
         nav.style.transform = 'translateY(-100%)';
       }
-    } else {
-      // Yukarı kaydırınca tekrar göster
+    } else if (!scrollingDown) {
+      // 300px geçtikten sonra yukarı kaydırınca göster
       if (navHidden) {
         navHidden = false;
         nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
         nav.style.transform = 'translateY(0)';
+      }
+    } else {
+      // Aşağı kaydırınca gizle
+      if (!navHidden) {
+        navHidden = true;
+        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+        nav.style.transform = 'translateY(-100%)';
       }
     }
 
