@@ -197,16 +197,6 @@ nav{background:var(--dark);padding:0 5%;display:flex;align-items:center;justify-
   </footer>
 
 <script>
-, 300);
-  } else {
-    menu.style.display = 'block';
-    requestAnimationFrame(function() {
-      menu.style.maxHeight = '400px';
-      menu.dataset.open = 'true';
-    });
-  }
-}
-
 window.addEventListener('scroll', function() {
   var menu = document.getElementById('mobileMenu');
   var btn = document.getElementById('hamburger');

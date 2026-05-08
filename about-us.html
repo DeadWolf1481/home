@@ -135,25 +135,7 @@ body { font-family: system-ui, -apple-system, sans-serif; padding-top: 0; backgr
 <style>
 
 </style>
-<script>
-, 400);
-  } else {
-    m.style.display = 'block';
-    requestAnimationFrame(function(){
-      m.style.maxHeight = '400px';
-      m.dataset.open = 'true';
-    });
-  }
-}
-function closeMobile() {
-  var h = document.getElementById('hamburger');
-  var m = document.getElementById('mobileMenu');
-  h.classList.remove('open');
-  m.style.maxHeight = '0';
-  m.dataset.open = 'false';
-  setTimeout(function(){ m.style.display = 'none'; }, 400);
-}
-</script>
+
 
 <!-- Hero -->
 <div class="about-hero">
