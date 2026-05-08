@@ -169,41 +169,39 @@
   });
 
   // ── Scroll davranışı ──────────────────────────────────────────────────────
-  // 0-300px: nav gizli
-  // 300px geçince yukarı kaydırınca: nav çıkar
-  // Aşağı kaydırınca: nav tekrar gizlenir
+  // Başta görünür
+  // Aşağı kaydırınca gizlenir
+  // 500px geçtikten sonra yukarı kaydırınca tekrar çıkar
+  // Tekrar en üste gelince görünür kalır
   var nav = document.getElementById('mainNav');
   var lastScrollY = window.scrollY || window.pageYOffset;
-  var navHidden = true;
+  var navHidden = false;
 
-  // Başlangıçta gizle
   nav.style.transition = 'none';
-  nav.style.transform = 'translateY(-100%)';
+  nav.style.transform = 'translateY(0)';
 
   window.addEventListener('scroll', function () {
     var currentY = window.scrollY || window.pageYOffset;
     var scrollingDown = currentY > lastScrollY;
 
-    if (currentY < 300) {
-      // 300px'in altında her zaman gizle
-      if (!navHidden) {
-        navHidden = true;
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(-100%)';
-      }
-    } else if (!scrollingDown) {
-      // 300px geçtikten sonra yukarı kaydırınca göster
-      if (navHidden) {
-        navHidden = false;
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(0)';
-      }
-    } else {
+    if (currentY <= 0) {
+      // En tepede — her zaman göster
+      navHidden = false;
+      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+      nav.style.transform = 'translateY(0)';
+    } else if (scrollingDown) {
       // Aşağı kaydırınca gizle
       if (!navHidden) {
         navHidden = true;
         nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
         nav.style.transform = 'translateY(-100%)';
+      }
+    } else if (!scrollingDown && currentY > 500) {
+      // 500px geçtikten sonra yukarı kaydırınca göster
+      if (navHidden) {
+        navHidden = false;
+        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+        nav.style.transform = 'translateY(0)';
       }
     }
 
