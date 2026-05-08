@@ -189,15 +189,15 @@
       navHidden = false;
       nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
       nav.style.transform = 'translateY(0)';
-    } else if (scrollingDown) {
-      // Aşağı kaydırınca gizle
+    } else if (scrollingDown && currentY < 500) {
+      // 0-500px arası aşağı gidince gizle
       if (!navHidden) {
         navHidden = true;
         nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
         nav.style.transform = 'translateY(-100%)';
       }
-    } else if (!scrollingDown && currentY > 500) {
-      // 500px geçtikten sonra yukarı kaydırınca göster
+    } else if (currentY >= 500) {
+      // 500px geçince her zaman göster
       if (navHidden) {
         navHidden = false;
         nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
