@@ -266,11 +266,11 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   <div class="top-nav">
     <div class="nav-item active" onclick="switchSection('reservations')" data-section="reservations">
       <div class="nav-item-title">RESERVATIONS</div>
-      <div class="nav-item-sub">Transfers &amp; Customers</div>
+      <div class="nav-item-sub">Transfer &amp; Tour Reservations</div>
     </div>
     <div class="nav-item" onclick="switchSection('content')" data-section="content">
       <div class="nav-item-title">CONTENT</div>
-      <div class="nav-item-sub">Blog, FAQ, Pages</div>
+      <div class="nav-item-sub">Tours, Blog, Pages</div>
     </div>
     <div class="nav-item" onclick="switchSection('vehicles')" data-section="vehicles">
       <div class="nav-item-title">VEHICLES</div>
@@ -280,13 +280,13 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <div class="nav-item-title">ACCOUNTING</div>
       <div class="nav-item-sub">Revenue</div>
     </div>
-    <div class="nav-item" onclick="switchSection('settings')" data-section="settings">
-      <div class="nav-item-title">SETTINGS</div>
-      <div class="nav-item-sub">General &amp; Users</div>
-    </div>
     <div class="nav-item" onclick="switchSection('messages')" data-section="messages">
       <div class="nav-item-title">MESSAGES</div>
-      <div class="nav-item-sub">Contact Messages</div>
+      <div class="nav-item-sub">Contact &amp; Inbox</div>
+    </div>
+    <div class="nav-item" onclick="switchSection('settings')" data-section="settings">
+      <div class="nav-item-title">SETTINGS</div>
+      <div class="nav-item-sub">FAQ &amp; Pages</div>
     </div>
   </div>
 
@@ -330,21 +330,14 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 // Change this to your Railway/Render backend URL after deployment
-const API_URL = 'https://home-production-6910.up.railway.app';
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3001'
+  : 'https://home-production-6910.up.railway.app'; // ← change after deploy
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let token = localStorage.getItem('att_token') || sessionStorage.getItem('att_token');
 let currentSection = 'reservations';
 let currentSub = '';
-let currentUser = null; // stores logged-in user with role
-
-// Role permissions
-const ROLE_ACCESS = {
-  admin:      ['reservations', 'content', 'vehicles', 'accounting', 'settings', 'messages'],
-  accounting: ['reservations', 'accounting', 'messages'],
-  editor:     ['content', 'vehicles'],
-  driver:     [],
-};
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 async function api(path, opts = {}) {
@@ -428,23 +421,15 @@ async function doLogin() {
       body: JSON.stringify({ email, password }),
     });
     token = data.token;
-    currentUser = data.user;
     const remember = document.getElementById('rememberMe').checked;
     if (remember) localStorage.setItem('att_token', token);
     else sessionStorage.setItem('att_token', token);
 
-    if (data.user.role === 'driver') {
-      window.location.href = 'drivers.html';
-      return;
-    }
-
-    document.getElementById('topBarUser').textContent = `${data.user.name || data.user.email} (${data.user.role})`;
+    document.getElementById('topBarUser').textContent = data.user.email;
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     document.getElementById('app').style.flexDirection = 'column';
-    applyRoleNav(data.user.role);
-    const allowed = ROLE_ACCESS[data.user.role] || ROLE_ACCESS.editor;
-    switchSection(allowed[0]);
+    switchSection('reservations');
   } catch (err) {
     errEl.textContent = 'Invalid email or password.';
     errEl.style.display = 'block';
@@ -460,39 +445,31 @@ function doLogout() {
   location.reload();
 }
 
-// ─── ROLE NAV ─────────────────────────────────────────────────────────────────
-function applyRoleNav(role) {
-  const allowed = ROLE_ACCESS[role] || ROLE_ACCESS.editor;
-  document.querySelectorAll('.nav-item[data-section]').forEach(el => {
-    el.style.display = allowed.includes(el.dataset.section) ? '' : 'none';
-  });
-}
-
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 const SECTIONS = {
   reservations: {
-    subs: ['Transfer Reservations', "Drivers' Jobs", 'Customers'],
-    render: (sub) => sub === 'Customers' ? renderCustomers() : sub === "Drivers' Jobs" ? renderDriversJobs() : renderReservations(),
+    subs: ['Transfer Reservations', 'Customers'],
+    render: (sub) => sub === 'Customers' ? renderCustomers() : renderReservations(),
   },
   content: {
-    subs: ['Blog', 'Blog Detail Pages', 'FAQ', 'Pages'],
-    render: (sub) => sub === 'Blog' ? renderBlog() : sub === 'FAQ' ? renderFaq() : sub === 'Blog Detail Pages' ? renderBlogDetailPages() : renderPages(),
+    subs: ['Tours', 'Blog', 'Pages'],
+    render: (sub) => sub === 'Tours' ? renderTours() : sub === 'Blog' ? renderBlog() : renderPages(),
   },
   vehicles: {
     subs: ['Vehicles'],
     render: () => renderVehicles(),
   },
   accounting: {
-    subs: ['Revenue', 'Payment Links', 'Driver Payments'],
-    render: (sub) => sub === 'Payment Links' ? renderPaymentLinks() : sub === 'Driver Payments' ? renderDriverPayments() : renderAccounting(),
-  },
-  settings: {
-    subs: ['General', 'Users', 'Drivers', 'Extra Price Settings', 'Driver Applications'],
-    render: (sub) => renderSettings(sub),
+    subs: ['Revenue'],
+    render: () => renderAccounting(),
   },
   messages: {
-    subs: ['Contact Messages', 'Mail Template'],
-    render: (sub) => sub === 'Mail Template' ? renderMailTemplate() : renderMessages(),
+    subs: ['Contact Messages'],
+    render: () => renderMessages(),
+  },
+  settings: {
+    subs: ['FAQ', 'Pages'],
+    render: (sub) => sub === 'Pages' ? renderPages() : renderFaq(),
   },
 };
 
@@ -521,55 +498,6 @@ function switchSection(section) {
 
   currentSub = cfg.subs[0];
   cfg.render(cfg.subs[0]);
-}
-
-async function renderDriversJobs() {
-  const mc = document.getElementById('mainContent');
-  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
-  try {
-    const rows = await api('/api/reservations/drivers-jobs');
-    mc.innerHTML = `
-      <div class="section-header">
-        <div class="section-header-left">
-          <h2>Drivers' Jobs</h2>
-          <p>Reservations accepted by drivers.</p>
-        </div>
-      </div>
-      <div class="table-card">
-        <div style="overflow-x:auto">
-        <table>
-          <thead><tr>
-            <th>Reference</th>
-            <th>Phone</th>
-            <th>Driver Email</th>
-            <th>Route</th>
-            <th>Date</th>
-            <th>Price</th>
-            <th>Accepted At</th>
-            <th>Status</th>
-          </tr></thead>
-          <tbody>
-            ${rows.length ? rows.map(r => `<tr>
-              <td style="font-family:monospace;font-size:11px;color:var(--blue)">${r.reference}</td>
-              <td style="font-weight:600">${r.driver_phone || '—'}</td>
-              <td style="font-size:12px;color:var(--blue)">${r.driver_email || '—'}</td>
-              <td style="font-size:12px">
-                <div>${r.pickup_location}</div>
-                <div style="color:var(--text2)">→ ${r.dropoff_location}</div>
-              </td>
-              <td style="font-size:12px;white-space:nowrap">${r.date}</td>
-              <td style="font-weight:700;color:var(--gold)">${r.price ? '€'+r.price : '—'}</td>
-              <td style="font-size:11px;color:var(--text2);white-space:nowrap">${r.driver_accepted_at ? fmtDate(r.driver_accepted_at) : '—'}</td>
-              <td>${statusBadge(r.status)}</td>
-            </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text2)">No jobs accepted by drivers yet.</td></tr>'}
-          </tbody>
-        </table>
-        </div>
-        <div class="table-footer"><span>${rows.length} job${rows.length !== 1 ? 's' : ''}</span></div>
-      </div>`;
-  } catch (err) {
-    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
-  }
 }
 
 // ─── RESERVATIONS ─────────────────────────────────────────────────────────────
@@ -628,7 +556,7 @@ function renderResRows(rows) {
       <td style="font-family:monospace;font-size:11px;color:var(--blue)">${r.reference?.slice(0,10) || '—'}</td>
       <td>
         <div style="font-weight:600">${r.customer_name}</div>
-        <div style="font-size:11px;color:var(--text2)">${r.phone || '—'}</div>
+        <div style="font-size:11px;color:var(--text2)">${r.email}</div>
       </td>
       <td style="font-size:12px">
         <div>${r.pickup_location}</div>
@@ -639,13 +567,14 @@ function renderResRows(rows) {
       <td>${statusBadge(r.status)}</td>
       <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.created_at)}</td>
       <td>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button class="btn btn-ghost btn-sm" onclick="viewReservation(${r.id})">👁</button>
-          ${currentUser?.role !== 'driver' ? `
-          <button class="btn btn-success btn-sm" onclick="setResStatus(${r.id},'approved')">✅</button>
-          <button class="btn btn-danger btn-sm" onclick="setResStatus(${r.id},'cancelled')">❌</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteReservation(${r.id})" title="Delete">🗑</button>
-          ` : ''}
+        <div class="actions-wrap">
+          <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+          <div class="actions-menu">
+            <button class="actions-menu-item" onclick="viewReservation(${r.id});closeAllActions()">View Detail</button>
+            <button class="actions-menu-item" onclick="setResStatus(${r.id},'approved');closeAllActions()">✅ Approve</button>
+            <button class="actions-menu-item" onclick="setResStatus(${r.id},'cancelled');closeAllActions()">❌ Cancel</button>
+            <button class="actions-menu-item danger" onclick="deleteReservation(${r.id});closeAllActions()">🗑 Delete</button>
+          </div>
         </div>
       </td>
     </tr>`).join('');
@@ -717,118 +646,49 @@ async function deleteReservation(id) {
   });
 }
 
-// ─── CUSTOMERS (Reservation-based tracking) ───────────────────────────────────
+// ─── CUSTOMERS TRACKING ───────────────────────────────────────────────────────
 async function renderCustomers() {
   const mc = document.getElementById('mainContent');
   mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
   try {
-    const data = await api('/api/customers-tracking?limit=200');
+    const data = await api('/api/customers-tracking?limit=100');
     const rows = data.data || [];
 
-    // Stats
-    const stepCount = { homepage: 0, results: 0, form_filled: 0, completed: 0 };
-    rows.forEach(r => {
-      if (r.current_step === 'homepage') stepCount.homepage++;
-      else if (r.current_step === 'results') stepCount.results++;
-      else if (r.current_step === 'form_filled') stepCount.form_filled++;
-      else if (r.current_step === 'completed') stepCount.completed++;
-    });
+    const stepCount = { homepage: 0, vehicle_selected: 0, form_filled: 0, completed: 0 };
+    rows.forEach(r => { if (stepCount[r.current_step] !== undefined) stepCount[r.current_step]++; });
 
     mc.innerHTML = `
       <div class="section-header">
         <div class="section-header-left">
           <h2>Customer Journey Tracking</h2>
-          <p>Real-time tracking of visitors from entry to completed booking.</p>
+          <p>Real-time user behavior on the website.</p>
         </div>
       </div>
       <div class="stats-grid" style="margin-bottom:1.5rem">
-        <div class="stat-card"><div class="stat-label" style="color:var(--text2)">🏠 Visited Site</div><div class="stat-value">${stepCount.homepage}</div><div class="stat-sub">Entered & left</div></div>
-        <div class="stat-card"><div class="stat-label" style="color:var(--blue)">🔍 Viewed Results</div><div class="stat-value">${stepCount.results}</div><div class="stat-sub">Searched vehicles</div></div>
-        <div class="stat-card"><div class="stat-label" style="color:var(--yellow)">📝 Filled Form</div><div class="stat-value">${stepCount.form_filled}</div><div class="stat-sub">Started booking</div></div>
-        <div class="stat-card"><div class="stat-label" style="color:var(--green)">✅ Completed</div><div class="stat-value">${stepCount.completed}</div><div class="stat-sub">Booking submitted</div></div>
+        <div class="stat-card stat-gray"><div class="stat-label">Visited Site</div><div class="stat-value">${stepCount.homepage}</div></div>
+        <div class="stat-card stat-blue"><div class="stat-label">Selected Vehicle</div><div class="stat-value">${stepCount.vehicle_selected}</div></div>
+        <div class="stat-card stat-yellow"><div class="stat-label">Filled Form</div><div class="stat-value">${stepCount.form_filled}</div></div>
+        <div class="stat-card stat-green"><div class="stat-label">Completed</div><div class="stat-value">${stepCount.completed}</div></div>
       </div>
       <div class="table-card">
-        <div class="table-toolbar">
-          <div class="table-toolbar-right">
-            <input class="table-search" placeholder="Search session or action..." id="custSearch" oninput="filterCustomers()" />
-          </div>
-        </div>
         <div style="overflow-x:auto">
-        <table id="custTable">
-          <thead><tr>
-            <th>ID ↓</th>
-            <th>IP Address</th>
-            <th>Location</th>
-            <th>Current Step</th>
-            <th>Last Action</th>
-            <th>Last Seen</th>
-            <th></th>
-          </tr></thead>
-          <tbody id="custTbody"></tbody>
+        <table>
+          <thead><tr><th>Session</th><th>Step</th><th>Last Action</th><th>IP</th><th>Updated</th></tr></thead>
+          <tbody>
+            ${rows.length ? rows.map(r => `<tr>
+              <td style="font-family:monospace;font-size:11px;color:var(--text2)">${r.session_id?.slice(0,16)}…</td>
+              <td><span class="step-badge step-${r.current_step.replace('_selected','').replace('_filled','')}">${r.current_step}</span></td>
+              <td style="font-size:12px;color:var(--text2)">${r.last_action || '—'}</td>
+              <td style="font-size:11px;color:var(--text3)">${r.ip_address || '—'}</td>
+              <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.updated_at)}</td>
+            </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No tracking data yet</td></tr>'}
+          </tbody>
         </table>
         </div>
-        <div class="table-footer"><span id="custCount">—</span></div>
       </div>`;
-
-    window._allCustomers = rows;
-    renderCustomerRows(rows);
   } catch (err) {
     mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
   }
-}
-
-function getStepBadge(step) {
-  const map = {
-    homepage:    { label: '🏠 Homepage',    bg: 'rgba(139,148,158,0.15)', color: 'var(--text2)' },
-    results:     { label: '🔍 Results',     bg: 'rgba(46,168,240,0.15)',  color: 'var(--blue)'  },
-    form_filled: { label: '📝 Form Filled', bg: 'rgba(210,153,34,0.15)', color: 'var(--yellow)' },
-    completed:   { label: '✅ Completed',   bg: 'rgba(63,185,80,0.15)',  color: 'var(--green)'  },
-  };
-  const s = map[step] || { label: step, bg: 'rgba(139,148,158,0.15)', color: 'var(--text2)' };
-  return `<span style="background:${s.bg};color:${s.color};border-radius:5px;padding:3px 10px;font-size:12px;font-weight:600">${s.label}</span>`;
-}
-
-function renderCustomerRows(rows) {
-  const tbody = document.getElementById('custTbody');
-  if (!tbody) return;
-  document.getElementById('custCount').textContent = `${rows.length} session${rows.length !== 1 ? 's' : ''}`;
-
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No tracking data yet. Visitors will appear here automatically.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = rows.map(r => `<tr>
-    <td>${r.id}</td>
-    <td style="font-family:monospace;font-size:12px;color:var(--text2)">${r.ip_address || '—'}</td>
-    <td style="font-size:12px;color:var(--text2)">${r.location || '—'}</td>
-    <td>${getStepBadge(r.current_step)}</td>
-    <td style="font-size:12px;color:var(--text2)">${r.last_action || '—'}</td>
-    <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.updated_at)}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="deleteTracking(${r.id})">🗑</button></td>
-  </tr>`).join('');
-}
-
-function filterCustomers() {
-  const q = document.getElementById('custSearch')?.value.toLowerCase() || '';
-  const filtered = (window._allCustomers || []).filter(r =>
-    r.session_id?.toLowerCase().includes(q) ||
-    r.last_action?.toLowerCase().includes(q) ||
-    r.current_step?.toLowerCase().includes(q) ||
-    r.ip_address?.toLowerCase().includes(q) ||
-    r.location?.toLowerCase().includes(q)
-  );
-  renderCustomerRows(filtered);
-}
-
-async function deleteTracking(id) {
-  openConfirm('Delete Record', 'This tracking record will be permanently deleted.', async () => {
-    try {
-      await api(`/api/customers-tracking/${id}`, { method: 'DELETE' });
-      toast('Record deleted');
-      renderCustomers();
-    } catch (err) { toast('Error: ' + err.message, 'error'); }
-  });
 }
 
 // ─── VEHICLES ─────────────────────────────────────────────────────────────────
@@ -865,10 +725,13 @@ async function renderVehicles() {
               <td>€${v.price}</td>
               <td>${statusBadge(v.status)}</td>
               <td>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  <button class="btn btn-ghost btn-sm" onclick="openVehicleModal(${JSON.stringify(v).replace(/"/g,'&quot;')})">✏️ Edit</button>
-                  <button class="btn btn-ghost btn-sm" onclick="toggleVehicleStatus(${v.id},'${v.status === 'active' ? 'passive' : 'active'}')">${v.status === 'active' ? '⏸' : '▶'}</button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteVehicle(${v.id})" title="Delete">🗑</button>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="openVehicleModal(${JSON.stringify(v).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item" onclick="toggleVehicleStatus(${v.id},'${v.status === 'active' ? 'passive' : 'active'}');closeAllActions()">${v.status === 'active' ? '⏸ Deactivate' : '▶ Activate'}</button>
+                    <button class="actions-menu-item danger" onclick="deleteVehicle(${v.id});closeAllActions()">🗑 Delete</button>
+                  </div>
                 </div>
               </td>
             </tr>`).join('')}
@@ -902,11 +765,36 @@ function openVehicleModal(v = null) {
           <option value="passive" ${v?.status === 'passive' ? 'selected' : ''}>Passive</option>
         </select></div>
     </div>
-    <div class="form-group"><label class="form-label">Image URL</label>
-      <input class="form-input" id="vImg" value="${v?.image_url || ''}" placeholder="https://…" /></div>`,
+    <div class="form-group"><label class="form-label">Vehicle Image</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input class="form-input" id="vImg" value="${v?.image_url || ''}" placeholder="Image URL or upload file…" style="flex:1;" readonly />
+        <label for="vImgFile" style="cursor:pointer;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" title="Upload image file">📁</label>
+        <input type="file" id="vImgFile" accept="image/*" style="display:none;" onchange="handleVehicleImgUpload(this)" />
+      </div>
+      ${v?.image_url ? `<img src="${v.image_url}" style="margin-top:8px;max-height:80px;border-radius:6px;object-fit:cover;max-width:100%;" onerror="this.style.display='none'" />` : ''}
+    </div>`,
     `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
      <button class="btn btn-primary" onclick="saveVehicle(${isEdit ? v.id : 'null'})">${isEdit ? 'Save Changes' : 'Add Vehicle'}</button>`
   );
+}
+
+function handleVehicleImgUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('vImg').value = e.target.result;
+    // Show preview
+    let preview = document.getElementById('vImgPreview');
+    if (!preview) {
+      preview = document.createElement('img');
+      preview.id = 'vImgPreview';
+      preview.style.cssText = 'margin-top:8px;max-height:80px;border-radius:6px;object-fit:cover;max-width:100%;display:block;';
+      input.parentElement.parentElement.appendChild(preview);
+    }
+    preview.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 async function saveVehicle(id) {
@@ -948,267 +836,107 @@ async function deleteVehicle(id) {
 }
 
 // ─── TOURS ────────────────────────────────────────────────────────────────────
-// ─── TRAVEL TIPS ──────────────────────────────────────────────────────────────
-
-const BLOG_PAGES = [
-  { file: 'blog-hagiasophia', label: 'Hagia Sophia',      emoji: '🕌', defaultStatus: 'active'  },
-  { file: 'blog-grandbazaar', label: 'Grand Bazaar',       emoji: '🏪', defaultStatus: 'active'  },
-  { file: 'blog-bosphorus',   label: 'Bosphorus',          emoji: '🚢', defaultStatus: 'active'  },
-  { file: 'blog-topkapi',     label: 'Topkapi Palace',     emoji: '🏰', defaultStatus: 'active'  },
-  { file: 'blog-galatatower', label: 'Galata Tower',       emoji: '🗼', defaultStatus: 'active'  },
-  { file: 'blog-sultanahmet', label: 'Sultanahmet',        emoji: '🕍', defaultStatus: 'active'  },
-  { file: 'blog-bluemosque',  label: 'Blue Mosque',        emoji: '🕌', defaultStatus: 'active'  },
-  { file: 'blog-galatabridge',label: 'Galata Bridge',      emoji: '🌉', defaultStatus: 'active'  },
-  { file: 'blog-basilicacistern', label: 'Basilica Cistern', emoji: '🏛️', defaultStatus: 'active' },
-  { file: 'blog-dolmabahce',  label: 'Dolmabahçe Palace',  emoji: '🏛', defaultStatus: 'passive' },
-  { file: 'blog-princessislands', label: "Princes' Islands", emoji: '🏝️', defaultStatus: 'passive' },
-];
-
-async function renderBlogDetailPages() {
+async function renderTours() {
   const mc = document.getElementById('mainContent');
   mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
-
-  let saved = {};
-  try { saved = await api('/api/settings/blog-pages'); } catch(e) { saved = {}; }
-
-  const DEFAULTS = {
-    'blog-hagiasophia': { title: "Hagia Sophia: Istanbul's Greatest Monument", subtitle: 'History', intro: "Few buildings in the world carry as much history as Hagia Sophia. For nearly 1,500 years, this extraordinary structure has stood at the heart of Istanbul.", content: "Completed in 537 AD under Emperor Justinian I, Hagia Sophia was for nearly a thousand years the largest cathedral in the world.\n\nAfter the Ottoman conquest of Constantinople in 1453, Sultan Mehmed II converted it into a mosque.\n\nHagia Sophia is located in Sultanahmet. Entry is free. Plan your visit early to avoid crowds.", image: 'pngler/hagiasophia.png' },
-    'blog-grandbazaar': { title: 'Grand Bazaar: The Ultimate Shopping Experience', subtitle: 'Shopping', intro: "With over 4,000 shops across 61 covered streets, the Grand Bazaar is one of the world's oldest and largest covered markets.", content: "The Grand Bazaar has been the commercial heart of Istanbul since 1461.\n\nBargaining is expected — start at roughly half the asking price. Allow at least 2-3 hours to explore.", image: 'pngler/grandbaazar.png' },
-    'blog-bosphorus': { title: 'Bosphorus Cruise: What You Need to Know', subtitle: 'Travel Tips', intro: "The Bosphorus strait separates Europe and Asia and offers some of Istanbul's most spectacular scenery.", content: "A Bosphorus cruise is one of the best ways to experience Istanbul.\n\nSunset cruises are particularly popular. Both airports are well-connected to the Bosphorus waterfront by private transfer.", image: 'pngler/bosphorus.png' },
-    'blog-topkapi': { title: 'Topkapi Palace: Inside the Heart of the Ottoman Empire', subtitle: 'History', intro: "For nearly 400 years, Topkapi Palace was the centre of the Ottoman Empire.", content: "Topkapi Palace was built by Sultan Mehmed II in the 1450s.\n\nDon't miss the Treasury and the Harem. Book tickets online. Closed on Tuesdays.", image: 'pngler/topkapi.png' },
-    'blog-galatatower': { title: 'Galata Tower: Best Views in Istanbul', subtitle: 'Sightseeing', intro: "Rising above the rooftops of Beyoğlu, the Galata Tower offers the finest panoramic view of Istanbul.", content: "The Galata Tower dates from 1348. The observation gallery at 63 metres offers panoramic views.\n\nBook tickets online — queues can be long in high season.", image: 'pngler/galata.png' },
-    'blog-sultanahmet': { title: 'Sultanahmet: The Heart of Historic Istanbul', subtitle: 'History', intro: "Sultanahmet is the historic peninsula at the heart of old Istanbul, home to the world's most remarkable monuments.", content: "The Sultanahmet district contains Hagia Sophia, the Blue Mosque, Topkapi Palace, and the Grand Bazaar all within walking distance.", image: 'pngler/sultanahmet.png' },
-  };
-
-  function getVal(key, field) {
-    if (saved[key] && saved[key][field] !== undefined) return saved[key][field];
-    if (DEFAULTS[key] && DEFAULTS[key][field] !== undefined) return DEFAULTS[key][field];
-    return '';
-  }
-
-  function getStatus(key) {
-    if (saved[key] && saved[key].status) return saved[key].status;
-    const page = BLOG_PAGES.find(p => p.file === key);
-    return page ? (page.defaultStatus || 'active') : 'active';
-  }
-
-  async function togglePageStatus(key) {
-    const current = getStatus(key);
-    const newStatus = current === 'active' ? 'passive' : 'active';
-    const data = {
-      title:    document.getElementById('bdt-title-' + key)?.value || getVal(key,'title'),
-      subtitle: document.getElementById('bdt-subtitle-' + key)?.value || getVal(key,'subtitle'),
-      intro:    document.getElementById('bdt-intro-' + key)?.value || getVal(key,'intro'),
-      content:  document.getElementById('bdt-content-' + key)?.value || getVal(key,'content'),
-      image:    document.getElementById('bdt-img-' + key)?.value || getVal(key,'image'),
-      status:   newStatus,
-    };
-    try {
-      await api('/api/settings/blog-pages/' + key, { method: 'PUT', body: JSON.stringify(data) });
-      // Update saved object in memory
-      if (!saved[key]) saved[key] = {};
-      saved[key].status = newStatus;
-      // Update just the button and badge without full re-render
-      const btn = document.querySelector(`button[onclick="window._togglePageStatus('${key}')"]`);
-      if (btn) {
-        btn.textContent = newStatus === 'active' ? '⏸' : '▶';
-        const badge = btn.previousElementSibling;
-        if (badge && badge.classList.contains('badge')) {
-          badge.className = 'badge ' + (newStatus === 'active' ? 'badge-green' : 'badge-gray');
-          badge.textContent = newStatus === 'active' ? 'Active' : 'Passive';
-        }
-      }
-      toast((newStatus === 'active' ? '✅ Active' : '⏸ Passive') + ': ' + key);
-    } catch (err) { toast('Error: ' + err.message, 'error'); }
-  }
-
-  window._togglePageStatus = togglePageStatus;
-
-  mc.innerHTML = `
-    <div class="section-header">
-      <div class="section-header-left">
-        <h2>Blog Detail Pages</h2>
-        <p>Edit blog page content. Toggle active/passive to control which appear on the site.</p>
-      </div>
-      <button class="btn btn-primary" onclick="openNewBlogPageModal()">＋ New Blog Page</button>
-    </div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-weight:600;color:var(--text)">🔄 Daily Rotation</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:2px">When ON — homepage shows 3 different active blogs every day automatically</div>
-      </div>
-      <button id="rotationToggleBtn" class="btn ${(saved['__rotation__'] && saved['__rotation__'].enabled === false) ? 'btn-ghost' : 'btn-success'} btn-sm" onclick="toggleDailyRotation()">
-        ${(saved['__rotation__'] && saved['__rotation__'].enabled === false) ? '⏸ OFF' : '▶ ON'}
-      </button>
-    </div>
-    <div style="display:grid;gap:0.75rem;margin-bottom:1.5rem">
-      ${BLOG_PAGES.map(p => `
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
-          <div style="padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="toggleBlogDetailEdit('${p.file}')">
-            <div style="display:flex;align-items:center;gap:0.75rem">
-              <span style="font-size:22px">${p.emoji}</span>
-              <div>
-                <div style="font-weight:700;color:var(--text);font-size:14px">${p.label}</div>
-                <div style="font-size:12px;color:var(--text2)">${p.file}.html</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center" onclick="event.stopPropagation()">
-              ${getStatus(p.file) === 'active' 
-                ? '<span class="badge badge-green" style="margin-right:4px">Active</span>' 
-                : '<span class="badge badge-gray" style="margin-right:4px">Passive</span>'}
-              <button class="btn btn-ghost btn-sm" onclick="window._togglePageStatus('${p.file}')">${getStatus(p.file) === 'active' ? '⏸' : '▶'}</button>
-              <a href="${p.file}.html" target="_blank" class="btn btn-ghost btn-sm">👁</a>
-              <span id="arrow-${p.file}" style="color:var(--text2);font-size:18px" onclick="toggleBlogDetailEdit('${p.file}')">▾</span>
-            </div>
-          </div>
-          <div id="edit-${p.file}" style="display:none;padding:0 1.25rem 1.25rem;border-top:1px solid var(--border)">
-            <div class="form-group" style="margin-top:1rem">
-              <label class="form-label">Page Title</label>
-              <input class="form-input" id="bdt-title-${p.file}" value="${getVal(p.file,'title').replace(/"/g,'&quot;')}" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Category Label</label>
-              <input class="form-input" id="bdt-subtitle-${p.file}" value="${getVal(p.file,'subtitle').replace(/"/g,'&quot;')}" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Introduction</label>
-              <textarea class="form-textarea" id="bdt-intro-${p.file}" style="min-height:100px">${getVal(p.file,'intro')}</textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Main Content <span style="font-size:11px;color:var(--text2)">(separate paragraphs with blank line)</span></label>
-              <textarea class="form-textarea" id="bdt-content-${p.file}" style="min-height:200px">${getVal(p.file,'content')}</textarea>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Hero Image URL</label>
-              <input class="form-input" id="bdt-img-${p.file}" value="${getVal(p.file,'image').replace(/"/g,'&quot;')}" />
-            </div>
-            <div style="display:flex;gap:0.75rem;margin-top:0.75rem">
-              <button class="btn btn-primary" onclick="saveBlogDetail('${p.file}')">💾 Save Changes</button>
-              <a href="${p.file}.html" target="_blank" class="btn btn-ghost">Open Page ↗</a>
-            </div>
-          </div>
-        </div>`).join('')}
-    </div>`;
-}
-
-
-async function toggleDailyRotation() {
   try {
-    const current = await api('/api/settings/blog-pages/__rotation__');
-    const enabled = current ? current.enabled !== false : true;
-    await api('/api/settings/blog-pages/__rotation__', {
-      method: 'PUT',
-      body: JSON.stringify({ enabled: !enabled }),
-    });
-    toast('Daily rotation ' + (!enabled ? 'enabled ✅' : 'disabled ⏸'));
-    renderBlogDetailPages();
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-function toggleBlogDetailEdit(file) {
-  const el = document.getElementById('edit-' + file);
-  const arrow = document.getElementById('arrow-' + file);
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
-}
-
-async function saveBlogDetail(file) {
-  const data = {
-    title:    document.getElementById('bdt-title-' + file).value,
-    subtitle: document.getElementById('bdt-subtitle-' + file).value,
-    intro:    document.getElementById('bdt-intro-' + file).value,
-    content:  document.getElementById('bdt-content-' + file).value,
-    image:    document.getElementById('bdt-img-' + file).value,
-  };
-  try {
-    await api('/api/settings/blog-pages/' + file, { method: 'PUT', body: JSON.stringify(data) });
-    toast('Saved! Changes are now live on the blog page ✅');
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-function openNewBlogPageModal() {
-  openModal('New Blog Page', `
-    <div class="form-group"><label class="form-label">Page Name * <span style="font-size:11px;color:var(--text2)">(e.g. "istanbul-food" → blog-istanbul-food.html)</span></label>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="color:var(--text2);font-size:13px;white-space:nowrap">blog-</span>
-        <input class="form-input" id="nbp-name" placeholder="istanbul-food" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')" />
-        <span style="color:var(--text2);font-size:13px;white-space:nowrap">.html</span>
+    const tours = await api('/api/tours');
+    mc.innerHTML = `
+      <div class="section-header">
+        <div class="section-header-left"><h2>Tours</h2><p>Manage tour packages.</p></div>
+        <button class="btn btn-primary" onclick="openTourModal()">＋ Add Tour</button>
       </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <div class="table-toolbar-right"><input class="table-search" placeholder="Search…" oninput="filterTable(this,'tourTable')" /></div>
+        </div>
+        <div style="overflow-x:auto">
+        <table id="tourTable">
+          <thead><tr><th>ID ↓</th><th>Tour Name</th><th>Duration</th><th>Max People</th><th>KM Limit</th><th>Price</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${tours.length ? tours.map(t => `<tr>
+              <td>${t.id}</td><td><b>${t.name}</b><br><span style="font-size:11px;color:var(--text2)">${t.description?.slice(0,50) || ''}</span></td>
+              <td>${t.duration}</td><td>${t.max_people}</td><td>${t.km_limit ? t.km_limit + ' km' : '—'}</td>
+              <td>€${t.price}</td><td>${statusBadge(t.status)}</td>
+              <td style="font-size:11px;color:var(--text2)">${fmtDate(t.created_at)}</td>
+              <td>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="openTourModal(${JSON.stringify(t).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item danger" onclick="deleteTour(${t.id});closeAllActions()">🗑 Delete</button>
+                  </div>
+                </div>
+              </td>
+            </tr>`).join('') : '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text2)">No tours yet</td></tr>'}
+          </tbody>
+        </table>
+        </div>
+        <div class="table-footer"><span>${tours.length} tour${tours.length !== 1 ? 's' : ''}</span></div>
+      </div>`;
+  } catch (err) {
+    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
+  }
+}
+
+function openTourModal(t = null) {
+  const isEdit = !!t;
+  openModal(isEdit ? 'Edit Tour' : 'Add Tour', `
+    <div class="form-group"><label class="form-label">Tour Name *</label>
+      <input class="form-input" id="tName" value="${t?.name || ''}" /></div>
+    <div class="form-group"><label class="form-label">Description</label>
+      <textarea class="form-textarea" id="tDesc">${t?.description || ''}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Duration *</label>
+        <input class="form-input" id="tDur" value="${t?.duration || ''}" placeholder="5 hours" /></div>
+      <div class="form-group"><label class="form-label">Max People *</label>
+        <input class="form-input" id="tMax" type="number" value="${t?.max_people || ''}" /></div>
     </div>
-    <div class="form-group"><label class="form-label">Page Title *</label>
-      <input class="form-input" id="nbp-title" placeholder="Istanbul Food Guide" /></div>
-    <div class="form-group"><label class="form-label">Category Label</label>
-      <input class="form-input" id="nbp-label" placeholder="Food & Culture" /></div>
-    <div class="form-group"><label class="form-label">Introduction *</label>
-      <textarea class="form-textarea" id="nbp-intro" style="min-height:100px" placeholder="Opening paragraph..."></textarea></div>
-    <div class="form-group"><label class="form-label">Main Content * <span style="font-size:11px;color:var(--text2)">(use ## for headings, blank line between paragraphs)</span></label>
-      <textarea class="form-textarea" id="nbp-content" style="min-height:180px" placeholder="## First Section\n\nContent here...\n\n## Second Section\n\nMore content..."></textarea></div>
-    <div class="form-group"><label class="form-label">Hero Image URL</label>
-      <input class="form-input" id="nbp-img" placeholder="https://..." /></div>`,
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">KM Limit</label>
+        <input class="form-input" id="tKm" type="number" value="${t?.km_limit || ''}" /></div>
+      <div class="form-group"><label class="form-label">Price (€) *</label>
+        <input class="form-input" id="tPrice" type="number" value="${t?.price || ''}" /></div>
+    </div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-select" id="tStatus">
+        <option value="active" ${t?.status === 'active' ? 'selected' : ''}>Active</option>
+        <option value="passive" ${t?.status === 'passive' ? 'selected' : ''}>Passive</option>
+      </select></div>`,
     `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="createNewBlogPage()">Create & Download</button>`
+     <button class="btn btn-primary" onclick="saveTour(${isEdit ? t.id : 'null'})">${isEdit ? 'Save' : 'Add Tour'}</button>`
   );
 }
 
-async function createNewBlogPage() {
-  const name    = document.getElementById('nbp-name').value.trim();
-  const title   = document.getElementById('nbp-title').value.trim();
-  const label   = document.getElementById('nbp-label').value.trim() || 'Blog';
-  const intro   = document.getElementById('nbp-intro').value.trim();
-  const content = document.getElementById('nbp-content').value.trim();
-  const image   = document.getElementById('nbp-img').value.trim();
-
-  if (!name || !title || !intro || !content) return toast('Please fill required fields', 'error');
-
-  const fileKey = 'blog-' + name;
-
-  // Save to database
+async function saveTour(id) {
+  const body = {
+    name: document.getElementById('tName').value.trim(),
+    description: document.getElementById('tDesc').value.trim(),
+    duration: document.getElementById('tDur').value.trim(),
+    max_people: document.getElementById('tMax').value,
+    km_limit: document.getElementById('tKm').value || null,
+    price: document.getElementById('tPrice').value,
+    status: document.getElementById('tStatus').value,
+  };
+  if (!body.name || !body.duration || !body.max_people || !body.price)
+    return toast('Fill required fields', 'error');
   try {
-    await api('/api/settings/blog-pages/' + fileKey, {
-      method: 'PUT',
-      body: JSON.stringify({ title, subtitle: label, intro, content, image }),
-    });
-  } catch(e) {}
-
-  // Save to blog API as a post too
-  try {
-    await api('/api/blog', {
-      method: 'POST',
-      body: JSON.stringify({ title, excerpt: intro.slice(0,200), content, image_url: image || null, status: 'active', slug: fileKey + '-' + Date.now() }),
-    });
-  } catch(e) {}
-
-  // Add to BLOG_PAGES in memory
-  if (!BLOG_PAGES.find(p => p.file === fileKey)) {
-    BLOG_PAGES.push({ file: fileKey, label: title, emoji: '📝' });
-  }
-
-  // Generate and download HTML file
-  const html = generateBlogHTML(fileKey, title, label, intro, content, image);
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = fileKey + '.html'; a.click();
-  URL.revokeObjectURL(url);
-
-  toast('Blog page created! Upload ' + fileKey + '.html to GitHub home/ folder.');
-  closeModalDirect();
-  renderBlogDetailPages();
+    if (id) await api(`/api/tours/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await api('/api/tours', { method: 'POST', body: JSON.stringify(body) });
+    toast(id ? 'Tour updated' : 'Tour added');
+    closeModalDirect();
+    renderTours();
+  } catch (err) { toast('Error: ' + err.message, 'error'); }
 }
 
-function generateBlogHTML(fileKey, title, label, intro, content, image) {
-  var sc = 'script', st = 'style';
-  var API = 'https://home-production-6910.up.railway.app';
-  var contentSections = content.split('\n\n').map(function(p){ return p.trim(); }).filter(Boolean).map(function(p){
-    if (p.startsWith('## ')) return '<div class="art-section"><h2>' + p.slice(3) + '</h2></div>';
-    return '<div class="art-section"><p>' + p.replace(/\n/g,'<br>') + '</p></div>';
-  }).join('\n');
-  var dateStr = new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
-  var imgHtml = image ? '<img class="art-hero" src="' + image + '" alt="' + title + '" onerror="this.style.display=\'none\'" />' : '';
-  var loaderScript = '(function(){fetch("' + API + '/api/settings/blog-pages/' + fileKey + '").then(function(r){return r.json();}).then(function(d){if(!d)return;var t=document.querySelector(".art-title");var intro=document.querySelector(".art-intro");var hero=document.querySelector(".art-hero");var label=document.querySelector(".art-label");if(t&&d.title)t.textContent=d.title;if(intro&&d.intro)intro.textContent=d.intro;if(label&&d.subtitle)label.textContent=d.subtitle;if(hero&&d.image)hero.src=d.image;if(d.content){document.querySelectorAll(".art-section").forEach(function(s){s.style.display="none";});var wrap=document.querySelector(".article-wrap");var cta=document.querySelector(".cta-box");var container=document.createElement("div");d.content.split("\\n\\n").forEach(function(part){part=part.trim();if(!part)return;var sec=document.createElement("div");sec.className="art-section";if(part.startsWith("## ")){sec.innerHTML="<h2>"+part.slice(3)+"</h2>";}else{sec.innerHTML="<p>"+part.replace(/\\n/g,"<br>")+"</p>";}container.appendChild(sec);});if(cta)wrap.insertBefore(container,cta);else wrap.appendChild(container);}}).catch(function(){});})();';
-
-  return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n<title>' + title + ' | Airports Transfer Turkey</title>\n<' + st + '>\n* { box-sizing: border-box; margin: 0; padding: 0; }\nbody { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 66px; }\n.nav { display: flex; align-items: center; padding: 1rem 2rem; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,22,40,0.96); backdrop-filter: blur(12px); }\n.nav-logo { font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #f0c040; cursor: pointer; }\n.nav-links { display: flex; gap: 2rem; list-style: none; margin: 0; padding: 0; position: absolute; left: 50%; transform: translateX(-50%); }\n.nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 15px; font-weight: 500; }\n.nav-links a:hover { color: #f0c040; }\n.hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; background: none; border: none; padding: 4px; margin-left: auto; }\n.hamburger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }\n@media(max-width:1150px) { .hamburger { display: flex !important; } .nav-links { display: none !important; } }\n.article-wrap { max-width: 760px; margin: 0 auto; padding: 3rem 2rem 5rem; }\n.back-link { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 13px; color: #9ab4cc; text-decoration: none; margin-bottom: 2rem; }\n.back-link:hover { color: #f0c040; }\n.art-label { font-size: 11px; font-weight: 700; color: #f0c040; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem; }\n.art-title { font-size: 34px; font-weight: 700; color: #dde6f0; line-height: 1.25; margin-bottom: 1rem; }\n.art-meta { display: flex; gap: 1rem; font-size: 13px; color: #7a9ab5; margin-bottom: 2rem; }\n.art-hero { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; margin-bottom: 2rem; background: #1a3a5c; }\n.art-intro { font-size: 17px; color: #c0d0e0; line-height: 1.75; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 0.5px solid rgba(255,255,255,0.08); }\n.art-section { margin-bottom: 2rem; }\n.art-section h2 { font-size: 20px; font-weight: 700; color: #dde6f0; margin-bottom: 0.75rem; }\n.art-section p { font-size: 15px; color: #b0c4d8; line-height: 1.8; }\n.cta-box { background: #1a3a5c; border: 0.5px solid #2e5070; border-radius: 12px; padding: 1.75rem; margin-top: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }\n.cta-box-text h3 { font-size: 17px; font-weight: 700; color: #dde6f0; margin-bottom: 0.3rem; }\n.cta-box-text p { font-size: 14px; color: #9ab4cc; }\n.cta-box-btn { background: #f0c040; color: #1a1a1a; border: none; border-radius: 8px; padding: 11px 24px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; white-space: nowrap; }\n.footer-rich { background: #07101e; padding: 2rem; text-align: center; color: rgba(255,255,255,0.5); font-size: 13px; }\n</' + st + '>\n</head>\n<body>\n<nav class="nav">\n  <div class="nav-logo" onclick="location.href=\'index.html\'">AIRPORTS TRANSFER TURKEY</div>\n  <ul class="nav-links">\n    <li><a href="index.html">Home</a></li>\n    <li><a href="about-us.html">About Us</a></li>\n    <li><a href="blog.html">Blog</a></li>\n    <li><a href="contact.html">Contact</a></li>\n  </ul>\n  <button class="hamburger"><span></span><span></span><span></span></button>\n</nav>\n<div class="article-wrap">\n  <a href="blog.html" class="back-link">← Back to Blog</a>\n  <div class="art-label" id="artLabel">' + label + '</div>\n  <h1 class="art-title" id="artTitle">' + title + '</h1>\n  <div class="art-meta"><span>📅 ' + dateStr + '</span></div>\n  ' + imgHtml + '\n  <p class="art-intro" id="artIntro">' + intro + '</p>\n  ' + contentSections + '\n  <div class="cta-box">\n    <div class="cta-box-text"><h3>Visiting Istanbul? We\'ll Handle the Transfer.</h3><p>Fixed prices · Flight tracking · Meet &amp; greet · No prepayment</p></div>\n    <a href="index.html" class="cta-box-btn">Book a Transfer →</a>\n  </div>\n</div>\n<footer class="footer-rich">© 2026 Airports Transfer Turkey. All rights reserved.</footer>\n<' + sc + ' src="whatsapp.js"></' + sc + '>\n<' + sc + '>' + loaderScript + '</' + sc + '>\n</body>\n</html>';
+async function deleteTour(id) {
+  openConfirm('Delete Tour', 'This tour will be permanently deleted.', async () => {
+    try {
+      await api(`/api/tours/${id}`, { method: 'DELETE' });
+      toast('Tour deleted');
+      renderTours();
+    } catch (err) { toast('Error: ' + err.message, 'error'); }
+  });
 }
 
 // ─── BLOG ─────────────────────────────────────────────────────────────────────
@@ -1241,10 +969,12 @@ async function renderBlog() {
               <td style="font-size:11px;color:var(--text2)">${fmtDate(p.created_at)}</td>
               <td>
                 <div class="actions-wrap">
-                  <div style="display:flex;gap:6px;align-items:center;">
-                    <button class="btn btn-ghost btn-sm" onclick="openBlogModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">✏️ Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteBlog(${p.id})" title="Delete">🗑</button>
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="openBlogModal(${JSON.stringify(p).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item danger" onclick="deleteBlog(${p.id});closeAllActions()">🗑 Delete</button>
                   </div>
+                </div>
               </td>
             </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">No posts yet</td></tr>'}
           </tbody>
@@ -1331,10 +1061,12 @@ async function renderFaq() {
               <td>${f.order_num}</td>
               <td>
                 <div class="actions-wrap">
-                  <div style="display:flex;gap:6px;align-items:center;">
-                    <button class="btn btn-ghost btn-sm" onclick="openFaqModal(${JSON.stringify(f).replace(/"/g,'&quot;')})">✏️ Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteFaq(${f.id})" title="Delete">🗑</button>
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="openFaqModal(${JSON.stringify(f).replace(/"/g,'&quot;')});closeAllActions()">✏️ Edit</button>
+                    <button class="actions-menu-item danger" onclick="deleteFaq(${f.id});closeAllActions()">🗑 Delete</button>
                   </div>
+                </div>
               </td>
             </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text2)">No FAQs yet</td></tr>'}
           </tbody>
@@ -1438,47 +1170,6 @@ async function savePage(name) {
 }
 
 // ─── ACCOUNTING ───────────────────────────────────────────────────────────────
-async function renderDriverPayments() {
-  const mc = document.getElementById('mainContent');
-  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
-  try {
-    const rows = await api('/api/driver-payments');
-    mc.innerHTML = `
-      <div class="section-header">
-        <div class="section-header-left">
-          <h2>Driver Payments</h2>
-          <p>Monthly payment summaries generated automatically on the 1st of each month.</p>
-        </div>
-      </div>
-      <div class="table-card">
-        <div style="overflow-x:auto">
-        <table>
-          <thead><tr>
-            <th>Date</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>IBAN</th>
-            <th>Period</th>
-            <th>Amount</th>
-          </tr></thead>
-          <tbody>
-            ${rows.length ? rows.map(r => `<tr>
-              <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(r.created_at)}</td>
-              <td style="color:var(--blue);font-size:12px">${r.driver_email || '—'}</td>
-              <td style="font-weight:600">${r.driver_phone || '—'}</td>
-              <td style="font-family:monospace;font-size:12px;letter-spacing:1px">${r.driver_iban || '—'}</td>
-              <td style="font-size:11px;color:var(--text2)">${fmtDate(r.period_start)} → ${fmtDate(r.period_end)}</td>
-              <td style="font-weight:700;color:var(--gold);font-size:16px">€${parseFloat(r.amount||0).toFixed(2)}</td>
-            </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">No payment summaries yet. Generated automatically on the 1st of each month.</td></tr>'}
-          </tbody>
-        </table>
-        </div>
-      </div>`;
-  } catch(err) {
-    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
-  }
-}
-
 async function renderAccounting() {
   const mc = document.getElementById('mainContent');
   mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
@@ -1527,891 +1218,6 @@ async function renderAccounting() {
   }
 }
 
-// ─── PAYMENT LINKS ────────────────────────────────────────────────────────────
-async function renderPaymentLinks() {
-  const mc = document.getElementById('mainContent');
-  mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
-  try {
-    const links = await api('/api/payment-links');
-    mc.innerHTML = `
-      <div class="section-header">
-        <div class="section-header-left">
-          <h2>Payment Links</h2>
-          <p>Iyzico payment links sent to customers.</p>
-        </div>
-        <button class="btn btn-primary" onclick="openNewPaymentLinkModal()">＋ New Payment Link</button>
-      </div>
-      <div class="table-card">
-        <div class="table-toolbar">
-          <div class="table-toolbar-right">
-            <input class="table-search" placeholder="Search customer..." oninput="filterTable(this,'plTable')" />
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-        <table id="plTable">
-          <thead><tr>
-            <th>ID ↓</th><th>Amount</th><th>Link</th><th>Status</th>
-            <th>Date</th><th>Paid At</th><th>Name</th><th>Phone</th><th>Email</th><th>Actions</th>
-          </tr></thead>
-          <tbody>
-            ${links.length ? links.map(l => `<tr>
-              <td>${l.id.toString().slice(-6)}</td>
-              <td style="font-weight:700;color:var(--gold)">${l.amount}${l.currency === 'EUR' ? '€' : l.currency === 'USD' ? '$' : l.currency === 'GBP' ? '£' : '₺'}</td>
-              <td style="max-width:200px">
-                <a href="${l.link}" target="_blank" style="color:var(--blue);font-size:12px;word-break:break-all">${l.link}</a>
-                <button onclick="navigator.clipboard.writeText('${l.link}');toast('Link copied!')" style="background:none;border:none;cursor:pointer;color:var(--text2);margin-left:4px">📋</button>
-              </td>
-              <td>${l.status === 'paid' ? '<span class="badge badge-green">Paid</span>' : l.status === 'failed' ? '<span class="badge badge-red">Failed</span>' : '<span class="badge badge-yellow">Pending</span>'}</td>
-              <td style="font-size:11px;color:var(--text2)">${fmtDate(l.created_at)}</td>
-              <td style="font-size:11px;color:var(--text2)">${l.paid_at ? fmtDate(l.paid_at) : '—'}</td>
-              <td style="font-size:13px">${l.customer_name || '—'}</td>
-              <td style="font-size:12px">${l.customer_phone || '—'}</td>
-              <td style="font-size:12px;color:var(--text2)">${l.customer_email || '—'}</td>
-              <td>
-                <div style="display:flex;gap:6px">
-                  <button class="btn btn-success btn-sm" onclick="setPaymentStatus('${l.id}','paid')">✅</button>
-                  <button class="btn btn-danger btn-sm" onclick="setPaymentStatus('${l.id}','failed')">❌</button>
-                  <button class="btn btn-danger btn-sm" onclick="deletePaymentLink('${l.id}')">🗑</button>
-                </div>
-              </td>
-            </tr>`).join('') : '<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--text2)">No payment links yet</td></tr>'}
-          </tbody>
-        </table>
-        </div>
-        <div class="table-footer"><span>${links.length} link${links.length !== 1 ? 's' : ''}</span></div>
-      </div>`;
-  } catch (err) {
-    mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
-  }
-}
-
-function openNewPaymentLinkModal() {
-  openModal('New Payment Link', `
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Amount *</label>
-        <input class="form-input" id="pl-amount" type="number" placeholder="150" /></div>
-      <div class="form-group"><label class="form-label">Currency</label>
-        <select class="form-select" id="pl-currency">
-          <option value="EUR">EUR (€)</option>
-          <option value="USD">USD ($)</option>
-          <option value="GBP">GBP (£)</option>
-          <option value="TRY">TRY (₺)</option>
-        </select></div>
-    </div>
-    <div class="form-group"><label class="form-label">Iyzico Payment Link *</label>
-      <input class="form-input" id="pl-link" placeholder="https://iyzi.link/..." /></div>
-    <div class="form-group"><label class="form-label">Customer Name</label>
-      <input class="form-input" id="pl-name" placeholder="John Smith" /></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Customer Phone</label>
-        <input class="form-input" id="pl-phone" placeholder="+90 555 000 0000" /></div>
-      <div class="form-group"><label class="form-label">Customer Email</label>
-        <input class="form-input" id="pl-email" type="email" placeholder="john@example.com" /></div>
-    </div>
-    <div class="form-group"><label class="form-label">Notes</label>
-      <input class="form-input" id="pl-notes" placeholder="Optional notes..." /></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="savePaymentLink()">Create Link</button>`
-  );
-}
-
-async function savePaymentLink() {
-  const amount   = document.getElementById('pl-amount').value;
-  const currency = document.getElementById('pl-currency').value;
-  const link     = document.getElementById('pl-link').value.trim();
-  const name     = document.getElementById('pl-name').value.trim();
-  const phone    = document.getElementById('pl-phone').value.trim();
-  const email    = document.getElementById('pl-email').value.trim();
-  const notes    = document.getElementById('pl-notes').value.trim();
-
-  if (!amount || !link) return toast('Amount and link are required', 'error');
-  try {
-    await api('/api/payment-links', {
-      method: 'POST',
-      body: JSON.stringify({ amount, currency, link, customer_name: name, customer_phone: phone, customer_email: email, notes }),
-    });
-    toast('Payment link created');
-    closeModalDirect();
-    renderPaymentLinks();
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-async function setPaymentStatus(id, status) {
-  try {
-    await api(`/api/payment-links/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
-    toast(`Marked as ${status}`);
-    renderPaymentLinks();
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-async function deletePaymentLink(id) {
-  openConfirm('Delete Payment Link', 'This payment link will be permanently deleted.', async () => {
-    try {
-      await api(`/api/payment-links/${id}`, { method: 'DELETE' });
-      toast('Deleted');
-      renderPaymentLinks();
-    } catch (err) { toast('Error: ' + err.message, 'error'); }
-  });
-}
-
-// ─── SETTINGS ─────────────────────────────────────────────────────────────────
-function renderSettings(sub) {
-  const mc = document.getElementById('mainContent');
-
-  if (sub === 'General') {
-    mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
-    api('/api/settings').then(s => {
-      mc.innerHTML = `
-        <div class="section-header">
-          <div class="section-header-left"><h2>General Settings</h2><p>Basic site configuration. Changes reflect on the frontend immediately.</p></div>
-        </div>
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:2rem;max-width:700px">
-          <div class="form-group"><label class="form-label">Company Name</label>
-            <input class="form-input" id="set-company" value="${s.company_name || ''}" /></div>
-          <div class="form-group"><label class="form-label">Site Title</label>
-            <input class="form-input" id="set-title" value="${s.site_title || ''}" /></div>
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">Phone</label>
-              <input class="form-input" id="set-phone" value="${s.phone || ''}" /></div>
-            <div class="form-group"><label class="form-label">WhatsApp</label>
-              <input class="form-input" id="set-wa" value="${s.whatsapp || ''}" /></div>
-          </div>
-          <div class="form-group"><label class="form-label">Email</label>
-            <input class="form-input" id="set-email" value="${s.email || ''}" /></div>
-          <div class="form-group"><label class="form-label">Address</label>
-            <textarea class="form-textarea" id="set-address" style="min-height:80px">${s.address || ''}</textarea></div>
-          <div class="form-row">
-            <div class="form-group"><label class="form-label">TURSAB License No</label>
-              <input class="form-input" id="set-tursab" value="${s.tursab || ''}" /></div>
-            <div class="form-group"><label class="form-label">MERSIS No</label>
-              <input class="form-input" id="set-mersis" value="${s.mersis || ''}" /></div>
-          </div>
-          <button class="btn btn-primary" onclick="saveGeneralSettings()">💾 Save Changes</button>
-        </div>`;
-    }).catch(() => {
-      mc.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><p>Could not load settings</p></div>';
-    });
-  } else if (sub === 'Users') {
-    mc.innerHTML = `
-      <div class="section-header">
-        <div class="section-header-left"><h2>Users</h2><p>Admin panel users and role management.</p></div>
-        <button class="btn btn-primary" onclick="openAddUserModal()">＋ Add User</button>
-      </div>
-      <div class="table-card">
-        <div style="overflow-x:auto">
-        <table>
-          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Access</th><th>Created</th><th>Actions</th></tr></thead>
-          <tbody id="usersTbody"><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text2)">Loading...</td></tr></tbody>
-        </table>
-        </div>
-      </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-top:1rem">
-        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:0.75rem">Role Permissions</div>
-        <div style="display:grid;gap:0.5rem;font-size:12px;color:var(--text2)">
-          <div><span class="badge badge-blue">admin</span> — Full access to all sections</div>
-          <div><span class="badge badge-green">accounting</span> — Reservations + Accounting + Other only</div>
-          <div><span class="badge badge-yellow">editor</span> — Content + Vehicles + Other only</div>
-          <div><span class="badge badge-purple">driver</span> — Transfer Reservations only (no customer details)</div>
-        </div>
-      </div>`;
-
-    api('/api/auth/users').then(users => {
-      const roleColors = { admin: 'badge-blue', accounting: 'badge-green', editor: 'badge-yellow', driver: 'badge-purple' };
-      const roleAccess = {
-        admin: 'All sections',
-        accounting: 'Reservations, Accounting, Other',
-        editor: 'Content, Vehicles, Other',
-        driver: 'Transfer Reservations only',
-      };
-      document.getElementById('usersTbody').innerHTML = users.map(u => `<tr>
-        <td>${u.id}</td>
-        <td>${u.name || '—'}</td>
-        <td style="font-size:12px">${u.email}</td>
-        <td><span class="badge ${roleColors[u.role] || 'badge-gray'}">${u.role}</span></td>
-        <td style="font-size:12px;color:var(--text2)">${roleAccess[u.role] || '—'}</td>
-        <td style="font-size:11px;color:var(--text2)">${fmtDate(u.created_at)}</td>
-        <td>
-          <div style="display:flex;gap:6px">
-            ${u.email !== 'bekpenturizm@gmail.com' ? `<button class="btn btn-ghost btn-sm" onclick="openEditUserModal(${JSON.stringify(u).replace(/"/g,'&quot;')})">✏️</button>` : ''}
-            <button class="btn btn-ghost btn-sm" onclick="openChangePasswordModal(${u.id})">🔑</button>
-            ${currentUser?.role === 'admin' && currentUser?.id !== u.id && u.email !== 'bekpenturizm@gmail.com' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">🗑</button>` : ''}
-          </div>
-        </td>
-      </tr>`).join('');
-    }).catch(err => {
-      document.getElementById('usersTbody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--red)">${err.message}</td></tr>`;
-    });
-  } else if (sub === 'Mail Templates') {
-    mc.innerHTML = `
-      <div class="section-header">
-        <div class="section-header-left"><h2>Mail Templates</h2><p>Edit email templates sent to customers.</p></div>
-      </div>
-      <div style="display:grid;gap:1rem">
-
-        <!-- Reply Template -->
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
-          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.25rem">✉️ Contact Reply Template</div>
-          <div style="font-size:12px;color:var(--text2);margin-bottom:1rem">Used when replying to contact messages. Variables: <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{name}</code></div>
-          <div class="form-group"><label class="form-label">Template Body</label>
-            <textarea class="form-textarea" id="tpl-reply" style="min-height:180px;font-family:monospace;font-size:13px"></textarea>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="saveTemplate('reply')">Save Template</button>
-          <button class="btn btn-ghost btn-sm" onclick="resetTemplate('reply')" style="margin-left:8px">Reset to Default</button>
-        </div>
-
-        <!-- Booking Confirmation Template -->
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
-          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.25rem">🎉 Booking Confirmation Template</div>
-          <div style="font-size:12px;color:var(--text2);margin-bottom:1rem">Sent to customers after booking. Variables: <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{name}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{reference}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{from}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{to}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{date}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{vehicle}</code> <code style="background:var(--bg3);padding:2px 6px;border-radius:4px">{price}</code></div>
-          <div class="form-group"><label class="form-label">Template Body</label>
-            <textarea class="form-textarea" id="tpl-booking" style="min-height:220px;font-family:monospace;font-size:13px"></textarea>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="saveTemplate('booking')">Save Template</button>
-          <button class="btn btn-ghost btn-sm" onclick="resetTemplate('booking')" style="margin-left:8px">Reset to Default</button>
-        </div>
-
-      </div>`;
-
-    // Load saved templates
-    loadTemplates();
-  } else if (sub === 'Extra Price Settings') {
-    const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
-    const locationRules = saved.location || [];
-    const nightRule = saved.night || { enabled: false, from: 23, to: 6, percent: 20 };
-    const lastMinuteRule = saved.lastMinute || { enabled: false, hours: 12, percent: 10 };
-
-    mc.innerHTML = `
-      <div class="section-header">
-        <div class="section-header-left"><h2>Extra Price Settings</h2><p>Define automatic price adjustments based on location, time, or booking window.</p></div>
-      </div>
-
-      <!-- Night Surcharge -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-          <div>
-            <div style="font-weight:700;color:var(--text);font-size:15px">🌙 Night Surcharge</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Add surcharge for transfers during night hours</div>
-          </div>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="night-enabled" ${nightRule.enabled ? 'checked' : ''} onchange="saveExtraPrices()" style="width:16px;height:16px;accent-color:var(--blue)" />
-            <span style="font-size:13px;color:var(--text2)">Enabled</span>
-          </label>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">From (hour)</label>
-            <input class="form-input" id="night-from" type="number" min="0" max="23" value="${nightRule.from}" placeholder="23" onchange="saveExtraPrices()" /></div>
-          <div class="form-group"><label class="form-label">To (hour)</label>
-            <input class="form-input" id="night-to" type="number" min="0" max="23" value="${nightRule.to}" placeholder="6" onchange="saveExtraPrices()" /></div>
-          <div class="form-group"><label class="form-label">Surcharge %</label>
-            <input class="form-input" id="night-percent" type="number" min="0" value="${nightRule.percent}" placeholder="20" onchange="saveExtraPrices()" /></div>
-        </div>
-        <div style="font-size:12px;color:var(--text2)">Example: Transfer at 02:00 → price × 1.${String(nightRule.percent).padStart(2,'0')}</div>
-      </div>
-
-      <!-- Last Minute -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-          <div>
-            <div style="font-weight:700;color:var(--text);font-size:15px">⚡ Last Minute Surcharge</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Add surcharge for bookings made within X hours of transfer</div>
-          </div>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="lm-enabled" ${lastMinuteRule.enabled ? 'checked' : ''} onchange="saveExtraPrices()" style="width:16px;height:16px;accent-color:var(--blue)" />
-            <span style="font-size:13px;color:var(--text2)">Enabled</span>
-          </label>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Within X hours</label>
-            <input class="form-input" id="lm-hours" type="number" min="1" value="${lastMinuteRule.hours}" placeholder="12" onchange="saveExtraPrices()" /></div>
-          <div class="form-group"><label class="form-label">Surcharge %</label>
-            <input class="form-input" id="lm-percent" type="number" min="0" value="${lastMinuteRule.percent}" placeholder="10" onchange="saveExtraPrices()" /></div>
-        </div>
-        <div style="font-size:12px;color:var(--text2)">Example: Booking within ${lastMinuteRule.hours}h → price +${lastMinuteRule.percent}%</div>
-      </div>
-
-      <!-- Location Rules -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-          <div>
-            <div style="font-weight:700;color:var(--text);font-size:15px">📍 Location-Based Rules</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:3px">Adjust price when From or To matches a specific location keyword</div>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="openAddLocationRule()">＋ Add Rule</button>
-        </div>
-        <table style="width:100%;border-collapse:collapse" id="locationRulesTable">
-          <thead><tr>
-            <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Applies When</th>
-            <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Location Contains</th>
-            <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Adjustment</th>
-            <th style="padding:8px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:1px solid var(--border)">Example</th>
-            <th style="padding:8px 12px;border-bottom:1px solid var(--border)"></th>
-          </tr></thead>
-          <tbody id="locationRulesTbody">
-            ${locationRules.length ? locationRules.map((r, i) => `<tr>
-              <td style="padding:10px 12px;font-size:13px">${r.field === 'from' ? '📤 From' : r.field === 'to' ? '📥 To' : '📍 From or To'}</td>
-              <td style="padding:10px 12px;font-size:13px;font-weight:600;color:var(--blue)">"${r.keyword}"</td>
-              <td style="padding:10px 12px;font-size:13px;font-weight:700;color:${r.type === 'discount' ? 'var(--green)' : 'var(--yellow)'}">
-                ${r.type === 'discount' ? '−' : '+'}${r.value}${r.unit === 'percent' ? '%' : '€'}
-              </td>
-              <td style="padding:10px 12px;font-size:12px;color:var(--text2)">${r.example || '—'}</td>
-              <td style="padding:10px 12px"><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="openEditLocationRule(${i})">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteLocationRule(${i})">🗑</button></div></td>
-            </tr>`).join('') : '<tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text2)">No location rules yet. Add one above.</td></tr>'}
-          </tbody>
-        </table>
-      </div>`;
-  } else if (sub === 'Drivers') {
-    mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
-    api('/api/auth/users').then(users => {
-      const drivers = users.filter(u => u.role === 'driver');
-      mc.innerHTML = `
-        <div class="section-header">
-          <div class="section-header-left">
-            <h2>Drivers</h2>
-            <p>Approved drivers with their login credentials.</p>
-          </div>
-        </div>
-        <div class="table-card">
-          <div style="overflow-x:auto">
-          <table>
-            <thead><tr>
-              <th>Name</th><th>Email</th><th>Password</th><th>Status</th><th>Created</th><th>Actions</th>
-            </tr></thead>
-            <tbody>
-              ${drivers.length ? drivers.map(u => {
-                const plain = u.plain_password || '••••••••';
-                return `<tr>
-                  <td style="font-weight:600">${u.name || '—'}</td>
-                  <td style="color:var(--blue);font-size:12px">${u.email}</td>
-                  <td>
-                    <div style="display:flex;align-items:center;gap:6px">
-                      <span id="pw-${u.id}" style="font-family:monospace;font-size:13px;color:var(--yellow)">••••••••</span>
-                      <button onclick="toggleDriverPw('${u.id}','${plain}')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:14px" title="Show/Hide">👁</button>
-                      <button onclick="navigator.clipboard.writeText('${plain}');toast('Copied!')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:14px" title="Copy">📋</button>
-                    </div>
-                  </td>
-                  <td>${statusBadge(u.status || 'active')}</td>
-                  <td style="font-size:11px;color:var(--text2)">${fmtDate(u.created_at)}</td>
-                  <td>
-                    <div style="display:flex;gap:6px">
-                      <button class="btn btn-ghost btn-sm" onclick="openChangePasswordModal(${u.id})">🔑</button>
-                      <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">🗑</button>
-                    </div>
-                  </td>
-                </tr>`;
-              }).join('') : '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text2)">No approved drivers yet.</td></tr>'}
-            </tbody>
-          </table>
-          </div>
-        </div>`;
-    }).catch(err => {
-      mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
-    });
-  } else if (sub === 'Driver Applications') {
-    mc.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading…</p></div>';
-    api('/api/driver-applications').then(apps => {
-      mc.innerHTML = `
-        <div class="section-header">
-          <div class="section-header-left">
-            <h2>Driver Applications</h2>
-            <p>Review and approve driver applications. Accepted drivers receive an email notification.</p>
-          </div>
-          <a href="driver-apply.html" target="_blank" class="btn btn-ghost">Application Form ↗</a>
-        </div>
-        <div class="table-card">
-          <div style="overflow-x:auto">
-          <table>
-            <thead><tr>
-              <th>ID</th><th>Name</th><th>Email</th><th>Phone</th>
-              <th>Bank</th><th>IBAN</th><th>Status</th><th>Applied</th><th>Actions</th>
-            </tr></thead>
-            <tbody>
-              ${apps.length ? apps.map(a => `<tr>
-                <td>${a.id}</td>
-                <td style="font-weight:600">${a.full_name}</td>
-                <td style="font-size:12px;color:var(--blue)">${a.email}</td>
-                <td style="font-size:12px">${a.phone}</td>
-                <td style="font-size:12px">${a.bank_name || '—'}</td>
-                <td style="font-size:11px;font-family:monospace;color:var(--text2)">${a.bank_iban || '—'}</td>
-                <td>${a.status === 'approved' ? '<span class="badge badge-green">✅ Approved</span>' : a.status === 'rejected' ? '<span class="badge badge-red">❌ Rejected</span>' : '<span class="badge badge-yellow">⏳ Pending</span>'}</td>
-                <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(a.created_at)}</td>
-                <td>
-                  <div style="display:flex;gap:6px">
-                    <button class="btn btn-ghost btn-sm" onclick="viewDriverApp(${a.id})">👁 View</button>
-                    <button class="btn btn-success btn-sm" onclick="setDriverStatus(${a.id},'approved')">✅</button>
-                    <button class="btn btn-danger btn-sm" onclick="setDriverStatus(${a.id},'rejected')">❌</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteDriverApp(${a.id})">🗑</button>
-                  </div>
-                </td>
-              </tr>`).join('') : '<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text2)">No applications yet.</td></tr>'}
-            </tbody>
-          </table>
-          </div>
-        </div>`;
-    }).catch(err => {
-      mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
-    });
-  }
-}
-
-function openEditUserModal(u) {
-  openModal('Edit User', `
-    <div class="form-group"><label class="form-label">Full Name</label>
-      <input class="form-input" id="eu-name" value="${u.name || ''}" /></div>
-    <div class="form-group"><label class="form-label">Email *</label>
-      <input class="form-input" id="eu-email" type="email" value="${u.email}" /></div>
-    <div class="form-group"><label class="form-label">Role *</label>
-      <select class="form-select" id="eu-role">
-        <option value="editor" ${u.role === 'editor' ? 'selected' : ''}>Editor — Content & Vehicles</option>
-        <option value="accounting" ${u.role === 'accounting' ? 'selected' : ''}>Accounting — Reservations & Revenue</option>
-        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin — Full Access</option>
-      </select></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="saveEditUser(${u.id})">Save Changes</button>`
-  );
-}
-
-async function saveEditUser(id) {
-  const name  = document.getElementById('eu-name').value.trim();
-  const email = document.getElementById('eu-email').value.trim();
-  const role  = document.getElementById('eu-role').value;
-  if (!email) return toast('Email required', 'error');
-  try {
-    await api(`/api/auth/users/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ name, email, role }),
-    });
-    toast('User updated');
-    closeModalDirect();
-    renderSettings('Users');
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-function openAddUserModal() {
-  openModal('Add New User', `
-    <div class="form-group"><label class="form-label">Full Name</label>
-      <input class="form-input" id="nu-name" placeholder="John Doe" /></div>
-    <div class="form-group"><label class="form-label">Email *</label>
-      <input class="form-input" id="nu-email" type="email" placeholder="john@example.com" /></div>
-    <div class="form-group"><label class="form-label">Password *</label>
-      <input class="form-input" id="nu-pass" type="password" placeholder="Min 6 characters" /></div>
-    <div class="form-group"><label class="form-label">Role *</label>
-      <select class="form-select" id="nu-role">
-        <option value="editor">Editor — Content & Vehicles</option>
-        <option value="accounting">Accounting — Reservations & Revenue</option>
-        <option value="admin">Admin — Full Access</option>
-      </select></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="saveNewUser()">Add User</button>`
-  );
-}
-
-async function saveNewUser() {
-  const name  = document.getElementById('nu-name').value.trim();
-  const email = document.getElementById('nu-email').value.trim();
-  const pass  = document.getElementById('nu-pass').value;
-  const role  = document.getElementById('nu-role').value;
-  if (!email || !pass) return toast('Email and password required', 'error');
-  if (pass.length < 6) return toast('Password must be at least 6 characters', 'error');
-  try {
-    await api('/api/auth/users', {
-      method: 'POST',
-      body: JSON.stringify({ name, email, password: pass, role }),
-    });
-    toast('User added successfully');
-    closeModalDirect();
-    renderSettings('Users');
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-async function deleteUser(id) {
-  openConfirm('Delete User', 'This user will be permanently deleted and cannot log in anymore.', async () => {
-    try {
-      await api(`/api/auth/users/${id}`, { method: 'DELETE' });
-      toast('User deleted');
-      renderSettings('Users');
-    } catch (err) { toast('Error: ' + err.message, 'error'); }
-  });
-}
-
-function openChangePasswordModal(userId) {
-  const id = userId || currentUser?.id;
-  openModal('Change Password', `
-    <div class="form-group"><label class="form-label">Current Password *</label>
-      <input class="form-input" id="cp-current" type="password" placeholder="Enter current password" /></div>
-    <div class="form-group"><label class="form-label">New Password *</label>
-      <input class="form-input" id="cp-new" type="password" placeholder="Min 6 characters" /></div>
-    <div class="form-group"><label class="form-label">Confirm New Password *</label>
-      <input class="form-input" id="cp-confirm" type="password" /></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="savePassword(${id})">Change Password</button>`
-  );
-}
-
-async function savePassword(id) {
-  const current = document.getElementById('cp-current').value;
-  const np = document.getElementById('cp-new').value;
-  const cp = document.getElementById('cp-confirm').value;
-  if (!current) return toast('Please enter your current password', 'error');
-  if (!np || np.length < 6) return toast('Password must be at least 6 characters', 'error');
-  if (np !== cp) return toast('Passwords do not match', 'error');
-  try {
-    await api(`/api/auth/users/${id}/password`, { method: 'PUT', body: JSON.stringify({ password: np, currentPassword: current }) });
-    toast('Password changed successfully ✅');
-    closeModalDirect();
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-
-function toggleDriverPw(id, plain) {
-  const el = document.getElementById('pw-' + id);
-  if (!el) return;
-  if (el.textContent === '••••••••') {
-    el.textContent = plain;
-    el.style.color = 'var(--green)';
-  } else {
-    el.textContent = '••••••••';
-    el.style.color = 'var(--yellow)';
-  }
-}
-
-
-async function viewDriverApp(id) {
-  try {
-    const a = await api('/api/driver-applications/' + id);
-    const docImg = (label, key) => a[key] ? `<div style="margin-bottom:0.75rem"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">${label}</div><img src="${a[key]}" style="max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--border)" onerror="this.style.display='none'" /></div>` : '';
-    openModal('Driver Application — ' + a.full_name, `
-      <div style="font-size:13px;display:grid;gap:0.5rem;margin-bottom:1rem">
-        <div><b>Email:</b> ${a.email}</div>
-        <div><b>Phone:</b> ${a.phone}</div>
-        <div><b>Bank:</b> ${a.bank_name || '—'} · ${a.bank_holder || '—'}</div>
-        <div><b>IBAN:</b> ${a.bank_iban || '—'}</div>
-        <div><b>Status:</b> ${a.status}</div>
-        ${a.bio ? `<div><b>Bio:</b> ${a.bio}</div>` : `<div><b>Bio:</b> <span style="color:var(--text2)">Not provided</span></div>`}
-        ${a.admin_notes ? `<div><b>Notes:</b> ${a.admin_notes}</div>` : ''}
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-        ${docImg('Profile Photo', 'photo')}
-        ${docImg('ID Front', 'id_front')}
-        ${docImg('ID Back', 'id_back')}
-        ${docImg('License Front', 'license_front')}
-        ${docImg('License Back', 'license_back')}
-        ${docImg('Criminal Record', 'criminal_record')}
-        ${docImg('Residence Doc', 'residence_doc')}
-        ${docImg('TÜRSAB', 'tursab_doc')}
-        ${docImg('D2 Doc', 'd2_doc')}
-        ${docImg('Car Front', 'car_front')}
-        ${docImg('Car Right', 'car_right')}
-        ${docImg('Car Left', 'car_left')}
-        ${docImg('Car Back', 'car_back')}
-        ${docImg('Interior 1', 'car_interior_1')}
-        ${docImg('Interior 2', 'car_interior_2')}
-        ${docImg('Interior 3', 'car_interior_3')}
-        ${docImg('Interior 4', 'car_interior_4')}
-      </div>`,
-      `<button class="btn btn-success" onclick="setDriverStatus(${id},'approved');closeModalDirect()">✅ Approve</button>
-       <button class="btn btn-danger" onclick="setDriverStatus(${id},'rejected');closeModalDirect()">❌ Reject</button>
-       <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>`,
-      true
-    );
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-function setDriverStatus(id, status) {
-  const label = status === 'approved' ? 'Approve' : 'Reject';
-  openModal(label + ' Application', `
-    <p style="font-size:14px;color:var(--text2);margin-bottom:1rem">The applicant will receive an email notification.</p>
-    <div class="form-group"><label class="form-label">Note to applicant (optional)</label>
-      <textarea class="form-textarea" id="driver-note" placeholder="Add a personal note..." style="min-height:80px"></textarea></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="confirmDriverStatus(${id},'${status}')">${label}</button>`
-  );
-}
-
-async function confirmDriverStatus(id, status) {
-  const notes = document.getElementById('driver-note')?.value.trim() || '';
-  try {
-    await api('/api/driver-applications/' + id + '/status', { method: 'PUT', body: JSON.stringify({ status, admin_notes: notes }) });
-    toast(status === 'approved' ? '✅ Approved — email sent' : '❌ Rejected — email sent');
-    closeModalDirect();
-    renderSettings('Driver Applications');
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-async function deleteDriverApp(id) {
-  openConfirm('Delete Application', 'This application will be permanently deleted.', async () => {
-    try {
-      await api('/api/driver-applications/' + id, { method: 'DELETE' });
-      toast('Deleted');
-      renderSettings('Driver Applications');
-    } catch (err) { toast('Error: ' + err.message, 'error'); }
-  });
-}
-
-async function saveGeneralSettings() {
-  const body = {
-    company_name: document.getElementById('set-company').value.trim(),
-    site_title:   document.getElementById('set-title').value.trim(),
-    phone:        document.getElementById('set-phone').value.trim(),
-    email:        document.getElementById('set-email').value.trim(),
-    whatsapp:     document.getElementById('set-wa').value.trim(),
-    address:      document.getElementById('set-address').value.trim(),
-    tursab:       document.getElementById('set-tursab').value.trim(),
-    mersis:       document.getElementById('set-mersis').value.trim(),
-  };
-  try {
-    await api('/api/settings', { method: 'PUT', body: JSON.stringify(body) });
-    toast('Settings saved ✅ — frontend will reflect changes on next load');
-  } catch (err) { toast('Error: ' + err.message, 'error'); }
-}
-
-function saveExtraPrices() {
-  const data = {
-    night: {
-      enabled: document.getElementById('night-enabled')?.checked || false,
-      from: parseInt(document.getElementById('night-from')?.value) || 23,
-      to: parseInt(document.getElementById('night-to')?.value) || 6,
-      percent: parseInt(document.getElementById('night-percent')?.value) || 20,
-    },
-    lastMinute: {
-      enabled: document.getElementById('lm-enabled')?.checked || false,
-      hours: parseInt(document.getElementById('lm-hours')?.value) || 12,
-      percent: parseInt(document.getElementById('lm-percent')?.value) || 10,
-    },
-    location: JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}').location || [],
-  };
-  localStorage.setItem('att_extra_prices_v2', JSON.stringify(data));
-  toast('Saved ✅');
-}
-
-function openEditLocationRule(index) {
-  const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
-  const r = (saved.location || [])[index];
-  if (!r) return;
-  openModal('Edit Location Rule', `
-    <div class="form-group"><label class="form-label">Applies When *</label>
-      <select class="form-select" id="lr-field">
-        <option value="from" ${r.field==='from'?'selected':''}>From location contains...</option>
-        <option value="to" ${r.field==='to'?'selected':''}>To location contains...</option>
-        <option value="both" ${r.field==='both'?'selected':''}>From OR To location contains...</option>
-      </select></div>
-    <div class="form-group"><label class="form-label">Location Keyword *</label>
-      <input class="form-input" id="lr-keyword" value="${r.keyword}" /></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Type *</label>
-        <select class="form-select" id="lr-type">
-          <option value="surcharge" ${r.type==='surcharge'?'selected':''}>Surcharge</option>
-          <option value="discount" ${r.type==='discount'?'selected':''}>Discount</option>
-        </select></div>
-      <div class="form-group"><label class="form-label">Unit *</label>
-        <select class="form-select" id="lr-unit">
-          <option value="percent" ${r.unit==='percent'?'selected':''}>Percentage (%)</option>
-          <option value="fixed" ${r.unit==='fixed'?'selected':''}>Fixed amount (€)</option>
-        </select></div>
-    </div>
-    <div class="form-group"><label class="form-label">Value *</label>
-      <input class="form-input" id="lr-value" type="number" min="0" value="${r.value}" /></div>
-    <div class="form-group"><label class="form-label">Example</label>
-      <input class="form-input" id="lr-example" value="${r.example||''}" /></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="updateLocationRule(${index})">Save Changes</button>`
-  );
-}
-
-function updateLocationRule(index) {
-  const keyword = document.getElementById('lr-keyword').value.trim();
-  const value   = document.getElementById('lr-value').value;
-  if (!keyword || !value) return toast('Keyword and value required', 'error');
-  const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
-  if (!saved.location) saved.location = [];
-  saved.location[index] = {
-    field:   document.getElementById('lr-field').value,
-    keyword,
-    type:    document.getElementById('lr-type').value,
-    unit:    document.getElementById('lr-unit').value,
-    value:   parseFloat(value),
-    example: document.getElementById('lr-example').value.trim(),
-  };
-  localStorage.setItem('att_extra_prices_v2', JSON.stringify(saved));
-  toast('Rule updated ✅');
-  closeModalDirect();
-  renderSettings('Extra Price Settings');
-}
-
-function openAddLocationRule() {
-  openModal('Add Location Rule', `
-    <div class="form-group"><label class="form-label">Applies When *</label>
-      <select class="form-select" id="lr-field">
-        <option value="from">From location contains...</option>
-        <option value="to">To location contains...</option>
-        <option value="both">From OR To location contains...</option>
-      </select></div>
-    <div class="form-group"><label class="form-label">Location Keyword * <span style="font-size:11px;color:var(--text2)">(case-insensitive)</span></label>
-      <input class="form-input" id="lr-keyword" placeholder="e.g. Sabiha, Antalya, Bodrum" /></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Type *</label>
-        <select class="form-select" id="lr-type">
-          <option value="surcharge">Surcharge (more expensive)</option>
-          <option value="discount">Discount (cheaper)</option>
-        </select></div>
-      <div class="form-group"><label class="form-label">Unit *</label>
-        <select class="form-select" id="lr-unit">
-          <option value="percent">Percentage (%)</option>
-          <option value="fixed">Fixed amount (€)</option>
-        </select></div>
-    </div>
-    <div class="form-group"><label class="form-label">Value *</label>
-      <input class="form-input" id="lr-value" type="number" min="0" placeholder="e.g. 10" /></div>
-    <div class="form-group"><label class="form-label">Example <span style="font-size:11px;color:var(--text2)">(optional, for your reference)</span></label>
-      <input class="form-input" id="lr-example" placeholder="e.g. SAW airport → +€5 vs IST" /></div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="saveLocationRule()">Add Rule</button>`
-  );
-}
-
-function saveLocationRule() {
-  const keyword = document.getElementById('lr-keyword').value.trim();
-  const value = document.getElementById('lr-value').value;
-  if (!keyword || !value) return toast('Keyword and value required', 'error');
-  const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
-  if (!saved.location) saved.location = [];
-  saved.location.push({
-    field:   document.getElementById('lr-field').value,
-    keyword,
-    type:    document.getElementById('lr-type').value,
-    unit:    document.getElementById('lr-unit').value,
-    value:   parseFloat(value),
-    example: document.getElementById('lr-example').value.trim(),
-  });
-  localStorage.setItem('att_extra_prices_v2', JSON.stringify(saved));
-  toast('Rule added ✅');
-  closeModalDirect();
-  renderSettings('Extra Price Settings');
-}
-
-function deleteLocationRule(index) {
-  openConfirm('Delete Rule', 'This rule will be removed.', () => {
-    const saved = JSON.parse(localStorage.getItem('att_extra_prices_v2') || '{}');
-    if (saved.location) saved.location.splice(index, 1);
-    localStorage.setItem('att_extra_prices_v2', JSON.stringify(saved));
-    toast('Deleted');
-    renderSettings('Extra Price Settings');
-  });
-}
-
-// ─── MAIL TEMPLATE ────────────────────────────────────────────────────────────
-function renderMailTemplate() {
-  const mc = document.getElementById('mainContent');
-  const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
-  const replyTpl = saved.reply || DEFAULT_TEMPLATES.reply;
-  const bookingTpl = saved.booking || DEFAULT_TEMPLATES.booking;
-  const signatureTpl = saved.signature || 'Best regards,\nAirports Transfer Turkey Team\n+90 544 102 1414\nairportstransferturkey@gmail.com';
-
-  mc.innerHTML = `
-    <div class="section-header">
-      <div class="section-header-left">
-        <h2>Mail Templates</h2>
-        <p>Customize the emails sent to customers. Use variables like <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:12px">{name}</code> to insert dynamic content.</p>
-      </div>
-    </div>
-
-    <!-- Signature -->
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
-      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.4rem">✍️ Email Signature</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:0.75rem">This signature is automatically appended to all emails.</div>
-      <textarea class="form-textarea" id="tpl-signature" style="min-height:100px;font-family:monospace;font-size:13px">${signatureTpl}</textarea>
-    </div>
-
-    <!-- Reply Template -->
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
-      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.4rem">✉️ Contact Reply Template</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:0.5rem">
-        Variables: <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{name}</code> — customer name &nbsp;|&nbsp; <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{replyText}</code> — your reply text
-      </div>
-      <textarea class="form-textarea" id="tpl-reply" style="min-height:180px;font-family:monospace;font-size:13px">${replyTpl}</textarea>
-    </div>
-
-    <!-- Booking Confirmation Template -->
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem">
-      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:0.4rem">🎉 Booking Confirmation Template</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:0.5rem">
-        Variables: <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{name}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{reference}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{from}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{to}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{date}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{vehicle}</code> <code style="background:var(--bg3);padding:1px 5px;border-radius:3px">{price}</code>
-      </div>
-      <textarea class="form-textarea" id="tpl-booking" style="min-height:200px;font-family:monospace;font-size:13px">${bookingTpl}</textarea>
-    </div>
-
-    <div style="display:flex;gap:0.75rem">
-      <button class="btn btn-primary" onclick="saveTemplates()">💾 Save Templates</button>
-      <button class="btn btn-ghost" onclick="resetTemplates()">↺ Reset to Default</button>
-    </div>`;
-}
-
-function saveTemplates() {
-  const templates = {
-    reply: document.getElementById('tpl-reply').value,
-    booking: document.getElementById('tpl-booking').value,
-    signature: document.getElementById('tpl-signature').value,
-  };
-  localStorage.setItem('att_mail_templates', JSON.stringify(templates));
-  toast('Templates saved ✅');
-}
-
-function resetTemplates() {
-  localStorage.removeItem('att_mail_templates');
-  renderMailTemplate();
-  toast('Templates reset to default');
-}
-
-function getTemplate(type) {
-  const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
-  return saved[type] || DEFAULT_TEMPLATES[type] || '';
-}
-
-function getSignature() {
-  const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
-  return saved.signature || 'Best regards,\nAirports Transfer Turkey Team\n+90 544 102 1414\nairportstransferturkey@gmail.com';
-}
-
-// ─── MESSAGES ─────────────────────────────────────────────────────────────────
-const DEFAULT_TEMPLATES = {
-  reply: `Thank you for reaching out to Airports Transfer Turkey.\n\n{replyText}`,
-  booking: `Dear {name},\n\nThank you for choosing Airports Transfer Turkey! We have received your booking.\n\nReference: {reference}\nFrom: {from}\nTo: {to}\nDate: {date}\nVehicle: {vehicle}\nPrice: {price}\n\nFor questions: +90 544 102 1414\n\nBest regards,\nAirports Transfer Turkey Team`,
-};
-
-function loadTemplates() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
-    const replyEl = document.getElementById('tpl-reply');
-    const bookingEl = document.getElementById('tpl-booking');
-    if (replyEl) replyEl.value = saved.reply || DEFAULT_TEMPLATES.reply;
-    if (bookingEl) bookingEl.value = saved.booking || DEFAULT_TEMPLATES.booking;
-  } catch(e) {}
-}
-
-function saveTemplate(type) {
-  try {
-    const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
-    saved[type] = document.getElementById('tpl-' + type).value;
-    localStorage.setItem('att_mail_templates', JSON.stringify(saved));
-    toast('Template saved ✅');
-  } catch(e) { toast('Error saving template', 'error'); }
-}
-
-function resetTemplate(type) {
-  const el = document.getElementById('tpl-' + type);
-  if (el) el.value = DEFAULT_TEMPLATES[type];
-  saveTemplate(type);
-  toast('Template reset to default');
-}
-
-function getTemplate(type, vars) {
-  try {
-    const saved = JSON.parse(localStorage.getItem('att_mail_templates') || '{}');
-    let tpl = saved[type] || DEFAULT_TEMPLATES[type];
-    if (vars) Object.keys(vars).forEach(k => { tpl = tpl.replace(new RegExp('{' + k + '}', 'g'), vars[k] || ''); });
-    return tpl;
-  } catch(e) { return ''; }
-}
-
 // ─── MESSAGES ─────────────────────────────────────────────────────────────────
 async function renderMessages() {
   const mc = document.getElementById('mainContent');
@@ -2420,145 +1226,57 @@ async function renderMessages() {
     const messages = await api('/api/contact');
     mc.innerHTML = `
       <div class="section-header">
-        <div class="section-header-left">
-          <h2>Contact Messages</h2>
-          <p>Messages received from the website contact form.</p>
-        </div>
+        <div class="section-header-left"><h2>Contact Messages</h2><p>Messages from the website contact form.</p></div>
       </div>
       <div class="table-card">
-        <div class="table-toolbar">
-          <div class="table-show">Show
-            <select onchange="filterMsgCount(this.value)">
-              <option>10</option><option selected>25</option><option>50</option><option>100</option>
-            </select>
-          </div>
-          <div class="table-toolbar-right">
-            <input class="table-search" placeholder="Search..." oninput="filterTable(this,'msgTable')" />
-          </div>
-        </div>
         <div style="overflow-x:auto">
-        <table id="msgTable">
-          <thead><tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Email ↓</th>
-            <th>Subject</th>
-            <th>Message</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr></thead>
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
           <tbody>
             ${messages.length ? messages.map(m => `<tr>
               <td>${m.id}</td>
-              <td style="font-weight:600;white-space:nowrap">${m.name}</td>
-              <td style="font-size:12px">${m.phone || '—'}</td>
-              <td style="font-size:12px;color:var(--blue)">${m.email}</td>
-              <td style="font-size:12px;max-width:180px">${m.subject || '—'}</td>
-              <td style="font-size:12px;color:var(--text2);max-width:280px">${(m.message || '').slice(0, 80)}${m.message?.length > 80 ? '…' : ''}</td>
-              <td style="font-size:11px;color:var(--text2);white-space:nowrap">${fmtDate(m.created_at)}</td>
+              <td><b>${m.name}</b></td>
+              <td style="font-size:12px">${m.email}</td>
+              <td style="font-size:12px;color:var(--text2)">${m.subject || '—'}</td>
+              <td>${statusBadge(m.status)}</td>
+              <td style="font-size:11px;color:var(--text2)">${fmtDate(m.created_at)}</td>
               <td>
-                <div style="display:flex;gap:6px;align-items:center">
-                  <button class="btn btn-ghost btn-sm" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')})" title="View">👁</button>
-                  <button class="btn btn-primary btn-sm" onclick="openReplyModal(${JSON.stringify(m).replace(/"/g,'&quot;')})" title="Reply">✉️ Reply</button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteMessage(${m.id})" title="Delete">🗑</button>
-                  ${localStorage.getItem('replied_' + m.id) ? '<span title="Reply sent" style="font-size:18px">↩️</span>' : ''}
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleActions(this)">Actions ▾</button>
+                  <div class="actions-menu">
+                    <button class="actions-menu-item" onclick="viewMessage(${JSON.stringify(m).replace(/"/g,'&quot;')});closeAllActions()">👁 View</button>
+                    <button class="actions-menu-item" onclick="markRead(${m.id});closeAllActions()">✅ Mark Read</button>
+                  </div>
                 </div>
               </td>
-            </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text2)">No messages yet</td></tr>'}
+            </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text2)">No messages yet</td></tr>'}
           </tbody>
         </table>
         </div>
-        <div class="table-footer">
-          <span>${messages.length} message${messages.length !== 1 ? 's' : ''}</span>
-        </div>
+        <div class="table-footer"><span>${messages.length} message${messages.length !== 1 ? 's' : ''}</span></div>
       </div>`;
   } catch (err) {
     mc.innerHTML = `<div class="empty-state"><div class="empty-icon">❌</div><p>${err.message}</p></div>`;
   }
 }
 
-async function deleteMessage(id) {
-  openConfirm('Delete Message', 'This message will be permanently deleted.', async () => {
-    try {
-      await api(`/api/contact/${id}`, { method: 'DELETE' });
-      localStorage.removeItem('replied_' + id);
-      toast('Message deleted');
-      renderMessages();
-    } catch (err) { toast('Error: ' + err.message, 'error'); }
-  });
-}
-
 function viewMessage(m) {
   openModal('Message Detail', `
-    <div style="display:grid;gap:1rem;font-size:13px">
-      <div style="background:var(--bg3);border-radius:8px;padding:1rem;display:grid;gap:0.5rem">
-        <div style="display:flex;gap:1rem">
-          <div style="flex:1"><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">From</span><br><b style="font-size:15px">${m.name}</b></div>
-          <div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Status</span><br>${statusBadge(m.status)}</div>
-        </div>
-        <div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Email</span><br><a href="mailto:${m.email}" style="color:var(--blue)">${m.email}</a></div>
-        ${m.phone ? `<div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Phone</span><br>${m.phone}</div>` : ''}
-        ${m.subject ? `<div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Subject</span><br><b>${m.subject}</b></div>` : ''}
-        <div><span style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">Received</span><br>${fmtDate(m.created_at)}</div>
+    <div style="display:grid;gap:0.75rem;font-size:13px">
+      <div class="form-row">
+        <div><span style="color:var(--text2)">From</span><br><b>${m.name}</b></div>
+        <div><span style="color:var(--text2)">Status</span><br>${statusBadge(m.status)}</div>
       </div>
-      <div>
-        <div style="color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Message</div>
-        <div style="background:var(--bg3);padding:14px;border-radius:8px;line-height:1.7;border-left:3px solid var(--blue)">${m.message}</div>
-      </div>
+      <div><span style="color:var(--text2)">Email</span><br><a href="mailto:${m.email}" style="color:var(--blue)">${m.email}</a></div>
+      ${m.phone ? `<div><span style="color:var(--text2)">Phone</span><br>${m.phone}</div>` : ''}
+      ${m.subject ? `<div><span style="color:var(--text2)">Subject</span><br>${m.subject}</div>` : ''}
+      <div><span style="color:var(--text2)">Message</span><br><div style="background:var(--bg3);padding:12px;border-radius:6px;line-height:1.6;margin-top:6px">${m.message}</div></div>
+      <div><span style="color:var(--text2)">Received</span><br>${fmtDate(m.created_at)}</div>
     </div>`,
-    `<button class="btn btn-primary" onclick="closeModalDirect();openReplyModal(${JSON.stringify(m).replace(/"/g,'&quot;')})">✉️ Reply</button>
+    `<button class="btn btn-success" onclick="markRead(${m.id});closeModalDirect()">Mark as Read</button>
+     <a href="mailto:${m.email}?subject=Re: ${m.subject || ''}" class="btn btn-primary">Reply by Email</a>
      <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>`
   );
-}
-
-function openReplyModal(m) {
-  const tpl = '';
-
-  openModal(`Reply to ${m.name}`, `
-    <div style="background:var(--bg3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:12px;color:var(--text2)">
-      <b style="color:var(--text)">To:</b> ${m.name} &lt;${m.email}&gt;<br>
-      <b style="color:var(--text)">Re:</b> ${m.subject || 'Your message'}
-    </div>
-    <div style="background:var(--bg3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;border-left:3px solid var(--border)">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Original message:</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.6">${m.message}</div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Your Reply *</label>
-      <textarea class="form-textarea" id="replyText" style="min-height:160px" placeholder="Type your reply here...">${tpl.includes('{replyText}') ? '' : tpl}</textarea>
-    </div>
-    <div style="font-size:11px;color:var(--text2);margin-top:0.5rem">
-      📝 Signature from <button onclick="switchSection('messages');document.querySelectorAll('.sub-btn')[1]?.click()" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:11px;padding:0">Mail Template</button> will be appended automatically.
-    </div>`,
-    `<button class="btn btn-ghost" onclick="closeModalDirect()">Cancel</button>
-     <button class="btn btn-primary" onclick="sendReply('${m.email}','${(m.subject || 'Your message').replace(/'/g,"\\'")}',${m.id})">✉️ Send Reply</button>`
-  );
-}
-
-async function sendReply(email, subject, msgId) {
-  const replyText = document.getElementById('replyText').value.trim();
-  if (!replyText) return toast('Please write a reply first', 'error');
-
-  const btn = document.querySelector('#modalFooter .btn-primary');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-
-  try {
-    await api(`/api/contact/${msgId}/reply`, {
-      method: 'POST',
-      body: JSON.stringify({ replyText }),
-    });
-    toast('Reply sent successfully ✉️');
-    localStorage.setItem('replied_' + msgId, '1');
-    closeModalDirect();
-    renderMessages();
-  } catch (err) {
-    const body = replyText;
-    window.open('mailto:' + email + '?subject=' + encodeURIComponent('Re: ' + subject) + '&body=' + encodeURIComponent(body), '_blank');
-    toast('Opened in mail client (API error: ' + err.message + ')', 'error');
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '✉️ Send Reply'; }
-  }
 }
 
 async function markRead(id) {
@@ -2569,21 +1287,12 @@ async function markRead(id) {
   } catch (err) { toast('Error', 'error'); }
 }
 
-
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 function toggleActions(btn) {
-  const menu = btn.nextElementSibling;
-  const isOpen = menu.classList.contains('open');
   closeAllActions();
-  if (!isOpen) {
-    menu.classList.add('open');
-  }
+  btn.nextElementSibling.classList.toggle('open');
+  document.addEventListener('click', closeAllActionsOnce, { once: true });
 }
-
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.actions-wrap')) {
-    closeAllActions();
-  }
-});
 
 function closeAllActions() {
   document.querySelectorAll('.actions-menu.open').forEach(m => m.classList.remove('open'));
@@ -2604,15 +1313,11 @@ function filterTable(input, tableId) {
 // ─── AUTO LOGIN (if token exists) ─────────────────────────────────────────────
 if (token) {
   api('/api/auth/me').then(user => {
-    if (user.role === 'driver') { window.location.href = 'drivers.html'; return; }
-    currentUser = user;
-    document.getElementById('topBarUser').textContent = `${user.name || user.email} (${user.role})`;
+    document.getElementById('topBarUser').textContent = user.email;
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
     document.getElementById('app').style.flexDirection = 'column';
-    applyRoleNav(user.role);
-    const allowed = ROLE_ACCESS[user.role] || ROLE_ACCESS.editor;
-    switchSection(allowed[0]);
+    switchSection('reservations');
   }).catch(() => {
     localStorage.removeItem('att_token');
     sessionStorage.removeItem('att_token');
