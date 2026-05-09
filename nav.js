@@ -143,9 +143,7 @@
     var nav = document.getElementById('mainNav');
     // Home'a tıklanınca nav'ı göster ve pinle
     if (id === 'hero') {
-      navHidden = false;
-      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      nav.style.transform = 'translateY(0)';
+      window.showNavLocked();
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -198,38 +196,49 @@
   // ── Scroll davranışı ──────────────────────────────────────────────────────
   // Başta görünür
   // Aşağı kaydırınca gizlenir
-  // 500px geçtikten sonra yukarı kaydırınca tekrar çıkar
-  // Tekrar en üste gelince görünür kalır
+  // Yukarı kaydırınca (500px geçmiş olsun ya da olmasın) tekrar çıkar
+  // 500px geçilmişken aşağı gidince tekrar gizlenir
   var nav = document.getElementById('mainNav');
   var lastScrollY = window.scrollY || window.pageYOffset;
   var navHidden = false;
+  var navLocked = false; // Home'a basılınca geçici kilit
 
   nav.style.transition = 'none';
   nav.style.transform = 'translateY(0)';
 
+  function showNav() {
+    navHidden = false;
+    nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+    nav.style.transform = 'translateY(0)';
+  }
+
+  function hideNav() {
+    navHidden = true;
+    nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+    nav.style.transform = 'translateY(-100%)';
+  }
+
+  window.showNavLocked = function () {
+    navLocked = true;
+    showNav();
+    setTimeout(function () { navLocked = false; }, 800);
+  };
+
   window.addEventListener('scroll', function () {
+    if (navLocked) { lastScrollY = window.scrollY || window.pageYOffset; return; }
+
     var currentY = window.scrollY || window.pageYOffset;
     var scrollingDown = currentY > lastScrollY;
 
     if (currentY <= 0) {
       // En tepede — her zaman göster
-      navHidden = false;
-      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      nav.style.transform = 'translateY(0)';
-    } else if (scrollingDown && currentY < 500) {
-      // 0-500px arası aşağı gidince gizle
-      if (!navHidden) {
-        navHidden = true;
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(-100%)';
-      }
-    } else if (currentY >= 500) {
-      // 500px geçince her zaman göster
-      if (navHidden) {
-        navHidden = false;
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(0)';
-      }
+      if (navHidden) showNav();
+    } else if (scrollingDown) {
+      // Aşağı kaydırınca gizle
+      if (!navHidden) hideNav();
+    } else {
+      // Yukarı kaydırınca göster (her zaman, 500px şartı yok)
+      if (navHidden) showNav();
     }
 
     lastScrollY = currentY;
