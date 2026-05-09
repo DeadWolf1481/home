@@ -153,6 +153,18 @@
     }, 400);
   };
 
+  // Body'e nav yüksekliği kadar padding ekle (hero olan sayfalar hariç)
+  function setBodyPadding() {
+    var nav = document.getElementById('mainNav');
+    if (!nav) return;
+    var hasHero = document.getElementById('hero') || document.querySelector('.hero');
+    if (!hasHero) {
+      document.body.style.paddingTop = nav.offsetHeight + 'px';
+    }
+  }
+  setBodyPadding();
+  window.addEventListener('resize', setBodyPadding);
+
   // Dışarı tıklayınca menüyü kapat
   document.addEventListener('click', function (e) {
     var menu = document.getElementById('mobileMenu');
