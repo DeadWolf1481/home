@@ -82,7 +82,7 @@
 @media (max-width: 600px) {   }
 @media (max-width: 419.98px) {   }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 66px; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 0; }
 
 /* ── Nav ── */
 
@@ -329,60 +329,6 @@ function submitReview() {
 // Nav hamburger
 // Nav scroll behavior — same as index, trigger = first blog card bottom
 (function() {
-  var nav = document.querySelector('.nav');
-  var lastScrollY = 0;
-  var navVisible = true;
-  var navH = 0;
-  var trigger = document.getElementById('nav-trigger');
-
-  function updateNav() {
-    navH = nav.offsetHeight;
-    var scrollY = window.scrollY || window.pageYOffset;
-    var scrollingDown = scrollY > lastScrollY;
-    var cardBottom = trigger ? trigger.getBoundingClientRect().top : 0;
-
-    if (cardBottom <= 0) {
-      // Past first blog card — always show nav
-      if (!navVisible) {
-        navVisible = true;
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(0)';
-      }
-    } else if (scrollingDown && scrollY > 10) {
-      // Scrolling down — hide nav smoothly with scroll
-      navVisible = false;
-      var ty = Math.min(scrollY, navH);
-      nav.style.transition = 'none';
-      nav.style.transform = 'translateY(-' + ty + 'px)';
-    } else if (!scrollingDown && scrollY <= 10) {
-      // Back at top — show nav
-      navVisible = true;
-      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      nav.style.transform = 'translateY(0)';
-    } else if (!scrollingDown && !navVisible) {
-      // Scrolling up above trigger — follow scroll
-      var ty2 = Math.min(scrollY, navH);
-      nav.style.transition = 'none';
-      nav.style.transform = 'translateY(-' + ty2 + 'px)';
-    }
-
-    lastScrollY = scrollY;
-  }
-
-  // Close mobile menu on scroll
-  window.addEventListener('scroll', function() {
-    var m = document.getElementById('mobileMenu');
-    var h = document.getElementById('hamburger');
-    if (m && m.dataset.open === 'true') {
-      m.style.maxHeight = '0'; m.dataset.open = 'false';
-      setTimeout(function() { m.style.display = 'none'; }, 300);
-      if (h) h.classList.remove('open');
-    }
-  }, { passive: true });
-
-  nav.style.transform = 'translateY(0)';
-  window.addEventListener('scroll', updateNav, { passive: true });
-  updateNav();
 })();
 </script>
 <script>

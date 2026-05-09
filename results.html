@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex" />
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 66px; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #243649; color: #dde6f0; padding-top: 0; }
 
 /* ── Nav ── */
 @media(max-width:1150px) { }
@@ -658,22 +658,6 @@ function submitBooking() {
 // ─── Nav / Mobile Menu ────────────────────────────────────────────────────────
 // Nav scroll
 (function(){
-  var nav = document.querySelector('.nav');
-  var lastY = 0, hidden = false;
-  window.addEventListener('scroll', function(){
-    var y = window.scrollY || window.pageYOffset;
-    var mm = document.getElementById('mobileMenu');
-    if (mm && mm.dataset.open === 'true') {
-      mm.style.maxHeight = '0'; mm.dataset.open = 'false';
-      setTimeout(function(){ mm.style.display = 'none'; }, 300);
-      var hh = document.getElementById('hamburger');
-      if (hh) hh.classList.remove('open');
-    }
-    if (y <= 10) { nav.style.transform = 'translateY(0)'; hidden = false; }
-    else if (y > lastY && !hidden) { nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)'; nav.style.transform = 'translateY(-100%)'; hidden = true; }
-    else if (y < lastY && hidden)  { nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)'; nav.style.transform = 'translateY(0)'; hidden = false; }
-    lastY = y;
-  }, { passive: true });
 })();
 </script>
 <script>

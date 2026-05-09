@@ -22,7 +22,7 @@
 @media (max-width: 600px) {   }
 @media (max-width: 419.98px) {   }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; padding-top: 66px; background: #243649; color: #dde6f0; }
+body { font-family: system-ui, -apple-system, sans-serif; padding-top: 0; background: #243649; color: #dde6f0; }
 
 /* ── Nav ── */
 
@@ -347,47 +347,7 @@ function sendMessage() {
   </div>
 </footer>
 <div class="footer-legal-note">BEKPEN ULUSLARARASI TURİZM TİCARET LİMİTED ŞİRKETİ – MERSİS No: 0161095459600001</div>
-<script>
-(function(){
-  var nav = document.querySelector('.nav');
-  var lastY = 0;
-  var hidden = false;
-  var trigger = null;
 
-  window.addEventListener('scroll', function(){
-    var y = window.scrollY || window.pageYOffset;
-    var tb = trigger ? trigger.getBoundingClientRect().top : -1;
-    var menu = document.getElementById('mobileMenu');
-    if (menu && menu.dataset.open === 'true') {
-      menu.style.maxHeight = '0';
-      menu.dataset.open = 'false';
-      setTimeout(function(){ menu.style.display = 'none'; }, 300);
-      var h = document.getElementById('hamburger');
-      if (h) h.classList.remove('open');
-    }
-    if (tb > 0) {
-      if (y <= 10) {
-        nav.style.transition = 'none';
-        nav.style.transform = 'translateY(0)';
-        hidden = false;
-      } else if (y > lastY && !hidden) {
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(-100%)';
-        hidden = true;
-      } else if (y < lastY && hidden) {
-        nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-        nav.style.transform = 'translateY(0)';
-        hidden = false;
-      }
-    } else {
-      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      nav.style.transform = 'translateY(0)';
-      hidden = false;
-    }
-    lastY = y;
-  }, { passive: true });
-})();
-</script>
 <script>
 function initContactMap() {
   var officeLocation = { lat: 40.8731, lng: 29.2513 }; // Pendik, Istanbul
