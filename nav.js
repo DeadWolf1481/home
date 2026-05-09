@@ -225,23 +225,19 @@
   };
 
   window.addEventListener('scroll', function () {
-    if (navLocked) { lastScrollY = window.scrollY || window.pageYOffset; return; }
-
     var currentY = window.scrollY || window.pageYOffset;
     var scrollingDown = currentY > lastScrollY;
+    lastScrollY = currentY;
 
-    if (currentY <= 0) {
-      // En tepede — her zaman göster
-      if (navHidden) showNav();
-    } else if (scrollingDown) {
+    if (navLocked) return;
+
+    if (scrollingDown) {
       // Aşağı kaydırınca gizle
       if (!navHidden) hideNav();
     } else {
-      // Yukarı kaydırınca göster (her zaman, 500px şartı yok)
+      // Yukarı kaydırınca göster
       if (navHidden) showNav();
     }
-
-    lastScrollY = currentY;
 
     // Mobile menu açıksa scroll'da kapat
     var menu = document.getElementById('mobileMenu');
