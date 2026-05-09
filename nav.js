@@ -112,8 +112,8 @@
   /* ── Aktif link vurgusu ──────────────────────────────────────────────────── */
   var currentFile = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.nav-links a').forEach(function (a) {
-    var href = a.getAttribute('href');
-    if (!href) return;
+    var href = a.getAttribute('href') || '';
+    if (!href || href.startsWith('#') || href.indexOf('#') !== -1) return;
     var hrefFile = href.split('/').pop().split('#')[0] || 'index.html';
     if (hrefFile === currentFile) a.classList.add('active');
   });
@@ -136,6 +136,21 @@
         menu.dataset.open = 'true';
       });
     }
+  };
+
+  window.smoothTo = function (e, id) {
+    e.preventDefault();
+    var nav = document.getElementById('mainNav');
+    // Home'a tıklanınca nav'ı göster ve pinle
+    if (id === 'hero') {
+      navHidden = false;
+      nav.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+      nav.style.transform = 'translateY(0)';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    var el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   window.mobileNavTo = function (e, id) {
