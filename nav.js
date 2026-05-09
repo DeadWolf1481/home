@@ -140,11 +140,18 @@
 
   window.smoothTo = function (e, id) {
     e.preventDefault();
-    var nav = document.getElementById('mainNav');
-    // Home'a tıklanınca nav'ı göster ve pinle
     if (id === 'hero') {
-      window.showNavLocked();
+      navLocked = true;
+      showNav();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Scroll bitince kilidi kaldır
+      var checkDone = setInterval(function () {
+        if ((window.scrollY || window.pageYOffset) <= 2) {
+          clearInterval(checkDone);
+          lastScrollY = 0;
+          navLocked = false;
+        }
+      }, 50);
       return;
     }
     var el = document.getElementById(id);
@@ -231,11 +238,12 @@
 
     if (navLocked) return;
 
-    if (scrollingDown) {
-      // Aşağı kaydırınca gizle
+    var currentY2 = window.scrollY || window.pageYOffset;
+    if (scrollingDown && currentY2 > 80) {
+      // 80px geçtikten sonra aşağı gidince gizle
       if (!navHidden) hideNav();
-    } else {
-      // Yukarı kaydırınca göster
+    } else if (!scrollingDown) {
+      // Yukarı kaydırınca her zaman göster
       if (navHidden) showNav();
     }
 
