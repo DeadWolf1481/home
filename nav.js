@@ -240,11 +240,15 @@
 
     var currentY2 = window.scrollY || window.pageYOffset;
     if (scrollingDown && currentY2 > 80) {
-      // 80px geçtikten sonra aşağı gidince gizle
+      // Aşağı gidince gizle
       if (!navHidden) hideNav();
     } else if (!scrollingDown) {
       // Yukarı kaydırınca her zaman göster
       if (navHidden) showNav();
+    }
+    // 500px eşiğini geçince (aşağı inerken) nav açılsın
+    if (scrollingDown && currentY2 >= 500 && navHidden) {
+      showNav();
     }
 
     // Mobile menu açıksa scroll'da kapat
